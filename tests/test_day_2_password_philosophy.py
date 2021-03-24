@@ -21,6 +21,10 @@ class TestDay2(unittest.TestCase):
         icontract_hypothesis.test_with_inferred_strategy(
             aocdbc.day_2_password_philosophy.verify)
 
+    def test_verify_line_with_icontract_hypothesis(self) -> None:
+        icontract_hypothesis.test_with_inferred_strategy(
+            aocdbc.day_2_password_philosophy.verify_line)
+
 
 if __name__ == "__main__":
     unittest.main()
