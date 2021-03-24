@@ -1,4 +1,6 @@
-# aocdbc
+******
+aocdbc
+******
 
 .. image:: https://github.com/mristin/aocdbc/actions/workflows/test-on-push-to-main.yml/badge.svg
     :target: https://github.com/mristin/aocdbc/actions/workflows/test-on-push-to-main.yml
