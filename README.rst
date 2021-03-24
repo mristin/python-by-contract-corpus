@@ -53,3 +53,12 @@ You can also just `create an issue`_ and post a code snippet, if that is easier 
 
 .. _create a pull request: https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork
 .. _create an issue: https://github.com/mristin/aocdbc/issues/new
+
+Contributors
+============
+The solutions annotated with the contracts were provided by the following authors
+(equal contribution, in alphabetical order):
+
+* `Lauren De bruyn <https://github.com/ProLoD>`_,
+* `Marko Ristin <https://github.com/mristin>`_, and
+* `Phillip Schanely <https://github.com/pschanely>`_.
