@@ -3,17 +3,20 @@ from typing import Optional
 
 from icontract import require, ensure
 
+# ERROR: the regex allows for min and max count to be equal zero, while
+# the pre-conditions expect them both to be greater than zero.
+
 ENTRY_RE = re.compile(
-    r"^(?P<min_count>[1-9][0-9]*)-(?P<max_count>[1-9][0-9]*) "
+    r"^(?P<min_count>0|[1-9][0-9]*)-(?P<max_count>0|[1-9][0-9]*) "
     r"(?P<character>[a-z]): (?P<password>[a-z]+)$"
 )
 
 
 @require(lambda line: ENTRY_RE.match(line))
 def verify_line(line: str) -> Optional[bool]:
-    # crosshair: on
     mtch = ENTRY_RE.match(line)
-    assert mtch is not None
+    if mtch is None:
+        return None
 
     min_count = int(mtch.group("min_count"))
     max_count = int(mtch.group("max_count"))
