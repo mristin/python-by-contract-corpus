@@ -1,5 +1,12 @@
 # aocdbc
 
+.. image:: https://github.com/mristin/aocdbc/actions/workflows/test-on-push-to-main.yml/badge.svg
+    :target: https://github.com/mristin/aocdbc/actions/workflows/test-on-push-to-main.yml
+    :alt: Test on push to main
+
+.. image:: https://coveralls.io/repos/github/mristin/aocdbc/badge.svg?branch=main
+    :target: https://coveralls.io/github/mristin/aocdbc?branch=main
+
 We present here the solutions for the exercises of the `Advent of Code 2020`_ written
 in Python and annotated with `contracts`_.
 This provides a data set of 25 programs with contracts specified using
