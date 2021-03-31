@@ -68,6 +68,7 @@ def main() -> int:
         # fmt: off
         black_targets = [
             "aocdbc",
+            "tests",
             "precommit.py"
         ]
         # fmt: on

@@ -8,7 +8,7 @@ import aocdbc.day_24_lobby_layout
 
 class TestParseLine(unittest.TestCase):
     def test_case(self) -> None:
-        line = 'nwwswee'
+        line = "nwwswee"
         directions = aocdbc.day_24_lobby_layout.parse_line(line=line)
 
         self.assertListEqual(
@@ -17,25 +17,30 @@ class TestParseLine(unittest.TestCase):
                 aocdbc.day_24_lobby_layout.VALUE_TO_DIRECTION["w"],
                 aocdbc.day_24_lobby_layout.VALUE_TO_DIRECTION["sw"],
                 aocdbc.day_24_lobby_layout.VALUE_TO_DIRECTION["e"],
-                aocdbc.day_24_lobby_layout.VALUE_TO_DIRECTION["e"]
+                aocdbc.day_24_lobby_layout.VALUE_TO_DIRECTION["e"],
             ],
-            directions)
+            directions,
+        )
 
     def test_with_icontract_hypothesis(self) -> None:
         icontract_hypothesis.test_with_inferred_strategy(
-            aocdbc.day_24_lobby_layout.parse_line)
+            aocdbc.day_24_lobby_layout.parse_line
+        )
 
     def test_empty_case_of_stringify(self) -> None:
         result = aocdbc.day_24_lobby_layout.stringify_directions(directions=[])
-        self.assertEqual('', result)
+        self.assertEqual("", result)
 
     def test_stringify_with_icontract_hypothesis(self) -> None:
         icontract_hypothesis.test_with_inferred_strategy(
-            aocdbc.day_24_lobby_layout.stringify_directions)
+            aocdbc.day_24_lobby_layout.stringify_directions
+        )
+
 
 class TestCounFlips(unittest.TestCase):
     def test_case(self) -> None:
-        text = textwrap.dedent('''\
+        text = textwrap.dedent(
+            """\
             sesenwnenenewseeswwswswwnenewsewsw
             neeenesenwnwwswnenewnwwsewnenwseswesw
             seswneswswsenwwnwse
@@ -55,21 +60,20 @@ class TestCounFlips(unittest.TestCase):
             nenewswnwewswnenesenwnesewesw
             eneswnwswnwsenenwnwnwwseeswneewsenese
             neswnwewnwnwseenwseesewsenwsweewe
-            wseweeenwnesenwwwswnew''')
+            wseweeenwnesenwwwswnew"""
+        )
 
-        lines = text.split('\n')
+        lines = text.split("\n")
 
-        plan = [
-            aocdbc.day_24_lobby_layout.parse_line(line)
-            for line in lines
-        ]
+        plan = [aocdbc.day_24_lobby_layout.parse_line(line) for line in lines]
 
         result = aocdbc.day_24_lobby_layout.count_flips(plan=plan)
         self.assertEqual(10, result)
 
     def test_with_icontract_hypothesis(self) -> None:
         icontract_hypothesis.test_with_inferred_strategy(
-            aocdbc.day_24_lobby_layout.count_flips)
+            aocdbc.day_24_lobby_layout.count_flips
+        )
 
 
 if __name__ == "__main__":

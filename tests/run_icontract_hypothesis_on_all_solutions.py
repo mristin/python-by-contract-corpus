@@ -12,8 +12,10 @@ def main() -> None:
         if i > 0:
             print()
 
-        print(f"Running crosshair on: {pth}")
-        subprocess.check_call([sys.executable, "-m", "crosshair", "check", str(pth)])
+        print(f"Running icontract-hypothesis on: {pth}")
+        subprocess.check_call(
+            [sys.executable, "-m", "icontract_hypothesis", "test", "--path", str(pth)]
+        )
 
 
 if __name__ == "__main__":

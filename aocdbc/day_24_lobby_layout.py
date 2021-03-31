@@ -3,13 +3,13 @@ import enum
 import re
 from typing import Tuple, List, MutableMapping
 
-from icontract import require, ensure
+from icontract import require, ensure, DBC
 
 
 # crosshair: on
 
 
-class Cell:
+class Cell(DBC):
     @require(lambda x, y, z: x + y + z == 0)
     def __init__(self, x: int, y: int, z: int) -> None:
         self.x = x
