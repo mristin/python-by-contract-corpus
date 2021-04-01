@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\aocdbc\day_8_handheld_halting.py">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
       </map>
     </option>
   </component>
