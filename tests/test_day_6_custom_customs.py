@@ -15,6 +15,10 @@ class TestDay6(unittest.TestCase):
         )
 
 
+if __name__ == '__main__':
+    unittest.main()
+
+
 _example_data = """
 abc
 
