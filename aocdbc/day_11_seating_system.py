@@ -1,7 +1,5 @@
-import dataclasses
-import enum
 import re
-from typing import Tuple, Mapping, List, Optional, Set, Iterable
+from typing import Tuple, List, Optional
 
 from icontract import require, ensure
 
@@ -38,50 +36,56 @@ def list_neighbourhood(
     return result
 
 
-@require(
-    lambda layout: len(layout) > 0
-    and len(layout[0]) > 0
-    and all(len(row) == len(layout[0]) for row in layout)
-)
-@require(
-    lambda layout: all(re.match("^[L#.]\Z", cell) for row in layout for cell in row)
-)
+class Layout:
+    @require(
+        lambda table: len(table) > 0
+        and len(table[0]) > 0
+        and all(len(row) == len(table[0]) for row in table)
+    )
+    @require(
+        lambda table: all(re.match("^[L#.]\Z", cell) for row in table for cell in row)
+    )
+    @ensure(lambda self: self.height == len(self.table))
+    @ensure(lambda self: len(self.table) > 0 and self.width == len(self.table[0]))
+    def __init__(self, table: List[List[str]]) -> None:
+        self.table = table
+        self.height = len(self.table)
+        self.width = len(self.table[0])
+
+
+@ensure(lambda layout, result: layout.height == result[0].height)
+@ensure(lambda layout, result: layout.width == result[0].width)
+# fmt: off
 @ensure(
-    lambda result: all(re.match("^[L#.]\Z", cell) for row in result[0] for cell in row)
-)
-@ensure(
-    lambda layout, result: len(layout) == len(result[0])
-    and all(len(result_row) == len(row) for row, result_row in zip(layout, result[0]))
-)
-@ensure(
-    lambda layout, result: all(
+    lambda layout, result:
+    all(
         (cell == "." and result_cell == ".")
         or (cell != "." and result_cell in ["L", "#"])
-        for row, result_row in zip(layout, result[0])
+        for row, result_row in zip(layout.table, result[0].table)
         for cell, result_cell in zip(row, result_row)
     ),
     "Valid change",
 )
-def apply(layout: List[List[str]]) -> Tuple[List[List[str]], int]:
+# fmt: on
+def apply(layout: Layout) -> Tuple[Layout, int]:
     """Return (new layout, number of changes)."""
-    height = len(layout)
-    width = len(layout[0])
-
-    result = [["" for _ in range(width)] for _ in range(height)]
+    new_table = [["" for _ in range(layout.width)] for _ in range(layout.height)]
 
     change_count = 0
 
-    for i in range(height):
-        for j in range(width):
-            state = layout[i][j]
+    for i in range(layout.height):
+        for j in range(layout.width):
+            state = layout.table[i][j]
 
             if state == ".":
                 new_state = "."
             else:
                 occupied = 0
-                neighbourhood = list_neighbourhood(i=i, j=j, height=height, width=width)
+                neighbourhood = list_neighbourhood(
+                    i=i, j=j, height=layout.height, width=layout.width
+                )
                 for neighbour_i, neighbour_j in neighbourhood:
-                    if layout[neighbour_i][neighbour_j] == "#":
+                    if layout.table[neighbour_i][neighbour_j] == "#":
                         occupied += 1
 
                 if state == "L" and occupied == 0:
@@ -93,36 +97,14 @@ def apply(layout: List[List[str]]) -> Tuple[List[List[str]], int]:
                 else:
                     new_state = state
 
-            result[i][j] = new_state
+            new_table[i][j] = new_state
 
-    return result, change_count
+    return Layout(table=new_table), change_count
 
 
-@require(
-    lambda layout: len(layout) > 0
-    and len(layout[0]) > 0
-    and all(len(row) == len(layout[0]) for row in layout)
-)
-@require(
-    lambda layout: all(re.match("^[L#.]\Z", cell) for row in layout for cell in row)
-)
-@ensure(lambda result: all(re.match("^[L#.]+\Z", row) for row in result))
-@ensure(
-    lambda layout, result: len(layout) == len(result)
-    and all(len(result_row) == len(row) for row, result_row in zip(layout, result))
-)
-@ensure(
-    lambda layout, result: all(
-        cell == result_cell
-        for row, result_row in zip(layout, result)
-        for cell, result_cell in zip(row, result_row)
-        if cell == "."
-    ),
-    "Floor remains floor",
-)
-def apply_until_stable(layout: List[List[str]]) -> List[List[str]]:
+def apply_until_stable(layout: Layout) -> Layout:
     change_count = None  # type: Optional[int]
-    result = [row[:] for row in layout]
+    result = Layout(table=[row[:] for row in layout.table])
 
     while change_count is None or change_count > 0:
         result, change_count = apply(layout=layout)
@@ -136,33 +118,29 @@ def apply_until_stable(layout: List[List[str]]) -> List[List[str]]:
     or all(len(line) == len(lines[0]) for line in lines),
     "Lines are a table",
 )
-@ensure(lambda lines, result: len(lines) == len(result))
+@ensure(lambda lines, result: len(lines) == result.height)
+# fmt: off
 @ensure(
-    lambda lines, result: not len(lines) == 0
+    lambda lines, result:
+    not len(lines) == 0
     or all(len(line) == len(row) for line, row in zip(lines, result))
 )
-def parse_layout(lines: List[str]) -> List[List[str]]:
-    result = []  # type: List[List[str]]
+# fmt: on
+def parse_layout(lines: List[str]) -> Layout:
+    table = []  # type: List[List[str]]
     for line in lines:
         row = []  # type: List[str]
         for symbol in line:
             row.append(symbol)
 
-        result.append(row)
+        table.append(row)
 
-    return result
-
-
-def repr_layout(layout: List[List[str]]) -> str:
-    return "\n".join("".join(row) for row in layout)
+    return Layout(table=table)
 
 
-@require(
-    lambda layout: not (len(layout) > 0 and len(layout[0]) > 0)
-    or all(len(row) == len(layout[0]) for row in layout)
-)
-@require(
-    lambda layout: all(re.match("^[L#.]\Z", cell) for row in layout for cell in row)
-)
-def count_occupied(layout: List[List[str]]) -> int:
-    return sum(1 for row in layout for cell in row if cell == "#")
+def repr_layout(layout: Layout) -> str:
+    return "\n".join("".join(row) for row in layout.table)
+
+
+def count_occupied(layout: Layout) -> int:
+    return sum(1 for row in layout.table for cell in row if cell == "#")
