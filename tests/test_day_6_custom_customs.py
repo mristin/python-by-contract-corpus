@@ -10,12 +10,10 @@ class TestDay6(unittest.TestCase):
         self.assertEqual(solve(_example_data), 11)
 
     def test_solve_with_icontract_hypothesis(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(
-            solve
-        )
+        icontract_hypothesis.test_with_inferred_strategy(solve)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
 
 
