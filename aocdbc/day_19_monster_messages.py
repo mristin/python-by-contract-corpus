@@ -1,6 +1,19 @@
 import abc
+import collections.abc
 import re
-from typing import List, Mapping, MutableMapping, Tuple, Optional, cast, Dict
+from typing import (
+    List,
+    Mapping,
+    MutableMapping,
+    Tuple,
+    Optional,
+    cast,
+    Dict,
+    Iterable,
+    Generator,
+    TypeVar,
+    Generic,
+)
 
 from icontract import require, ensure, DBC
 
@@ -147,8 +160,12 @@ def parse_rule(line: str) -> Tuple[int, Node]:
 
             sequences.append(NodeSequence(references=references))
 
-        node = NodeOr(sequences=sequences)
-        return identifier, node
+        # Optimize for nicer representation
+        if len(sequences) == 1:
+            return identifier, sequences[0]
+        else:
+            node = NodeOr(sequences=sequences)
+            return identifier, node
 
     raise NotImplementedError(
         f"The body {body!r} of a rule could not be parsed: {line!r}"
@@ -166,7 +183,99 @@ def parse_rules(lines: List[str]) -> MutableMapping[int, Node]:
     return rule_trees
 
 
+T = TypeVar("T")
+
+
+class AbstractVisitor(abc.ABC, Generic[T]):
+    @abc.abstractmethod
+    def visit_literal(self, node: NodeLiteral) -> T:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def visit_reference(self, node: NodeReference) -> T:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def visit_sequence(self, node: NodeSequence) -> T:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def visit_or(self, node: NodeOr) -> T:
+        raise NotImplementedError()
+
+    def visit(self, node: Node) -> T:
+        if isinstance(node, NodeLiteral):
+            return self.visit_literal(node)
+        elif isinstance(node, NodeReference):
+            return self.visit_reference(node)
+        elif isinstance(node, NodeSequence):
+            return self.visit_sequence(node)
+        elif isinstance(node, NodeOr):
+            return self.visit_or(node)
+        else:
+            raise NotImplementedError(node)
+
+
+class _VisitorIterable(AbstractVisitor[Iterable[Node]]):
+    def visit_literal(self, node: NodeLiteral) -> Iterable[Node]:
+        yield node
+
+    def visit_reference(self, node: NodeReference) -> Iterable[Node]:
+        yield node
+
+    def visit_sequence(self, node: NodeSequence) -> Iterable[Node]:
+        yield node
+        for reference in node.references:
+            yield from self.visit(reference)
+
+    def visit_or(self, node: NodeOr) -> Iterable[Node]:
+        yield node
+        for sequence in node.sequences:
+            yield from self.visit(sequence)
+
+
+def iterate(rule_tree: Node) -> Iterable[Node]:
+    """Yield the ``rule_tree`` and all its descendants."""
+    visitor = _VisitorIterable()
+    yield from visitor.visit(rule_tree)
+
+
+class _VisitorStr(AbstractVisitor[str]):
+    def visit_literal(self, node: NodeLiteral) -> str:
+        return f'Lit("{node.literal}")'
+
+    def visit_reference(self, node: NodeReference) -> str:
+        return f"Ref({node.identifier})"
+
+    def visit_sequence(self, node: NodeSequence) -> str:
+        parts = " ".join(self.visit(reference) for reference in node.references)
+        return f"Seq({parts})"
+
+    def visit_or(self, node: NodeOr) -> str:
+        parts = " | ".join(self.visit(sequence) for sequence in node.sequences)
+        return f"Or({parts})"
+
+
+def repr_rule_tree(rule_tree: Node) -> str:
+    visitor = _VisitorStr()
+    return visitor.visit(rule_tree)
+
+
 @require(lambda rule_trees: 0 in rule_trees)
+# fmt: off
+@require(
+    lambda rule_trees:
+    all(
+        all(
+            node.identifier in rule_trees
+            for node in iterate(rule_tree)
+            if isinstance(node, NodeReference)
+        )
+        for rule_tree in rule_trees.values()
+    ),
+    "No dangling references"
+)
+# fmt: on
 def interpret_rule_0(rule_trees: Mapping[int, Node]) -> Rule:
     """Interpret the rule trees and construct the rule 0."""
     # This serves as a cache so that an already interpreted tree is not re-interpreted.
