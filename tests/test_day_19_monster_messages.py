@@ -1,5 +1,7 @@
+import re
 import textwrap
 import unittest
+from typing import MutableMapping, Dict, List
 
 import icontract_hypothesis
 
@@ -35,6 +37,75 @@ class TestRuleCompositeRe(unittest.TestCase):
 
 
 class TestManually(unittest.TestCase):
+    def test_repr(self) -> None:
+        rule_lines = textwrap.dedent(
+            '''\
+            0: 4 1 5
+            1: 2 3 | 3 2
+            2: 4 4 | 5 5
+            3: 4 5 | 5 4
+            4: "a"
+            5: "b"'''
+        ).splitlines()
+
+        rules_to_repr = dict()  # type: Dict[int, str]
+
+        rule_trees = aocdbc.day_19_monster_messages.parse_rules(lines=rule_lines)
+
+        for identifier, rule_tree in rule_trees.items():
+            rules_to_repr[identifier] = aocdbc.day_19_monster_messages.repr_rule_tree(
+                rule_tree=rule_tree
+            )
+
+        # fmt: off
+        self.assertDictEqual(
+            {
+                0: 'Seq(Ref(4) Ref(1) Ref(5))',
+                1: 'Or(Seq(Ref(2) Ref(3)) | Seq(Ref(3) Ref(2)))',
+                2: 'Or(Seq(Ref(4) Ref(4)) | Seq(Ref(5) Ref(5)))',
+                3: 'Or(Seq(Ref(4) Ref(5)) | Seq(Ref(5) Ref(4)))',
+                4: 'Lit("a")', 5: 'Lit("b")'
+            },
+            rules_to_repr)
+        # fmt: on
+
+    def test_iterate(self) -> None:
+        rule_lines = textwrap.dedent(
+            '''\
+            0: 4 1 5
+            1: 2 3 | 3 2
+            2: 4 4 | 5 5
+            3: 4 5 | 5 4
+            4: "a"
+            5: "b"'''
+        ).splitlines()
+
+        rule_trees = aocdbc.day_19_monster_messages.parse_rules(lines=rule_lines)
+
+        identifier_to_node_types = dict()  # type: Dict[int, List[str]]
+
+        for identifier, rule_tree in rule_trees.items():
+            node_types = [
+                re.sub(r"^Node", "", type(node).__name__)
+                .replace("Sequence", "Seq")
+                .replace("Reference", "Ref")
+                .replace("Literal", "Lit")
+                for node in aocdbc.day_19_monster_messages.iterate(rule_tree=rule_tree)
+            ]
+
+            identifier_to_node_types[identifier] = node_types
+
+        # fmt: off
+        self.assertDictEqual(
+            {0: ['Seq', 'Ref', 'Ref', 'Ref'],
+             1: ['Or', 'Seq', 'Ref', 'Ref', 'Seq', 'Ref', 'Ref'],
+             2: ['Or', 'Seq', 'Ref', 'Ref', 'Seq', 'Ref', 'Ref'],
+             3: ['Or', 'Seq', 'Ref', 'Ref', 'Seq', 'Ref', 'Ref'], 
+             4: ['Lit'],
+             5: ['Lit']},
+            identifier_to_node_types)
+        # fmt: on
+
     def test_case(self) -> None:
         rule_lines = textwrap.dedent(
             '''\
