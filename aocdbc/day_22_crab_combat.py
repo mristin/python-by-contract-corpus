@@ -1,5 +1,5 @@
 import re
-from typing import Tuple, List
+from typing import Tuple, List, Sequence, overload, Union, Any
 
 from icontract import require, ensure, DBC
 
@@ -7,11 +7,56 @@ from icontract import require, ensure, DBC
 # crosshair: on
 
 
-class Deck(DBC, List[int]):
+class Deck(DBC, Sequence[int]):
     @require(lambda cards: all(card >= 0 for card in cards))
     @require(lambda cards: len(set(cards)) == len(cards), "Unique cards")
-    def __init__(self, cards: List[int]) -> None:
-        list.__init__(self, cards)
+    def __init__(self, cards: Sequence[int]) -> None:
+        if isinstance(cards, Deck):
+            self._cards = cards._cards  # type: Sequence[int]
+        else:
+            self._cards = cards
+
+    @overload
+    def __getitem__(self, index: int) -> int:
+        pass
+
+    @overload
+    def __getitem__(self, index: slice) -> "Deck":
+        pass
+
+    def __getitem__(self, index: Union[int, slice]) -> Union[int, "Deck"]:
+        if isinstance(index, slice):
+            return Deck(cards=self._cards[index])
+        else:
+            return self._cards[index]
+
+    def __len__(self) -> int:
+        return len(self._cards)
+
+    # fmt: off
+    @require(
+        lambda self, other:
+        (
+                sum := list(self._cards) + other._cards,
+                len(set(sum)) == len(sum)
+        ),
+        "Unique cards after the addition")
+    # fmt: on
+    def __add__(self, other: "Deck") -> "Deck":
+        sum = list(self._cards)
+        sum.extend(other._cards)
+        return Deck(cards=sum)
+
+    def __repr__(self) -> str:
+        return repr(self._cards)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Deck):
+            return self._cards.__eq__(other._cards)
+        elif isinstance(other, list):
+            return self._cards.__eq__(other)
+        else:
+            return object.__eq__(self, other)
 
 
 class Split(DBC):
@@ -57,13 +102,14 @@ def play_a_round(split: Split) -> Split:
     card2 = split.deck2[0]
 
     if card1 > card2:
-        new_deck1 = split.deck1[1:] + [card1, card2]
+        new_deck1 = split.deck1[1:] + Deck([card1, card2])
         new_deck2 = split.deck2[1:]
     else:
         new_deck1 = split.deck1[1:]
-        new_deck2 = split.deck2[1:] + [card2, card1]
+        new_deck2 = split.deck2[1:] + Deck([card2, card1])
 
-    result = Split(deck1=Deck(new_deck1), deck2=Deck(new_deck2))
+    result = Split(deck1=new_deck1, deck2=new_deck2)
+
     return result
 
 
