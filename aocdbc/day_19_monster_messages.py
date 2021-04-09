@@ -66,10 +66,6 @@ class RuleLiteral(Rule):
         return text[len(self.literal) :]
 
 
-# TODO (mristin, 2021-04-08): discuss with Lauren: is there a nice way to formulate
-#   the rule tree as contracts so that it can be automatically generated?
-
-
 class Node(DBC):
     """Represent a node in the abstract syntax tree."""
 
@@ -94,12 +90,6 @@ class NodeSequence(Node):
 class NodeOr(Node):
     def __init__(self, sequences: List[NodeSequence]) -> None:
         self.sequences = sequences
-
-
-# TODO (mristin, 2021-04-08): discuss with Phillip and Lauren: what about using
-#   a package such as lexery here to define the tokenization so that we can generate
-#   or reason about it to generate the inputs?
-#   This would work only for very simple languages, but that is already a huge win!
 
 
 RULE_RE = re.compile(

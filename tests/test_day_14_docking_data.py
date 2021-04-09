@@ -5,10 +5,6 @@ import icontract_hypothesis
 
 import aocdbc.day_14_docking_data
 
-# TODO (mristin, 2021-04-04): Discuss and refactor all unit tests to be uniform.
-#   For example, split in two test cases, ``TestWithIcontractHypothesis`` and
-#   ``TestCases``.
-
 
 class TestWithIcontractHypothesis(unittest.TestCase):
     def test_parse_mask(self) -> None:
