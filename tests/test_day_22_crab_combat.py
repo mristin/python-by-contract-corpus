@@ -6,10 +6,6 @@ import icontract_hypothesis
 import aocdbc.day_22_crab_combat
 
 
-# TODO (mristin, 2021-04-05): run pylint on both the implementation and the tests to
-#   remove the unused imports.
-
-
 class TestWithIcontractHypothesis(unittest.TestCase):
     def test_compute_score(self) -> None:
         icontract_hypothesis.test_with_inferred_strategy(

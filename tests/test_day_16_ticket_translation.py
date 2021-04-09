@@ -9,8 +9,6 @@ import aocdbc.day_16_ticket_translation
 
 
 class TestWithIcontractHypothesis(unittest.TestCase):
-    # TODO (mristin, 2021-04-07): rewrite all the other tests to conform to this
-    #   code pattern.
     def test_functions_automatically(self) -> None:
         testable_functions = [
             aocdbc.day_16_ticket_translation.applies,
