@@ -1,10 +1,10 @@
-from re import fullmatch
+from re import compile, fullmatch
 import sys
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from icontract import require, ensure
 
-_REQUIRED_KEYS = set(["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"])
+_REQUIRED_KEYS = {"byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"}
 
 
 @ensure(lambda: True)
@@ -14,15 +14,21 @@ def blank_line_split(text: str) -> List[str]:
     return text.split("\n\n")
 
 
-@ensure(lambda: True)
-def parse(passport: str) -> Optional[Dict[str, str]]:
-    result = {}
-    for tok in passport.split():
-        pair = tok.split(":", 2)
-        if len(pair) != 2:
-            return None
-        result[pair[0]] = pair[1]
+PASSPORT_RE = compile(r"\s*(\w+:(\S+))(\s+\w+:(\S+))*\s*")
+
+
+@require(lambda text: PASSPORT_RE.fullmatch(text))
+def parse_passport_entries(text: str) -> List[Tuple[str, str]]:
+    result = []
+    for tok in text.split():
+        (k, v) = tok.split(":", 2)
+        result.append((k, v))
     return result
+
+
+@require(lambda entries: len(dict(entries)) == len(entries))
+def parse_passport(entries: List[Tuple[str, str]]) -> Dict[str, str]:
+    return dict(entries)
 
 
 @ensure(lambda entry, result: result == (not (_REQUIRED_KEYS - entry.keys())))
@@ -30,11 +36,16 @@ def is_valid(entry: Dict[str, str]) -> bool:
     return len(_REQUIRED_KEYS - entry.keys()) == 0
 
 
+@require(lambda batch: all(PASSPORT_RE.match(l) for l in blank_line_split(batch)))
 @ensure(lambda result: result >= 0)
 def count_valid(batch: str) -> int:
     count = 0
     for passport_text in blank_line_split(batch):
-        passport = parse(passport_text)
+        entries = parse_passport_entries(passport_text)
+        passport = dict(entries)
+        if len(passport) < len(entries):
+            # Duplicate keys; count as invalid
+            continue
         if passport and is_valid(passport):
             count += 1
     return count
@@ -88,13 +99,16 @@ def is_kv_valid2(key: str, value: str) -> object:
     return True
 
 
+@require(lambda batch: all(PASSPORT_RE.match(l) for l in blank_line_split(batch)))
 @ensure(lambda result: result >= 0)
 def count_valid2(batch: str) -> int:
     count = 0
     for passport_text in blank_line_split(batch):
-        passport = parse(passport_text)
-        if not passport:
-            raise Exception
+        entries = parse_passport_entries(passport_text)
+        passport = dict(entries)
+        if len(passport) < len(entries):
+            # Duplicate keys; count as invalid
+            continue
         if passport:
             if is_valid2(passport):
                 count += 1
