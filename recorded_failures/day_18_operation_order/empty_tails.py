@@ -5,7 +5,7 @@ import regex as re
 from icontract import require, ensure, DBC
 
 
-NUMBER_RE = re.compile(r'^(-?\d+)')
+NUMBER_RE = re.compile(r'^(\d+)')
 
 
 class Operation(Enum):
@@ -22,10 +22,10 @@ class Tail:
 @dataclass
 class Node:
     head: Union[int, 'Node']
-    tail: List[Tail]
+    tail: Optional[List[Tail]]
 
 
-@require(lambda expr: re.match(r'^\(.+\)', expr))
+@require(lambda expr: expr.startswith('('))
 @require(lambda expr: expr.count('(') == expr.count(')'))
 @ensure(lambda expr, result: result in expr)
 def extract_expression(expr: str) -> str:  # TODO find better name
@@ -74,8 +74,6 @@ def parse(expression: str) -> Optional[Node]:
         else:
             raise Exception
         tails.append(Tail(op=op, right=right))
-    if not tails:
-        return Node(head=head, tail=[])
     return Node(head=head, tail=tails)
 
 
@@ -115,3 +113,20 @@ def compute(node: Node) -> int:
             result *= right
 
     return result
+
+
+if __name__ == '__main__':
+    e1 = '(1+2)+(3*4)'  # 15
+    e2 = '(1+(2*3))+4'  # 11
+    e3 = '1+2*3+4+6*7'  # 133
+
+    n1 = Node(head=Node(head=1, tail=[Tail(op=Operation.ADD, right=2)]), tail=[Tail(op=Operation.ADD, right=Node(head=3, tail=[Tail(op=Operation.MUL, right=4)]))])
+    n2 = Node(head=Node(head=1, tail=[Tail(op=Operation.ADD, right=Node(head=2, tail=[Tail(op=Operation.MUL, right=3)]))]), tail=[Tail(op=Operation.ADD, right=4)])
+
+    assert n1 == parse(e1)
+    assert n2 == parse(e2)
+    assert e1 == serialize(parse(e1))
+    assert e2 == serialize(parse(e2))
+    assert compute(parse(e1)) == 15
+    assert compute(parse(e2)) == 11
+    assert compute(parse(e3)) == 133

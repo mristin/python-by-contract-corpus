@@ -2,97 +2,45 @@ import unittest
 
 import icontract_hypothesis
 
-from aocdbc.day_18_operation_order import parse, Computation, compute
+from aocdbc.day_18_operation_order import serialize, compute, Node, Operation, Tail, parse
 
 
-# class TestWithIcontractHypothesis(unittest.TestCase):
-# TODO how to test this function? 'Computation' has no strategy
-#     def test_compute(self) -> None:
-#         icontract_hypothesis.test_with_inferred_strategy(compute)
-#
-#     def test_parse(self) -> None:
-#         icontract_hypothesis.test_with_inferred_strategy(parse)
+class TestWithIcontractHypothesis(unittest.TestCase):
+    def test_serialize(self) -> None:
+        icontract_hypothesis.test_with_inferred_strategy(
+            serialize
+        )
+
+    def test_compute(self) -> None:
+        icontract_hypothesis.test_with_inferred_strategy(
+            compute
+        )
 
 
-computation_test_objects = [  # "1 + 2 * 3 + 4 * 5 + 6"
-                           Computation(operators=['+', '*', '+', '*', '+'],
-                                       operands=[1, 2, 3, 4, 5, 6]),
-                           # "1 + (2 * 3) + (4 * (5 + 6))"
-                           Computation(operators=['+', '+'],
-                                       operands=[
-                                           1,
-                                           Computation(operators=['*'],
-                                                       operands=[2, 3]),
-                                           Computation(operators=['*'],
-                                                       operands=[
-                                                           4,
-                                                           Computation(
-                                                               operators=['+'],
-                                                               operands=[5, 6])])]),
-                           # "2 * 3 + (4 * 5)"
-                           Computation(operators=['*', '+'],
-                                       operands=[2, 3, Computation(operators=['*'],
-                                                                   operands=[4, 5])]),
-                           # "5 + (8 * 3 + 9 + 3 * 4 * 3)"
-                           Computation(operators=['+'],
-                                       operands=[
-                                           5,
-                                           Computation(
-                                               operators=['*', '+', '+', '*', '*'],
-                                               operands=[8, 3, 9, 3, 4, 3])]),
-                           # "5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))"
-                           Computation(operators=['*', '*'],
-                                       operands=[5,
-                                                 9,
-                                                 Computation(
-                                                     operators=['*', '*', '+',
-                                                                '*', '+'],
-                                                     operands=[7, 3, 3, 9, 3,
-                                                               Computation(
-                                                                   operators=['+', '*'],
-                                                                   operands=[8, 6, 4])])
-                                                 ]),
-                           # "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"
-                           Computation(operators=['+', '+', '*'],
-                                       operands=[
-                                           Computation(
-                                               operators=['*', '+'],
-                                               operands=[
-                                                   Computation(
-                                                       operators=['+', '*'],
-                                                       operands=[2, 4, 9]),
-                                                   Computation(
-                                                       operators=['+', '*', '+'],
-                                                       operands=[6, 9, 8, 6]),
-                                                   6]),
-                                           2, 4, 2])]
+class ManualTests(unittest.TestCase):
+    test_expressions = ['(1+2)+(3*4)',  # 15
+                        '(1+(2*3))+4',  # 11
+                        '1+2*3+4+6*7']  # 133
 
+    test_nodes = [
+        Node(head=Node(head=1, tail=[Tail(op=Operation.ADD, right=2)]), tail=[Tail(op=Operation.ADD, right=Node(head=3, tail=[Tail(op=Operation.MUL, right=4)]))]),
+        Node(head=Node(head=1, tail=[Tail(op=Operation.ADD, right=Node(head=2, tail=[Tail(op=Operation.MUL, right=3)]))]), tail=[Tail(op=Operation.ADD, right=4)]),
+        Node(head=1, tail=[Tail(op=Operation.ADD, right=2), Tail(op=Operation.MUL, right=3), Tail(op=Operation.ADD, right=4), Tail(op=Operation.ADD, right=6), Tail(op=Operation.MUL, right=7)])
+    ]
 
-class TestManuallyParse(unittest.TestCase):
-    def test_case(self) -> None:
-        test_input = ["1 + 2 * 3 + 4 * 5 + 6",
-                      "1 + (2 * 3) + (4 * (5 + 6))",
-                      "2 * 3 + (4 * 5)",
-                      "5 + (8 * 3 + 9 + 3 * 4 * 3)",
-                      "5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))",
-                      "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"]
+    test_results = [15, 11, 133]
 
-        expected_output = computation_test_objects
-        for test_pair in zip(test_input, expected_output):
-            self.assertEqual(test_pair[1], parse(test_pair[0]))
+    def test_parse(self) -> None:
+        for expr, node in zip(self.test_expressions, self.test_nodes):
+            self.assertEqual(node, parse(expr))
 
+    def test_serialize(self) -> None:
+        for expr, node in zip(self.test_expressions, self.test_nodes):
+            self.assertEqual(expr, serialize(node))
 
-class TestManuallyCompute(unittest.TestCase):
-    def test_case(self) -> None:
-        test_input = computation_test_objects
-        expected_output = [71,
-                           51,
-                           26,
-                           437,
-                           12240,
-                           13632]
-        for test_pair in zip(test_input, expected_output):
-            self.assertEqual(test_pair[0].compute(), test_pair[1])
+    def test_compute(self) -> None:
+        for node, result in zip(self.test_nodes, self.test_results):
+            self.assertEqual(result, compute(node))
 
 
 if __name__ == "__main__":

@@ -4,8 +4,21 @@ from dataclasses import dataclass
 import regex as re
 from icontract import require, ensure, DBC
 
+"""
+Occurred when testing parse()
+Falsifying example: execute(
+    kwargs={'expression': ':'},
+)
+---------
+ File "/home/lauren/Nextcloud/Documents/2020-2021/thesis/code/aocdbc/aocdbc/day_18_operation_order.py", line 48, in <lambda>
+    @ensure(lambda result, expression: serialize(result) == expression)
+  File "/home/lauren/Nextcloud/Documents/2020-2021/thesis/code/aocdbc/aocdbc/day_18_operation_order.py", line 83, in serialize
+    if isinstance(node.head, int):
+AttributeError: 'NoneType' object has no attribute 'head'
+"""
 
-NUMBER_RE = re.compile(r'^(-?\d+)')
+
+NUMBER_RE = re.compile(r'^(\d+)')
 
 
 class Operation(Enum):
@@ -22,10 +35,10 @@ class Tail:
 @dataclass
 class Node:
     head: Union[int, 'Node']
-    tail: List[Tail]
+    tail: Optional[List[Tail]]
 
 
-@require(lambda expr: re.match(r'^\(.+\)', expr))
+@require(lambda expr: expr.startswith('('))
 @require(lambda expr: expr.count('(') == expr.count(')'))
 @ensure(lambda expr, result: result in expr)
 def extract_expression(expr: str) -> str:  # TODO find better name
@@ -45,6 +58,7 @@ def extract_expression(expr: str) -> str:  # TODO find better name
     raise Exception("I should never end up here!")
 
 
+@ensure(lambda result, expression: serialize(result) == expression)
 def parse(expression: str) -> Optional[Node]:
     if not expression:
         return None
@@ -74,12 +88,9 @@ def parse(expression: str) -> Optional[Node]:
         else:
             raise Exception
         tails.append(Tail(op=op, right=right))
-    if not tails:
-        return Node(head=head, tail=[])
     return Node(head=head, tail=tails)
 
 
-@ensure(lambda result, node: parse(result) == node)
 def serialize(node: Node) -> str:
     result = ''
     if isinstance(node.head, int):
@@ -115,3 +126,20 @@ def compute(node: Node) -> int:
             result *= right
 
     return result
+
+
+if __name__ == '__main__':
+    e1 = '(1+2)+(3*4)'  # 15
+    e2 = '(1+(2*3))+4'  # 11
+    e3 = '1+2*3+4+6*7'  # 133
+
+    n1 = Node(head=Node(head=1, tail=[Tail(op=Operation.ADD, right=2)]), tail=[Tail(op=Operation.ADD, right=Node(head=3, tail=[Tail(op=Operation.MUL, right=4)]))])
+    n2 = Node(head=Node(head=1, tail=[Tail(op=Operation.ADD, right=Node(head=2, tail=[Tail(op=Operation.MUL, right=3)]))]), tail=[Tail(op=Operation.ADD, right=4)])
+
+    assert n1 == parse(e1)
+    assert n2 == parse(e2)
+    assert e1 == serialize(parse(e1))
+    assert e2 == serialize(parse(e2))
+    assert compute(parse(e1)) == 15
+    assert compute(parse(e2)) == 11
+    assert compute(parse(e3)) == 133
