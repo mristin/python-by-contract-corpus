@@ -13,8 +13,15 @@ class TestWithIcontractHypothesis(unittest.TestCase):
 
 class TestManually(unittest.TestCase):
     def test_case(self) -> None:
-        test_input = [[0, 3, 6], [1, 3, 2], [2, 1, 3], [1, 2, 3], [2, 3, 1], [3, 2, 1],
-                      [3, 1, 2]]
+        test_input = [
+            [0, 3, 6],
+            [1, 3, 2],
+            [2, 1, 3],
+            [1, 2, 3],
+            [2, 3, 1],
+            [3, 2, 1],
+            [3, 1, 2],
+        ]
         expected_output = [436, 1, 10, 27, 78, 438, 1836]
 
         for test_pair in zip(test_input, expected_output):

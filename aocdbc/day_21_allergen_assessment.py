@@ -1,17 +1,17 @@
-from typing import List, Dict, Set
+from typing import List, Dict, Set, TYPE_CHECKING
 from icontract import require, ensure, DBC
-import regex as re
+import regex as re  # type: ignore
 
 
 class Ingredient(str):
-    @require(lambda identifier: re.match('^[a-zA-Z]+$', identifier))
+    @require(lambda identifier: re.match("^[a-zA-Z]+$", identifier))
     def __init__(self, identifier: str) -> None:
         super().__init__()
         self.identifier: str = identifier
 
 
 class Allergen(DBC):
-    @require(lambda identifier: re.match('^[a-zA-Z]+$', identifier))
+    @require(lambda identifier: re.match("^[a-zA-Z]+$", identifier))
     def __init__(self, identifier: str) -> None:
         self.identifier: str = identifier
         self.potential_ingredients: List[Set[Ingredient]] = []
@@ -19,13 +19,17 @@ class Allergen(DBC):
     def __repr__(self) -> str:
         return "{}, {}".format(self.identifier, self.potential_ingredients)
 
-    def __eq__(self, other: 'Allergen') -> bool:
-        return self.identifier == other.identifier \
-               and self.potential_ingredients == other.potential_ingredients
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Allergen):
+            return NotImplemented
+        return (
+            self.identifier == other.identifier
+            and self.potential_ingredients == other.potential_ingredients
+        )
 
     def add_potential_ingredients_set(
-            self,
-            potential_ingredients: Set[Ingredient]) -> None:
+        self, potential_ingredients: Set[Ingredient]
+    ) -> None:
         self.potential_ingredients.append(set(potential_ingredients))
 
     def intersection_potential_ingredients(self) -> Set[Ingredient]:
@@ -33,8 +37,9 @@ class Allergen(DBC):
 
 
 # small error: this allows for "ing1 ing2 (contains , soy, water)"
-ALLERGEN_LINE_RE = re.compile(r'^(?:\s?(?P<ingredient>\w+))* '
-                              r'\(contains (?:(?:,\s)?(?P<allergen>\w+))*\)$')
+ALLERGEN_LINE_RE = re.compile(
+    r"^(?:\s?(?P<ingredient>\w+))* " r"\(contains (?:(?:,\s)?(?P<allergen>\w+))*\)$"
+)
 
 
 @require(lambda line_1: ALLERGEN_LINE_RE.match(line_1))
@@ -46,13 +51,25 @@ def is_equal_ingredient_line(line_1: str, line_2: str) -> bool:
     ingredients_in_line_2 = set(ALLERGEN_LINE_RE.match(line_2).captures(1))
     allergens_in_line_2 = set(ALLERGEN_LINE_RE.match(line_2).captures(2))
 
-    return ingredients_in_line_1 == ingredients_in_line_2 \
-           and allergens_in_line_1 == allergens_in_line_2
+    return (
+        ingredients_in_line_1 == ingredients_in_line_2
+        and allergens_in_line_1 == allergens_in_line_2
+    )
 
 
-@require(lambda ingredient_list_1: all(ALLERGEN_LINE_RE.match(line) for line in ingredient_list_1))
-@require(lambda ingredient_list_2: all(ALLERGEN_LINE_RE.match(line) for line in ingredient_list_2))
-def is_equal_ingredient_list(ingredient_list_1: List[str], ingredient_list_2: List[str]) -> bool:
+@require(
+    lambda ingredient_list_1: all(
+        ALLERGEN_LINE_RE.match(line) for line in ingredient_list_1
+    )
+)
+@require(
+    lambda ingredient_list_2: all(
+        ALLERGEN_LINE_RE.match(line) for line in ingredient_list_2
+    )
+)
+def is_equal_ingredient_list(
+    ingredient_list_1: List[str], ingredient_list_2: List[str]
+) -> bool:
     if len(ingredient_list_1) != len(ingredient_list_2):
         return False
     for l1 in ingredient_list_1:
@@ -65,7 +82,7 @@ def is_equal_ingredient_list(ingredient_list_1: List[str], ingredient_list_2: Li
 
 
 @require(lambda lines: all(ALLERGEN_LINE_RE.match(line) for line in lines))
-@ensure(lambda result, lines: is_equal_ingredient_list(serialize(result), lines))
+@ensure(lambda result, lines: is_equal_ingredient_list(serialize(result), lines))  # type: ignore
 def parse_list_of_foods(lines: List[str]) -> List[Allergen]:
     allergens: Dict[str, Allergen] = dict()
     for line in lines:
@@ -78,14 +95,19 @@ def parse_list_of_foods(lines: List[str]) -> List[Allergen]:
     return list(allergens.values())
 
 
-@require(lambda allergen_set: all(len(allergen.potential_ingredients) > 0 for allergen in allergen_set))
+@require(
+    lambda allergen_set: all(
+        len(allergen.potential_ingredients) > 0 for allergen in allergen_set
+    )
+)
 @ensure(lambda result, allergen_set: allergen_set == parse_list_of_foods(result))
 def serialize(allergen_set: List[Allergen]) -> List[str]:
     ingredient_groups: Dict[str, List[Allergen]] = dict()
     for allergen in allergen_set:
         for ingredient_set in allergen.potential_ingredients:
             ingredient_set_str = " ".join(
-                [str(ingredient) for ingredient in ingredient_set])
+                [str(ingredient) for ingredient in ingredient_set]
+            )
             if str(ingredient_set_str) in ingredient_groups.keys():
                 ingredient_groups[str(ingredient_set_str)].append(allergen)
             else:
@@ -93,25 +115,33 @@ def serialize(allergen_set: List[Allergen]) -> List[str]:
     ingredient_list: List[str] = []
     for ingredients, allergens in ingredient_groups.items():
         allergens_str: str = ", ".join(
-            [str(allergen.identifier) for allergen in allergens])
+            [str(allergen.identifier) for allergen in allergens]
+        )
         ingredient_list.append("{} (contains {})".format(ingredients, allergens_str))
     return ingredient_list
 
 
-ALLERGEN_LIST_RE = re.compile(r'^(\s?\w+)* \(contains ((,\s)?\w+)*\)'
-                              r'(\n(\s?\w+)* \(contains ((,\s)?\w+)*\))*$')
+ALLERGEN_LIST_RE = re.compile(
+    r"^(\s?\w+)* \(contains ((,\s)?\w+)*\)" r"(\n(\s?\w+)* \(contains ((,\s)?\w+)*\))*$"
+)
 
 
 @require(lambda puzzle_input: ALLERGEN_LIST_RE.match(puzzle_input))
 def solve(puzzle_input: str) -> Set[Ingredient]:
-    ingredient_lines = puzzle_input.split('\n')
+    ingredient_lines = puzzle_input.split("\n")
     allergen_set = parse_list_of_foods(ingredient_lines)
-    excluded_ingredients = set.union(*map(lambda allergen: allergen.intersection_potential_ingredients(),allergen_set))
-    all_ingredients = set.union(*map(lambda allergen: set.union(*allergen.potential_ingredients), allergen_set))
+    excluded_ingredients = set.union(
+        *map(
+            lambda allergen: allergen.intersection_potential_ingredients(), allergen_set
+        )
+    )
+    all_ingredients = set.union(
+        *map(lambda allergen: set.union(*allergen.potential_ingredients), allergen_set)
+    )
     return all_ingredients.difference(excluded_ingredients)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ingredient_list_str = """mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
 trh fvjkl sbzzf mxmxvkd (contains dairy)
 sqjhc fvjkl (contains soy)
@@ -131,10 +161,6 @@ sqjhc mxmxvkd sbzzf (contains fish)"""
     # for a in parse_list_of_foods(ingredient_list_str.split('\n')):
     #     print("\t{}: {}".format(a.identifier, a.intersection_potential_ingredients()))
     print(solve(ingredient_list_str))
-
-
-
-
 
 
 large_input = """fgrlmbk dmhfc gbc bqjdc nfxjhz htxsjf lkhlq frrns fzpl ckkhgh gtfg cfzdnz qdgsb vcm rfct dvvtfbhc jjhh lbdknnb lrsqdnj gzzpg rqf nlvklmk xfdpmx rpsvg bbbl bpfkb bsfrk zstls srkf dtjkqfd zcvc cll nstk cmbcm xgljlz hpbfvxmj qqmtv lmds hnrdth vbjlmq kdpgj pcbms nrjzp thfjc nrbqn cbmjz lprxj gxkkcxk hsjxkq gskbc tghhr rvgdt dvnbh ppmtvvb xtbjmj mbljqv slkp dvdh nrrvpz (contains shellfish, dairy, nuts)
@@ -176,4 +202,3 @@ frrns lslkm rqjdfxm slvhb htxsjf cbxr dtjkqfd tgqcfpk hsjxkq nstk cmbcm cqnq ljk
 chjzv rrdf hpbfvxmj qsddtd cldns vbjlmq sqrmn bbbl htxsjf cqnq pcgxqf fbccmpv dtjkqfd xhgfc bqjdc fzpl qhbrf nstk nlvklmk bpfkb zmvvf trgzhs dvdh dlmvvd tgqcfpk qbvhh knrtx xtghfk xcbpv pxjs gskbc xgljlz srpql qrxfdsb rjcrs pscb pthsvl bhjnl fkmzx qlmjk zcvc bdq gzzpg bknqz tchncfl vcm cmbcm cbmjz kbjbzdv cjthv srjgg gbc rcv ttbrlvd jhbpz txkpq ppmtvvb btltc pvfb btq dvnbh pllbt lmds lcqvnp mstcz npkz cbxr bvcnmx kdbzffc (contains shellfish, fish)
 nthdsp gbc zgnvx sqrmn fddk slvhb rqjdfxm hsjxkq bsfrk kdbzffc dkctbd mbljqv kbz cbpnbfr ngbnh zdxfcln qxcrc srjgg pvfb mlh khpmn gdtfv cbmjz sxrsr ttbrlvd mkvk mrvskt dvdh gskbc thfjc qtmvn pthsvl vfrvvfr pllbt tllk vnbfkbm dvgrzqb xdbx kbnhq cmbcm dmhfc jnlkg bdq ndhcp bpfkb rlfdl htxsjf cqnq cfzdnz xnffv bbbl tgqcfpk gtfg lmds pxjs (contains fish, dairy)
 gzmbgc fzpl nlvklmk sjjq mrvskt kdbzffc sqrmn gjfbc qdgsb lxtt sxrsr tchncfl lrsqdnj qrxfdsb zmvvf cll bsfrk pcbtcc zhmb fhxtgj lprxj cjthv fgrlmbk rpsvg hpbfvxmj ttbrlvd qsddtd npkz nrbqn ppmtvvb snbbqj tghhr mlh lbdknnb cfzdnz xvkpct fbccmpv dlmvvd rrdf xtbjmj lcqvnp vlhld rlfdl nfxjhz jhbpz htxsjf dvnbh dvdh jmzfqd rjcrs tgqcfpk ncnm btltc skfqm jjhh xgljlz qxcrc lmds cqnq jznrg bskvb rpx dxlzph lslkm gbc hsjxkq jxcfst rvgdt cbmjz xfdpmx cmbcm srpql rcv (contains eggs)"""
-

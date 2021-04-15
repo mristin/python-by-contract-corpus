@@ -24,6 +24,6 @@ def solve(starting_numbers: List[int]) -> int:
     return last
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     example_starting_numbers = [0, 3, 6]
     print(solve(example_starting_numbers))
