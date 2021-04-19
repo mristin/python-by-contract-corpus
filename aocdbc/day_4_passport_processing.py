@@ -26,39 +26,30 @@ def parse_passport_entries(text: str) -> List[Tuple[str, str]]:
     return result
 
 
-@require(lambda entries: len(dict(entries)) == len(entries))
-def parse_passport(entries: List[Tuple[str, str]]) -> Dict[str, str]:
-    return dict(entries)
-
-
-@ensure(lambda entry, result: result == (not (_REQUIRED_KEYS - entry.keys())))
-def is_valid(entry: Dict[str, str]) -> bool:
-    return len(_REQUIRED_KEYS - entry.keys()) == 0
+@ensure(lambda entry, result: result == all(k in dict(entry) for k in _REQUIRED_KEYS))
+def is_valid(entry: List[Tuple[str, str]]) -> bool:
+    entry_keys = dict(entry).keys()
+    return len(_REQUIRED_KEYS - entry_keys) == 0
 
 
 @require(lambda batch: all(PASSPORT_RE.match(l) for l in blank_line_split(batch)))
 @ensure(lambda result: result >= 0)
 def count_valid(batch: str) -> int:
-    count = 0
-    for passport_text in blank_line_split(batch):
-        entries = parse_passport_entries(passport_text)
-        passport = dict(entries)
-        if len(passport) < len(entries):
-            # Duplicate keys; count as invalid
-            continue
-        if passport and is_valid(passport):
-            count += 1
-    return count
+    return sum(
+        1
+        for passport_text in blank_line_split(batch)
+        if is_valid(parse_passport_entries(passport_text))
+    )
 
 
 # part 2
 
 
 @ensure(lambda: True)
-def is_valid2(entry: Dict[str, str]) -> bool:
+def is_valid2(entry: List[Tuple[str, str]]) -> bool:
     if not is_valid(entry):
         return False
-    for key, value in entry.items():
+    for key, value in entry:
         if not is_kv_valid2(key, value):
             return False
     return True
@@ -106,13 +97,8 @@ def count_valid2(batch: str) -> int:
     count = 0
     for passport_text in blank_line_split(batch):
         entries = parse_passport_entries(passport_text)
-        passport = dict(entries)
-        if len(passport) < len(entries):
-            # Duplicate keys; count as invalid
-            continue
-        if passport:
-            if is_valid2(passport):
-                count += 1
+        if is_valid2(entries):
+            count += 1
     return count
 
 
