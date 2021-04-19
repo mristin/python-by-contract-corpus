@@ -13,7 +13,7 @@ from icontract import require, ensure
 def next_departure(bus_id: int, min_time: int) -> int:
     if min_time == 0:
         return 0
-    # ERROR:
+    # ERROR: bus_id and min_time should be reversed here:
     wait_time = bus_id % min_time
     return min_time + wait_time
 
