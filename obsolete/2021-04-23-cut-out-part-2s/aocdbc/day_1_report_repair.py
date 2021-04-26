@@ -1,5 +1,3 @@
-import sys
-
 from collections import Counter
 from itertools import combinations
 from typing import List, Optional, Tuple
@@ -29,6 +27,27 @@ def find_pair_with_sum(items: List[int], total: int) -> Optional[Tuple[int, int]
     return None
 
 
-if __name__ == "__main__":
-    entries = list(map(int, sys.stdin.read().split()))
-    print(find_pair_with_sum(entries, 2020))
+@require(lambda n: n >= 1)
+@ensure(
+    lambda result, n: result is None or len(result) == n,
+    "Correct number of items returned",
+)
+@ensure(
+    lambda result, total: result is None or sum(result) == total,
+    "Returned items sum to the right total",
+)
+@ensure(
+    lambda result, items: result is None or all(i in items for i in result),
+    "Returned values appear in the input",
+)
+@ensure(
+    lambda result, items: len(Counter(result) - Counter(items)) == 0,
+    "Don't return duplicates that aren't also duplicated in the input",
+)
+def find_n_items_with_sum(
+    items: List[int], n: int, total: int
+) -> Optional[Tuple[int, ...]]:
+    for combination in combinations(items, n):
+        if sum(combination) == total:
+            return combination
+    return None
