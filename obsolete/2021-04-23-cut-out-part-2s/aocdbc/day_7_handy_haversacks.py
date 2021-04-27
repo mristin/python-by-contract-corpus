@@ -65,13 +65,43 @@ def containers(kind: str, rules: Rules) -> Optional[Set[str]]:
     return known_containers
 
 
-def count_containers(text: str) -> int:
+def part1(text: str) -> int:
     rules = parse_rules(text)
     allowed_containers = containers("shiny gold", rules)
     assert allowed_containers is not None
     return len(allowed_containers) - 1
 
 
+def rules_are_valid(rules: Rules) -> bool:
+    # Every kind mentioned is defined
+    for subbags in rules.values():
+        for subkind in subbags.keys():
+            if subkind not in rules:
+                return False
+    # Containment is acyclic:
+    for start in rules.keys():
+        if containers(start, rules) is None:
+            return False
+    return True
+
+
+@require(lambda rules: rules_are_valid(rules))
+@require(lambda kind, rules: kind in rules)
+@ensure(lambda kind, rules, result: (result == 0) == (len(rules[kind]) == 0))
+@ensure(lambda kind, rules, result: result >= sum(rules[kind].values()))
+def count_bags(kind: str, rules: Rules) -> int:
+    count = 0
+    for subkind, ct in rules[kind].items():
+        count += (count_bags(subkind, rules) + 1) * ct
+    return count
+
+
+def part2(text: str) -> int:
+    rules = parse_rules(text)
+    return count_bags("shiny gold", rules)
+
+
 if __name__ == "__main__":
     data = "".join(sys.stdin.readlines())
-    print(count_containers(data))
+    print("part 1:", part1(data))
+    print("part 2:", part2(data))
