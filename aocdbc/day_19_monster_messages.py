@@ -76,7 +76,7 @@ class RuleLiteral(Rule):
         if not text.startswith(self.literal):
             return None
 
-        return text[len(self.literal) :]
+        return text[len(self.literal):]
 
 
 class Node(DBC):
@@ -317,6 +317,7 @@ def interpret_rule_0(rule_trees: Mapping[int, Node]) -> Rule:
             raise NotImplementedError(rule_tree)
 
     return interpret_rule_tree(rule_tree=rule_trees[0])
+
 
 
 @ensure(lambda messages, result: 0 <= result <= len(messages))
