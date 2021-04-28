@@ -31,6 +31,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\ethz_eprog_2019\__init__.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\tests\test_day_11_seating_system.py">
           <value>
             <Attribute>
