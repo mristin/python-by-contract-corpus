@@ -8,7 +8,11 @@ from correct_programs.aoc2020 import day_12_rain_risk
 class TestDay6(unittest.TestCase):
     def test_case(self) -> None:
         self.assertEqual(
-            day_12_rain_risk.ShipPosition(17, -8, day_12_rain_risk.Orientation.SOUTH),
+            day_12_rain_risk.ShipPosition(
+                horizontal=17,
+                vertical=-8,
+                orientation=day_12_rain_risk.Orientation.SOUTH,
+            ),
             day_12_rain_risk.solve(_example_input),
         )
 

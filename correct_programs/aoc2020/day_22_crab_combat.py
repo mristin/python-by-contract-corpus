@@ -1,5 +1,5 @@
 import re
-from typing import Tuple, List, Sequence, overload, Union, Any
+from typing import Tuple, List, Sequence, overload, Union, Any, Final
 
 from icontract import require, ensure, DBC
 
@@ -8,13 +8,38 @@ from icontract import require, ensure, DBC
 
 
 class Deck(DBC, Sequence[int]):
+    """Represent a deck of cards.
+
+    Please make sure that you transfer the "ownership" immediately to ``Deck``
+    and don't modify the original list of strings any more:
+
+       .. code-block: python
+
+           ##
+           # OK
+           ##
+
+           deck = Deck([1, 2, 3])
+
+           ##
+           # Not OK
+           ##
+
+           cards = [1, 2, 3]
+           deck = Deck(cards)
+           # ... do something assuming ``deck`` is immutable ...
+
+           cards[0] = 2
+           # ERROR! cards[0] now breaks the invariant!
+
+    """
+
+    _cards: Final[Sequence[int]]
+
     @require(lambda cards: all(card >= 0 for card in cards))
     @require(lambda cards: len(set(cards)) == len(cards), "Unique cards")
     def __init__(self, cards: Sequence[int]) -> None:
-        if isinstance(cards, Deck):
-            self._cards = cards._cards  # type: Sequence[int]
-        else:
-            self._cards = cards
+        self._cards = cards._cards if isinstance(cards, Deck) else cards
 
     @overload
     def __getitem__(self, index: int) -> int:
@@ -60,6 +85,9 @@ class Deck(DBC, Sequence[int]):
 
 
 class Split(DBC):
+    deck1: Final[Deck]
+    deck2: Final[Deck]
+
     @require(
         lambda deck1, deck2: not set(deck1).intersection(deck2), "No overlapping cards"
     )

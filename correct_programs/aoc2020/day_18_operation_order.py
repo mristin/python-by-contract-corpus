@@ -13,13 +13,13 @@ class Operation(Enum):
     MUL = "*"
 
 
-@dataclass
+@dataclass(frozen=True)
 class Tail:
     op: Operation
     right: Union[int, "Node"]
 
 
-@dataclass
+@dataclass(frozen=True)
 class Node:
     head: Union[int, "Node"]
     tail: List[Tail]

@@ -1,16 +1,17 @@
+import dataclasses
 from collections import defaultdict
 from dataclasses import dataclass
 from itertools import permutations
 import math
 import re
 import sys
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Final
 
 from icontract import require, ensure, invariant, DBC
 
 
 def valid_side(side: str) -> bool:
-    return re.fullmatch(r"[\.\#]{10}", side) is not None
+    return re.fullmatch(r"[.#]{10}", side) is not None
 
 
 @require(lambda side: valid_side(side))
@@ -19,21 +20,29 @@ def reverse_side(side: str) -> str:
     return "".join(reversed(side))
 
 
-@invariant(
-    lambda self: all(
-        valid_side(s) for s in (self.top, self.right, self.bottom, self.left)
-    )
-)
-@invariant(lambda self: self.top[-1] == self.right[0])
-@invariant(lambda self: self.right[-1] == self.bottom[0])
-@invariant(lambda self: self.bottom[-1] == self.left[0])
-@invariant(lambda self: self.left[-1] == self.top[0])
-@dataclass(frozen=True)
 class Tile(DBC):
-    top: str
-    right: str
-    bottom: str
-    left: str
+    top: Final[str]
+    right: Final[str]
+    bottom: Final[str]
+    left: Final[str]
+
+    # fmt: off
+    @require(
+        lambda top, right, bottom, left:
+        all(
+            valid_side(s) for s in (top, right, bottom, left)
+        )
+    )
+    @require(lambda top, right: top[-1] == right[0])
+    @require(lambda right, bottom: right[-1] == bottom[0])
+    @require(lambda bottom, left: bottom[-1] == left[0])
+    @require(lambda left, top: left[-1] == top[0])
+    # fmt: on
+    def __init__(self, top: str, right: str, bottom: str, left: str) -> None:
+        self.top = top
+        self.right = right
+        self.bottom = bottom
+        self.left = left
 
     def rotate(self) -> "Tile":
         return Tile(self.left, self.top, self.right, self.bottom)
@@ -53,6 +62,23 @@ class Tile(DBC):
             reverse_side(self.bottom),
             reverse_side(self.right),
         )
+
+    def __repr__(self) -> str:
+        return (
+            f"top={self.top}, "
+            f"right={self.right}, "
+            f"bottom={self.bottom}, "
+            f"left={self.left}"
+        )
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Tile):
+            return hash(self) == hash(other)
+
+        return self == other
+
+    def __hash__(self) -> int:
+        return hash((self.top, self.right, self.bottom, self.left))
 
 
 def transform_tile(tile: Tile) -> Set[Tile]:
@@ -76,11 +102,11 @@ class Image(DBC):
     def pop(self) -> Tuple[int, Tile]:
         return self.tiles.pop()
 
-    def attempt_add(self, tileid: int, tile: Tile) -> bool:
+    def attempt_add(self, tile_id: int, tile: Tile) -> bool:
         tiles, width = self.tiles, self.width
         count = len(tiles)
         if count == 0:
-            self.tiles.append((tileid, tile))
+            self.tiles.append((tile_id, tile))
             return True
         if count % width > 0:
             # align left with previous right:
@@ -92,7 +118,7 @@ class Image(DBC):
             above_id, above_contents = tiles[count - width]
             if tile.top != reverse_side(above_contents.bottom):
                 return False
-        self.tiles.append((tileid, tile))
+        self.tiles.append((tile_id, tile))
         return True
 
 

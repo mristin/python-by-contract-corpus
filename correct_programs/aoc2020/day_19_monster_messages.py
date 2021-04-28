@@ -13,6 +13,7 @@ from typing import (
     Generator,
     TypeVar,
     Generic,
+    Final,
 )
 
 from icontract import require, ensure, DBC
@@ -35,6 +36,8 @@ class Rule(DBC):
 
 
 class RuleOr(Rule):
+    rules: Final[List[Rule]]
+
     def __init__(self, rules: List[Rule]) -> None:
         self.rules = rules
 
@@ -48,6 +51,8 @@ class RuleOr(Rule):
 
 
 class RuleSequence(Rule):
+    rules: Final[List[Rule]]
+
     def __init__(self, rules: List[Rule]) -> None:
         self.rules = rules
 
@@ -63,6 +68,8 @@ class RuleSequence(Rule):
 
 
 class RuleLiteral(Rule):
+    literal: Final[str]
+
     def __init__(self, literal: str) -> None:
         self.literal = literal
 
@@ -86,21 +93,29 @@ class Node(DBC):
 
 
 class NodeLiteral(Node):
+    literal: Final[str]
+
     def __init__(self, literal: str) -> None:
         self.literal = literal
 
 
 class NodeReference(Node):
+    identifier: Final[int]
+
     def __init__(self, identifier: int) -> None:
         self.identifier = identifier
 
 
 class NodeSequence(Node):
+    references: Final[List[NodeReference]]
+
     def __init__(self, references: List[NodeReference]) -> None:
         self.references = references
 
 
 class NodeOr(Node):
+    sequences: Final[List[NodeSequence]]
+
     def __init__(self, sequences: List[NodeSequence]) -> None:
         self.sequences = sequences
 

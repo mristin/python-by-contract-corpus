@@ -1,5 +1,5 @@
 import re
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Final
 
 from icontract import require, ensure
 
@@ -37,6 +37,10 @@ def list_neighbourhood(
 
 
 class Layout:
+    table: Final[List[List[str]]]
+    height: Final[int]
+    width: Final[int]
+
     @require(
         lambda table: len(table) > 0
         and len(table[0]) > 0

@@ -1,7 +1,7 @@
 import collections
 import enum
 import re
-from typing import Tuple, List, MutableMapping
+from typing import Tuple, List, MutableMapping, Final
 
 from icontract import require, ensure, DBC
 
@@ -10,6 +10,10 @@ from icontract import require, ensure, DBC
 
 
 class Cell(DBC):
+    x: Final[int]
+    y: Final[int]
+    z: Final[int]
+
     @require(lambda x, y, z: x + y + z == 0)
     def __init__(self, x: int, y: int, z: int) -> None:
         self.x = x
