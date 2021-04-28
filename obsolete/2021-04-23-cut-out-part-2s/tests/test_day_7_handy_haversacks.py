@@ -2,7 +2,11 @@ import unittest
 
 import icontract_hypothesis
 
-from aocdbc.day_7_handy_haversacks import *
+from correct_programs.aoc2020.day_7_handy_haversacks import (
+    parse_bagexpr,
+    parse_rule,
+    containers
+)
 
 
 class TestDay4(unittest.TestCase):

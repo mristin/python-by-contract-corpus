@@ -2,8 +2,7 @@ import unittest
 
 from icontract_hypothesis import test_with_inferred_strategy
 
-from aocdbc.day_1_report_repair import find_pair_with_sum
-from aocdbc.day_1_report_repair import find_n_items_with_sum
+from correct_programs.aoc2020.day_1_report_repair import find_pair_with_sum
 
 
 class TestDay1(unittest.TestCase):
@@ -13,17 +12,8 @@ class TestDay1(unittest.TestCase):
         assert ret is not None
         self.assertEqual(ret[0] * ret[1], 1016131)
 
-    def test_part_2(self) -> None:
-        entries = list(map(int, _CHALLENGE_DATA.split()))
-        ret = find_n_items_with_sum(entries, 3, 2020)
-        assert ret is not None
-        self.assertEqual(ret[0] * ret[1] * ret[2], 276432018)
-
     def TODO_test_verify_with_icontract_hypothesis(self) -> None:
         test_with_inferred_strategy(find_pair_with_sum)
-
-    def TODO_test_verify_line_with_icontract_hypothesis(self) -> None:
-        test_with_inferred_strategy(find_n_items_with_sum)
 
 
 _CHALLENGE_DATA = """
@@ -228,7 +218,6 @@ _CHALLENGE_DATA = """
 1995
 1937
 """
-
 
 if __name__ == "__main__":
     unittest.main()

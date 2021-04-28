@@ -1,7 +1,7 @@
 import dataclasses
 import enum
 import re
-from typing import Tuple, Mapping, List, Optional, Set
+from typing import Tuple, Mapping, List, Optional, Set, Final
 
 from icontract import require, ensure
 
@@ -19,7 +19,7 @@ assert len(set(op.value for op in Operation)) == sum(1 for op in Operation)
 VALUE_TO_OPERATION = {op.value: op for op in Operation}  # type: Mapping[str, Operation]
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Instruction:
     operation: Operation
     argument: int

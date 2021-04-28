@@ -1,5 +1,5 @@
 import re
-from typing import List, Mapping, MutableMapping, Tuple
+from typing import List, Mapping, MutableMapping, Tuple, Final
 
 from icontract import require, ensure, DBC
 
@@ -10,12 +10,18 @@ from icontract import require, ensure, DBC
 class RuleParsing:
     """Represent a rule which is not constrained by pre-conditions."""
 
+    identifier: Final[str]
+    ranges: Final[List[Tuple[int, int]]]
+
     def __init__(self, identifier: str, ranges: List[Tuple[int, int]]) -> None:
         self.identifier = identifier
         self.ranges = ranges
 
 
 class Rule(DBC):
+    identifier: Final[str]
+    ranges: Final[List[Tuple[int, int]]]
+
     @require(lambda identifier: len(identifier) > 0)
     @require(lambda ranges: all(range[0] < range[1] for range in ranges))
     def __init__(self, identifier: str, ranges: List[Tuple[int, int]]) -> None:

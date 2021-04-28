@@ -2,9 +2,10 @@
 Input: list of actions
 Output: position, Manhattan distance
 """
+import dataclasses
 from dataclasses import dataclass
 from icontract import invariant, require, ensure
-from typing import List
+from typing import List, Final
 import re
 from enum import Enum
 
@@ -16,11 +17,11 @@ class Orientation(Enum):
     NORTH = 3
 
 
-@dataclass
+@dataclasses.dataclass
 class ShipPosition:
-    horizontal: int = 0
-    vertical: int = 0
-    orientation: Orientation = Orientation.EAST
+    horizontal: int
+    vertical: int
+    orientation: Orientation
 
     def __repr__(self) -> str:
         result = ""

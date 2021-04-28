@@ -1,5 +1,5 @@
 import re
-from typing import List, Mapping, MutableMapping, Tuple
+from typing import List, Mapping, MutableMapping, Tuple, Final
 
 from icontract import require, ensure, DBC
 
@@ -9,6 +9,9 @@ MASK_RE = re.compile(r"^mask = (?P<mask>[01X]{36})\Z")
 
 
 class Mask(DBC):
+    clearing: Final[int]
+    setting: Final[int]
+
     @require(lambda clearing: 0 <= clearing <= 2 ** 36 - 1)
     @require(lambda setting: 0 <= setting <= 2 ** 36 - 1)
     def __init__(self, clearing: int, setting: int) -> None:
@@ -51,6 +54,9 @@ def parse_mask(text: str) -> Mask:
 
 
 class Write(DBC):
+    address: Final[int]
+    value: Final[int]
+
     @require(lambda address: 0 <= address, "The address non-negative")
     @require(lambda value: 0 <= value <= 2 ** 36 - 1, "The value in expected range")
     def __init__(self, address: int, value: int) -> None:
@@ -77,6 +83,9 @@ def parse_write(text: str) -> Tuple[int, int]:
 
 
 class Program(DBC):
+    mask: Final[Mask]
+    writes: Final[List[Write]]
+
     def __init__(self, mask: Mask, writes: List[Write]) -> None:
         self.mask = mask
         self.writes = writes
@@ -101,6 +110,8 @@ def parse_lines(lines: List[str]) -> Program:
 
 
 class Memory(DBC):
+    slots: Final[Mapping[int, int]]
+
     @require(
         lambda slots: all(value >= 0 for value in slots.values()), "Values non-negative"
     )
