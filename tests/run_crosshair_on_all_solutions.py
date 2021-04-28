@@ -6,9 +6,9 @@ import sys
 
 def main() -> None:
     tests_dir = pathlib.Path(os.path.realpath(__file__)).parent
-    aocdbc_dir = tests_dir.parent / "aocdbc"
+    correct_programs_dir = tests_dir.parent / "correct_programs"
 
-    for i, pth in enumerate(sorted(aocdbc_dir.glob("day_*.py"))):
+    for i, pth in enumerate(sorted(correct_programs_dir.glob("**/test_*.py"))):
         if i > 0:
             print()
 

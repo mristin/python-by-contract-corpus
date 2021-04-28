@@ -67,7 +67,7 @@ def main() -> int:
         print("Black'ing...")
         # fmt: off
         black_targets = [
-            "aocdbc",
+            "correct_programs",
             "tests",
             "precommit.py"
         ]
@@ -85,7 +85,7 @@ def main() -> int:
     if Step.MYPY in selects and Step.MYPY not in skips:
         print("Mypy'ing...")
         # fmt: off
-        mypy_targets = ["aocdbc", "tests"]
+        mypy_targets = ["correct_programs", "tests"]
         subprocess.check_call(["mypy", "--strict"] + mypy_targets, cwd=str(repo_root))
         # fmt: on
     else:
@@ -100,7 +100,7 @@ def main() -> int:
         subprocess.check_call(
             [
                 "coverage", "run",
-                "--source", "aocdbc",
+                "--source", "correct_programs",
                 "-m", "unittest", "discover"
             ],
             cwd=str(repo_root),
@@ -116,7 +116,7 @@ def main() -> int:
         print("Doctesting...")
         subprocess.check_call([sys.executable, "-m", "doctest", "README.rst"])
 
-        aocdbc_dir = repo_root / "aocdbc"
+        aocdbc_dir = repo_root / "correct_programs"
         for pth in sorted(aocdbc_dir.glob("**/*.py")):
             subprocess.check_call([sys.executable, "-m", "doctest", str(pth)])
 
