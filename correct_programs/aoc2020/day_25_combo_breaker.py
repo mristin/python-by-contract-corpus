@@ -6,11 +6,7 @@ TESTING_WITH_ICONTRACT_HYPOTHESIS = False
 
 
 # fmt: off
-@require(
-    lambda loop_size:
-    loop_size >= 0
-    and (not TESTING_WITH_ICONTRACT_HYPOTHESIS or loop_size < 10000)
-)
+@require(lambda loop_size: loop_size >= 0)
 @require(lambda subject: subject >= 0)
 @ensure(lambda result: 0 <= result < 20201227)
 # fmt: on
