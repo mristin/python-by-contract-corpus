@@ -1,5 +1,5 @@
 import re
-from typing import Tuple, List, Sequence, overload, Union, Any, Final
+from typing import Tuple, List, Sequence, overload, Union, Any, Final, Iterator
 
 from icontract import require, ensure, DBC
 
@@ -57,6 +57,9 @@ class Deck(DBC):
 
     def __len__(self) -> int:
         return len(self.cards)
+
+    def __iter__(self) -> Iterator[int]:
+        return self.cards.__iter__()
 
     # fmt: off
     @require(
