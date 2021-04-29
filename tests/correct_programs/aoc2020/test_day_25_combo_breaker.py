@@ -1,21 +1,21 @@
 import unittest
 
 import icontract_hypothesis
+from icontract import require, ensure
 
 from correct_programs.aoc2020 import day_25_combo_breaker
 
 
 class TestWithIcontractHypothesis(unittest.TestCase):
-    def setUp(self) -> None:
-        day_25_combo_breaker.TESTING_WITH_ICONTRACT_HYPOTHESIS = True
-
-    def tearDown(self) -> None:
-        day_25_combo_breaker.TESTING_WITH_ICONTRACT_HYPOTHESIS = False
-
     def test_functions(self) -> None:
-        for func in [
-            day_25_combo_breaker.transform,
-        ]:
+        # We need to add more constraints so that the function is testable.
+        @require(lambda loop_size: loop_size >= 0)
+        @require(lambda loop_size: loop_size < 1000)
+        @require(lambda subject: subject >= 0)
+        def transform_testable(subject: int, loop_size: int) -> int:
+            return day_25_combo_breaker.transform(subject, loop_size)
+
+        for func in [transform_testable]:
             try:
                 icontract_hypothesis.test_with_inferred_strategy(func)
             except Exception as error:
