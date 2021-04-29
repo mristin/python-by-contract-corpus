@@ -1,5 +1,4 @@
 import abc
-import collections.abc
 import re
 from typing import (
     List,
@@ -7,17 +6,14 @@ from typing import (
     MutableMapping,
     Tuple,
     Optional,
-    cast,
     Dict,
     Iterable,
-    Generator,
     TypeVar,
     Generic,
     Final,
 )
 
 from icontract import require, ensure, DBC
-
 
 # crosshair: on
 from correct_programs import common

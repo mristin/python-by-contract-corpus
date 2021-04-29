@@ -47,8 +47,13 @@ def parse_input(lines: List[str]) -> Tuple[int, Set[int]]:
     return (int(min_time_text), bus_ids)
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Execute the main routine."""
     min_time, bus_ids = parse_input(sys.stdin.readlines())
     departure_time, bus_id = find_departure(min_time, bus_ids)
     wait_time = departure_time - min_time
     print(wait_time * bus_id)
+
+
+if __name__ == "__main__":
+    main()

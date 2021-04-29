@@ -1,5 +1,5 @@
 import re
-from typing import Tuple, List, Sequence, overload, Union, Any, Final, Iterator
+from typing import Tuple, List, Sequence, overload, Union, Final, Iterator
 
 from icontract import require, ensure, DBC
 
@@ -71,9 +71,9 @@ class Deck(DBC):
         "Unique cards after the addition")
     # fmt: on
     def __add__(self, other: "Deck") -> "Deck":
-        sum = list(self.cards)
-        sum.extend(other.cards)
-        return Deck(cards=sum)
+        sum_of_cards = list(self.cards)
+        sum_of_cards.extend(other.cards)
+        return Deck(cards=sum_of_cards)
 
     def __repr__(self) -> str:
         return repr(self.cards)

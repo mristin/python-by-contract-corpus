@@ -54,7 +54,7 @@ def apply(activity: Activity) -> Activity:
         is_active = point in activity
 
         if is_active:
-            if active_neighbours == 2 or active_neighbours == 3:
+            if active_neighbours in (2, 3):
                 next_activity.add(point)
             else:
                 pass

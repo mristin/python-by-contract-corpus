@@ -1,10 +1,14 @@
 import textwrap
 import unittest
-from typing import Sequence
 
 import icontract_hypothesis
 
 from correct_programs.aoc2020 import day_22_crab_combat
+
+
+# We need to register a strategy as Hypothesis 6.10.1 seems to have a bug related to
+# interpreting Sequence[int] as `one_of(binary, list)`,
+# see: https://github.com/HypothesisWorks/hypothesis/issues/2950
 
 
 class TestWithIcontractHypothesis(unittest.TestCase):
