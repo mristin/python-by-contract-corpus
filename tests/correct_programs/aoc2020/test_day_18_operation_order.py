@@ -13,14 +13,18 @@ from correct_programs.aoc2020.day_18_operation_order import (
 
 
 class TestWithIcontractHypothesis(unittest.TestCase):
-    def test_serialize(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(serialize)
+    def test_functions(self) -> None:
+        for func in [serialize, compute]:
+            try:
+                icontract_hypothesis.test_with_inferred_strategy(func)
+            except Exception as error:
+                raise Exception(
+                    f"Automatically testing {func} with icontract-hypothesis failed "
+                    f"(please see the original error above)"
+                ) from error
 
-    def test_compute(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(compute)
 
-
-class ManualTests(unittest.TestCase):
+class TestManually(unittest.TestCase):
     test_expressions = ["(1+2)+(3*4)", "(1+(2*3))+4", "1+2*3+4+6*7"]  # 15  # 11  # 133
 
     test_nodes = [

@@ -7,10 +7,15 @@ from correct_programs.aoc2020 import day_15_rambunctious_recitation
 
 
 class TestWithIcontractHypothesis(unittest.TestCase):
-    def test_solve(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(
-            day_15_rambunctious_recitation.solve
-        )
+    def test_functions(self) -> None:
+        for func in [day_15_rambunctious_recitation.solve]:
+            try:
+                icontract_hypothesis.test_with_inferred_strategy(func)
+            except Exception as error:
+                raise Exception(
+                    f"Automatically testing {func} with icontract-hypothesis failed "
+                    f"(please see the original error above)"
+                ) from error
 
 
 class TestManually(unittest.TestCase):

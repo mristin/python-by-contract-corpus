@@ -7,23 +7,20 @@ from correct_programs.aoc2020 import day_17_conway_cubes
 
 
 class TestWithIcontractHypothesis(unittest.TestCase):
-    def test_are_neighbours(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(
-            day_17_conway_cubes.are_neighbours
-        )
-
-    def test_list_neighbourhood(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(
-            day_17_conway_cubes.list_neighbourhood
-        )
-
-    def test_apply(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(day_17_conway_cubes.apply)
-
-    def test_count_active(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(
-            day_17_conway_cubes.count_active
-        )
+    def test_functions(self) -> None:
+        for func in [
+            day_17_conway_cubes.are_neighbours,
+            day_17_conway_cubes.list_neighbourhood,
+            day_17_conway_cubes.apply,
+            day_17_conway_cubes.count_active,
+        ]:
+            try:
+                icontract_hypothesis.test_with_inferred_strategy(func)  # type: ignore
+            except Exception as error:
+                raise Exception(
+                    f"Automatically testing {func} with icontract-hypothesis failed "
+                    f"(please see the original error above)"
+                ) from error
 
 
 class TestManually(unittest.TestCase):
@@ -160,7 +157,7 @@ class TestManually(unittest.TestCase):
             self.assertEqual(
                 expected_repr,
                 day_17_conway_cubes.repr_activity(activity=activity),
-                f"after {cycle } cycle",
+                f"after {cycle} cycle",
             )
 
             cycle += 1

@@ -5,6 +5,7 @@ from icontract import require, ensure, DBC
 
 
 # crosshair: on
+from correct_programs import common
 
 
 class RuleParsing:
@@ -41,7 +42,7 @@ RULE_RE = re.compile(
 
 
 @require(lambda lines: all(RULE_RE.match(line) for line in lines))
-def parse_rules(lines: List[str]) -> List[RuleParsing]:
+def parse_rules(lines: common.Lines) -> List[RuleParsing]:
     result = []  # type: List[RuleParsing]
     for line in lines:
         identifier, rest = line.split(": ", 1)

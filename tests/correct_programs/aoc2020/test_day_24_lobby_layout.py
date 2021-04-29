@@ -6,6 +6,22 @@ import icontract_hypothesis
 from correct_programs.aoc2020 import day_24_lobby_layout
 
 
+class TestWithIcontractHypothesis(unittest.TestCase):
+    def test_functions(self) -> None:
+        for func in [
+            day_24_lobby_layout.parse_line,
+            day_24_lobby_layout.stringify_directions,
+            day_24_lobby_layout.count_flips,
+        ]:
+            try:
+                icontract_hypothesis.test_with_inferred_strategy(func)  # type: ignore
+            except Exception as error:
+                raise Exception(
+                    f"Automatically testing {func} with icontract-hypothesis failed "
+                    f"(please see the original error above)"
+                ) from error
+
+
 class TestParseLine(unittest.TestCase):
     def test_case(self) -> None:
         line = "nwwswee"
@@ -22,17 +38,9 @@ class TestParseLine(unittest.TestCase):
             directions,
         )
 
-    def test_with_icontract_hypothesis(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(day_24_lobby_layout.parse_line)
-
     def test_empty_case_of_stringify(self) -> None:
         result = day_24_lobby_layout.stringify_directions(directions=[])
         self.assertEqual("", result)
-
-    def test_stringify_with_icontract_hypothesis(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(
-            day_24_lobby_layout.stringify_directions
-        )
 
 
 class TestCounFlips(unittest.TestCase):
@@ -67,11 +75,6 @@ class TestCounFlips(unittest.TestCase):
 
         result = day_24_lobby_layout.count_flips(plan=plan)
         self.assertEqual(10, result)
-
-    def test_with_icontract_hypothesis(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(
-            day_24_lobby_layout.count_flips
-        )
 
 
 if __name__ == "__main__":

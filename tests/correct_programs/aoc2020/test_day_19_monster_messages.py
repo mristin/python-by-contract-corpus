@@ -3,6 +3,7 @@ import textwrap
 import unittest
 from typing import Dict, List
 
+from correct_programs import common
 from correct_programs.aoc2020 import day_19_monster_messages
 
 
@@ -36,15 +37,17 @@ class TestRuleCompositeRe(unittest.TestCase):
 
 class TestManually(unittest.TestCase):
     def test_repr(self) -> None:
-        rule_lines = textwrap.dedent(
-            '''\
-            0: 4 1 5
-            1: 2 3 | 3 2
-            2: 4 4 | 5 5
-            3: 4 5 | 5 4
-            4: "a"
-            5: "b"'''
-        ).splitlines()
+        rule_lines = common.Lines(
+            textwrap.dedent(
+                '''\
+                0: 4 1 5
+                1: 2 3 | 3 2
+                2: 4 4 | 5 5
+                3: 4 5 | 5 4
+                4: "a"
+                5: "b"'''
+            ).splitlines()
+        )
 
         rules_to_repr = dict()  # type: Dict[int, str]
 
@@ -68,15 +71,17 @@ class TestManually(unittest.TestCase):
         # fmt: on
 
     def test_iterate(self) -> None:
-        rule_lines = textwrap.dedent(
-            '''\
-            0: 4 1 5
-            1: 2 3 | 3 2
-            2: 4 4 | 5 5
-            3: 4 5 | 5 4
-            4: "a"
-            5: "b"'''
-        ).splitlines()
+        rule_lines = common.Lines(
+            textwrap.dedent(
+                '''\
+                0: 4 1 5
+                1: 2 3 | 3 2
+                2: 4 4 | 5 5
+                3: 4 5 | 5 4
+                4: "a"
+                5: "b"'''
+            ).splitlines()
+        )
 
         rule_trees = day_19_monster_messages.parse_rules(lines=rule_lines)
 
@@ -105,15 +110,17 @@ class TestManually(unittest.TestCase):
         # fmt: on
 
     def test_case(self) -> None:
-        rule_lines = textwrap.dedent(
-            '''\
-            0: 4 1 5
-            1: 2 3 | 3 2
-            2: 4 4 | 5 5
-            3: 4 5 | 5 4
-            4: "a"
-            5: "b"'''
-        ).splitlines()
+        rule_lines = common.Lines(
+            textwrap.dedent(
+                '''\
+                0: 4 1 5
+                1: 2 3 | 3 2
+                2: 4 4 | 5 5
+                3: 4 5 | 5 4
+                4: "a"
+                5: "b"'''
+            ).splitlines()
+        )
 
         rule_trees = day_19_monster_messages.parse_rules(lines=rule_lines)
 

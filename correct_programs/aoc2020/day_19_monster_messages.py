@@ -20,6 +20,7 @@ from icontract import require, ensure, DBC
 
 
 # crosshair: on
+from correct_programs import common
 
 
 class Rule(DBC):
@@ -178,7 +179,7 @@ def parse_rule(line: str) -> Tuple[int, Node]:
 
 
 @require(lambda lines: all(RULE_RE.match(line) for line in lines))
-def parse_rules(lines: List[str]) -> MutableMapping[int, Node]:
+def parse_rules(lines: common.Lines) -> MutableMapping[int, Node]:
     rule_trees = dict()  # type: Dict[int, Node]
 
     for line in lines:

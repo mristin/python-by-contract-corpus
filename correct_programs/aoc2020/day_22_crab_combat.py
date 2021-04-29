@@ -7,7 +7,7 @@ from icontract import require, ensure, DBC
 # crosshair: on
 
 
-class Deck(DBC, Sequence[int]):
+class Deck(DBC):
     """Represent a deck of cards.
 
     Please make sure that you transfer the "ownership" immediately to ``Deck``
@@ -34,12 +34,12 @@ class Deck(DBC, Sequence[int]):
 
     """
 
-    _cards: Final[Sequence[int]]
+    cards: Final[Sequence[int]]
 
     @require(lambda cards: all(card >= 0 for card in cards))
     @require(lambda cards: len(set(cards)) == len(cards), "Unique cards")
     def __init__(self, cards: Sequence[int]) -> None:
-        self._cards = cards._cards if isinstance(cards, Deck) else cards
+        self.cards = cards
 
     @overload
     def __getitem__(self, index: int) -> int:
@@ -51,35 +51,35 @@ class Deck(DBC, Sequence[int]):
 
     def __getitem__(self, index: Union[int, slice]) -> Union[int, "Deck"]:
         if isinstance(index, slice):
-            return Deck(cards=self._cards[index])
+            return Deck(cards=self.cards[index])
         else:
-            return self._cards[index]
+            return self.cards[index]
 
     def __len__(self) -> int:
-        return len(self._cards)
+        return len(self.cards)
 
     # fmt: off
     @require(
         lambda self, other:
         (
-                sum := list(self._cards) + other._cards,
+                sum := list(self.cards) + other.cards,
                 len(set(sum)) == len(sum)
         ),
         "Unique cards after the addition")
     # fmt: on
     def __add__(self, other: "Deck") -> "Deck":
-        sum = list(self._cards)
-        sum.extend(other._cards)
+        sum = list(self.cards)
+        sum.extend(other.cards)
         return Deck(cards=sum)
 
     def __repr__(self) -> str:
-        return repr(self._cards)
+        return repr(self.cards)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Deck):
-            return self._cards.__eq__(other._cards)
+            return self.cards.__eq__(other.cards)
         elif isinstance(other, list):
-            return self._cards.__eq__(other)
+            return self.cards.__eq__(other)
         else:
             return object.__eq__(self, other)
 

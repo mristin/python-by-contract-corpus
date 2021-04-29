@@ -86,7 +86,7 @@ def update_position(current_position: ShipPosition, move: str) -> ShipPosition:
 
 @require(
     lambda puzzle_input: re.match(
-        r"^(([NSEWF][0-9]+)|([LR](0|90|180|270|360)))(\n(([NSEWF][0-9]+)|([LR](0|90|180|270|360))))*$",
+        r"^(([NSEWF][0-9]+)|([LR](0|90|180|270|360)))(\n(([NSEWF][0-9]+)|([LR](0|90|180|270|360))))*\Z",
         puzzle_input,
     )
 )
