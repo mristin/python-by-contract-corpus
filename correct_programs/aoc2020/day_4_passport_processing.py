@@ -1,6 +1,6 @@
-from re import compile, fullmatch
 import sys
-from typing import Dict, List, Optional, Tuple
+import re
+from typing import List, Tuple
 
 from icontract import require, ensure
 
@@ -14,7 +14,7 @@ def blank_line_split(text: str) -> List[str]:
     return text.split("\n\n")
 
 
-PASSPORT_RE = compile(r"\s*(\w+:(\S+))(\s+\w+:(\S+))*\s*")
+PASSPORT_RE = re.compile(r"\s*(\w+:(\S+))(\s+\w+:(\S+))*\s*")
 
 
 @require(lambda text: PASSPORT_RE.fullmatch(text))
@@ -32,7 +32,7 @@ def is_valid(entry: List[Tuple[str, str]]) -> bool:
     return len(_REQUIRED_KEYS - entry_keys) == 0
 
 
-@require(lambda batch: all(PASSPORT_RE.match(l) for l in blank_line_split(batch)))
+@require(lambda batch: all(PASSPORT_RE.match(line) for line in blank_line_split(batch)))
 @ensure(lambda result: result >= 0)
 def count_valid(batch: str) -> int:
     return sum(

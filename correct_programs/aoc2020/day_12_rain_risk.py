@@ -3,11 +3,11 @@ Input: list of actions
 Output: position, Manhattan distance
 """
 import dataclasses
-from dataclasses import dataclass
-from icontract import invariant, require, ensure
-from typing import List, Final
 import re
 from enum import Enum
+from typing import List
+
+from icontract import require, ensure
 
 
 class Orientation(Enum):

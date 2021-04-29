@@ -47,7 +47,7 @@ class Layout:
         and all(len(row) == len(table[0]) for row in table)
     )
     @require(
-        lambda table: all(re.match("^[L#.]\Z", cell) for row in table for cell in row)
+        lambda table: all(re.match(r"^[L#.]\Z", cell) for row in table for cell in row)
     )
     @ensure(lambda self: self.height == len(self.table))
     @ensure(lambda self: len(self.table) > 0 and self.width == len(self.table[0]))

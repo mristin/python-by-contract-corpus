@@ -11,6 +11,7 @@ import sys
 class Step(enum.Enum):
     BLACK = "black"
     MYPY = "mypy"
+    PYLINT = "pylint"
     TEST = "test"
     DOCTEST = "doctest"
 
@@ -90,6 +91,17 @@ def main() -> int:
         # fmt: on
     else:
         print("Skipped mypy'ing.")
+
+    if Step.PYLINT in selects and Step.PYLINT not in skips:
+        # fmt: off
+        print("Pylint'ing...")
+        pylint_targets = ["correct_programs"]
+        subprocess.check_call(
+            ["pylint", "--rcfile=pylint.rc"] + pylint_targets, cwd=str(repo_root)
+        )
+        # fmt: on
+    else:
+        print("Skipped pylint'ing.")
 
     if Step.TEST in selects and Step.TEST not in skips:
         print("Testing...")

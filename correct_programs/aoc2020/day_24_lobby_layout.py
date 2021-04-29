@@ -65,8 +65,8 @@ def follow_directions(start: Cell, directions: List[Direction]) -> Cell:
     return cursor
 
 
-DIRECTIONS_RE = re.compile("^(se|sw|nw|ne|w|e)+\Z")
-ONE_DIRECTION_RE = re.compile("(se|sw|nw|ne|w|e)")
+DIRECTIONS_RE = re.compile(r"^(se|sw|nw|ne|w|e)+\Z")
+ONE_DIRECTION_RE = re.compile(r"(se|sw|nw|ne|w|e)")
 
 
 @require(lambda line: not (len(line) > 0) or DIRECTIONS_RE.match(line))

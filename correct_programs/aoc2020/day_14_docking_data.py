@@ -58,7 +58,7 @@ class Write(DBC):
     address: Final[int]
     value: Final[int]
 
-    @require(lambda address: 0 <= address, "The address non-negative")
+    @require(lambda address: address >= 0)
     @require(lambda value: 0 <= value <= 2 ** 36 - 1, "The value in expected range")
     def __init__(self, address: int, value: int) -> None:
         self.address = address
@@ -99,7 +99,7 @@ def parse_lines(lines: common.Lines) -> Program:
     mask = parse_mask(text=lines[0])
     writes_as_tuples = [parse_write(line) for line in lines[1:]]
 
-    for address, value in writes_as_tuples:
+    for _, value in writes_as_tuples:
         if value >= 2 ** 36:
             raise ValueError(f"Value does not fit in 35 bits (>= {2**36=}): {value}")
 

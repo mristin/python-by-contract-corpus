@@ -19,7 +19,7 @@ source code, so we shortened the text as much as possible and give it here only 
 orientation about the complexity of the exercises. Please refer to the original text
 (in German) for details.
 
-The content of the exercises is courtesy of Laboratory for Software Technology, 
+The content of the exercises is courtesy of Laboratory for Software Technology,
 ETH Zurich, which also bears the copyright.
 
 You can find the original exercises at:

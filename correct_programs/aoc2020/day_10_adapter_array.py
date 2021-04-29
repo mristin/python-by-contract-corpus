@@ -1,8 +1,6 @@
 import collections
 import re
 from typing import (
-    Final,
-    Sequence,
     MutableMapping,
     Iterable,
     Tuple,
@@ -18,7 +16,7 @@ from icontract import require, ensure, DBC
 
 from correct_programs import common
 
-T = TypeVar("T")
+T = TypeVar("T")  # pylint: disable=invalid-name
 
 
 def pairwise(iterable: Iterable[T]) -> Iterable[Tuple[T, T]]:

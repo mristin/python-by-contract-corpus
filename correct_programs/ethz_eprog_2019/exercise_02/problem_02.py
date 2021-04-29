@@ -1,4 +1,4 @@
-"""
+r"""
 Draw the following pattern:
 
 .. code-block:

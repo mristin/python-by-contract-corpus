@@ -1,13 +1,10 @@
-import dataclasses
-from collections import defaultdict
-from dataclasses import dataclass
-from itertools import permutations
 import math
 import re
 import sys
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Set, Tuple, Final
 
-from icontract import require, ensure, invariant, DBC
+from icontract import require, ensure, DBC
 
 
 def valid_side(side: str) -> bool:
@@ -115,12 +112,12 @@ class Image(DBC):
             return True
         if count % width > 0:
             # align left with previous right:
-            left_id, left_contents = tiles[-1]
+            _, left_contents = tiles[-1]
             if tile.left != reverse_side(left_contents.right):
                 return False
         if count >= width:
             # align top with bottom of tile above:
-            above_id, above_contents = tiles[count - width]
+            _, above_contents = tiles[count - width]
             if tile.top != reverse_side(above_contents.bottom):
                 return False
         self.tiles.append((tile_id, tile))

@@ -1,12 +1,13 @@
-from typing import List, Dict, Set, TYPE_CHECKING, Final
+import regex
+from typing import List, Dict, Set, Final
+
 from icontract import require, ensure, DBC
-import regex as re  # type: ignore
 
 
 class Ingredient:
     identifier: Final[str]
 
-    @require(lambda identifier: re.match("^[a-zA-Z]+$", identifier))
+    @require(lambda identifier: regex.match("^[a-zA-Z]+$", identifier))
     def __init__(self, identifier: str) -> None:
         self.identifier = identifier
 
@@ -17,7 +18,7 @@ class Ingredient:
 class Allergen(DBC):
     identifier: Final[str]
 
-    @require(lambda identifier: re.match("^[a-zA-Z]+$", identifier))
+    @require(lambda identifier: regex.match("^[a-zA-Z]+$", identifier))
     def __init__(self, identifier: str) -> None:
         self.identifier: str = identifier
         self.potential_ingredients: List[Set[Ingredient]] = []
@@ -43,7 +44,7 @@ class Allergen(DBC):
 
 
 # small error: this allows for "ing1 ing2 (contains , soy, water)"
-ALLERGEN_LINE_RE = re.compile(
+ALLERGEN_LINE_RE = regex.compile(
     r"^(?:\s?(?P<ingredient>\w+))* " r"\(contains (?:(?:,\s)?(?P<allergen>\w+))*\)$"
 )
 
@@ -51,11 +52,17 @@ ALLERGEN_LINE_RE = re.compile(
 @require(lambda line_1: ALLERGEN_LINE_RE.match(line_1))
 @require(lambda line_2: ALLERGEN_LINE_RE.match(line_2))
 def is_equal_ingredient_line(line_1: str, line_2: str) -> bool:
-    ingredients_in_line_1 = set(ALLERGEN_LINE_RE.match(line_1).captures(1))
-    allergens_in_line_1 = set(ALLERGEN_LINE_RE.match(line_1).captures(2))
+    mtch1 = ALLERGEN_LINE_RE.match(line_1)
+    assert mtch1 is not None
 
-    ingredients_in_line_2 = set(ALLERGEN_LINE_RE.match(line_2).captures(1))
-    allergens_in_line_2 = set(ALLERGEN_LINE_RE.match(line_2).captures(2))
+    ingredients_in_line_1 = set(mtch1.captures(1))
+    allergens_in_line_1 = set(mtch1.captures(2))
+
+    mtch2 = ALLERGEN_LINE_RE.match(line_2)
+    assert mtch2 is not None
+
+    ingredients_in_line_2 = set(mtch2.captures(1))
+    allergens_in_line_2 = set(mtch2.captures(2))
 
     return (
         ingredients_in_line_1 == ingredients_in_line_2
@@ -132,7 +139,7 @@ def serialize(allergen_set: List[Allergen]) -> List[str]:
     return ingredient_list
 
 
-ALLERGEN_LIST_RE = re.compile(
+ALLERGEN_LIST_RE = regex.compile(
     r"^(\s?\w+)* \(contains ((,\s)?\w+)*\)" r"(\n(\s?\w+)* \(contains ((,\s)?\w+)*\))*$"
 )
 
