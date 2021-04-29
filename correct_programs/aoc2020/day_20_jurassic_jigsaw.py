@@ -73,7 +73,12 @@ class Tile(DBC):
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Tile):
-            return hash(self) == hash(other)
+            return (
+                self.top == other.top
+                and self.right == other.right
+                and self.bottom == other.bottom
+                and self.left == other.left
+            )
 
         return self == other
 
