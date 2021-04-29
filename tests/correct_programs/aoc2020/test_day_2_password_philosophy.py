@@ -5,7 +5,22 @@ import icontract_hypothesis
 from correct_programs.aoc2020 import day_2_password_philosophy
 
 
-class TestDay2(unittest.TestCase):
+class TestWithIcontractHypothesis(unittest.TestCase):
+    def test_functions(self) -> None:
+        for func in [
+            day_2_password_philosophy.verify,
+            day_2_password_philosophy.verify_line,
+        ]:
+            try:
+                icontract_hypothesis.test_with_inferred_strategy(func)  # type: ignore
+            except Exception as error:
+                raise Exception(
+                    f"Automatically testing {func} with icontract-hypothesis failed "
+                    f"(please see the original error above)"
+                ) from error
+
+
+class TestManually(unittest.TestCase):
     def test_cases(self) -> None:
         cases = [
             ("1-3 a: abcde", True),
@@ -16,16 +31,6 @@ class TestDay2(unittest.TestCase):
         for line, expected_result in cases:
             result = day_2_password_philosophy.verify_line(line=line)
             self.assertEqual(expected_result, result)
-
-    def test_verify_with_icontract_hypothesis(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(
-            day_2_password_philosophy.verify
-        )
-
-    def test_verify_line_with_icontract_hypothesis(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(
-            day_2_password_philosophy.verify_line
-        )
 
 
 if __name__ == "__main__":

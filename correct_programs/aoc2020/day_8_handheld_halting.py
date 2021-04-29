@@ -1,12 +1,12 @@
 import dataclasses
 import enum
 import re
-from typing import Tuple, Mapping, List, Optional, Set, Final
+from typing import Mapping, List, Optional, Set
 
 from icontract import require, ensure
 
-
 # crosshair: on
+from correct_programs import common
 
 
 class Operation(enum.Enum):
@@ -45,7 +45,7 @@ def parse_line(line: str) -> Instruction:
 
 @require(lambda lines: all(INSTRUCTION_RE.match(line) for line in lines))
 @ensure(lambda lines, result: len(lines) == len(result))
-def parse(lines: List[str]) -> List[Instruction]:
+def parse(lines: common.Lines) -> List[Instruction]:
     return [parse_line(line) for line in lines]
 
 

@@ -2,10 +2,18 @@ import sys
 
 from icontract import require, ensure
 
+TESTING_WITH_ICONTRACT_HYPOTHESIS = False
 
-@require(lambda loop_size: loop_size >= 0)
+
+# fmt: off
+@require(
+    lambda loop_size:
+    loop_size >= 0
+    and (not TESTING_WITH_ICONTRACT_HYPOTHESIS or loop_size < 10000)
+)
 @require(lambda subject: subject >= 0)
 @ensure(lambda result: 0 <= result < 20201227)
+# fmt: on
 def transform(subject: int, loop_size: int) -> int:
     value = 1
     for _ in range(loop_size):
@@ -14,11 +22,13 @@ def transform(subject: int, loop_size: int) -> int:
     return value
 
 
+# fmt: off
 @require(lambda subject: subject >= 0)
 @ensure(
-    lambda result, subject, public_key: result == -1
-    or transform(subject, result) == public_key
+    lambda result, subject, public_key:
+    not (result != -1) or transform(subject, result) == public_key
 )
+# fmt: on
 def deduce_loop_size(subject: int, public_key: int) -> int:
     value = 1
     for loop_ct in range(100000000):

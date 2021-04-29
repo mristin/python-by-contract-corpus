@@ -125,14 +125,14 @@ class Image(DBC):
 def place_remaining_tiles(image: Image, tiles: Dict[int, Set[Tile]]) -> bool:
     if not tiles:
         return True
-    for tileid, variants in list(tiles.items()):
+    for tile_id, variants in list(tiles.items()):
         for variant in variants:
-            if image.attempt_add(tileid, variant):
-                del tiles[tileid]
+            if image.attempt_add(tile_id, variant):
+                del tiles[tile_id]
                 if place_remaining_tiles(image, tiles):
                     return True
                 image.pop()
-                tiles[tileid] = variants
+                tiles[tile_id] = variants
     return False
 
 
@@ -160,12 +160,12 @@ def valid_tile_text(lines: List[str]) -> bool:
 def parse_tile(lines: List[str]) -> Tuple[int, Tile]:
     match = re.match(r"Tile (\d+)", lines[0])
     assert match
-    tileid = int(match.group(1))
+    tile_id = int(match.group(1))
     top = lines[1]
     bottom = lines[-1][::-1]
     right = "".join(line[-1] for line in lines[1:])
     left = "".join([line[0] for line in lines[1:]][::-1])
-    return (tileid, Tile(top, right, bottom, left))
+    return (tile_id, Tile(top, right, bottom, left))
 
 
 def parse_tiles(text: str) -> Dict[int, Set[Tile]]:
@@ -174,12 +174,13 @@ def parse_tiles(text: str) -> Dict[int, Set[Tile]]:
     for section in sections:
         if not valid_tile_text(section):
             raise ValueError
-        tileid, tile = parse_tile(section)
-        tiles[tileid] = transform_tile(tile)
+        tile_id, tile = parse_tile(section)
+        tiles[tile_id] = transform_tile(tile)
     return tiles
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Execute the main routine."""
     tiles = parse_tiles(sys.stdin.read())
     image = place_tiles(tiles)
     assert image is not None
@@ -187,3 +188,7 @@ if __name__ == "__main__":
     width = image.width
     print(ids)
     print(ids[0] * ids[width - 1] * ids[-width] * ids[-1])
+
+
+if __name__ == "__main__":
+    main()

@@ -1,5 +1,6 @@
 import textwrap
 import unittest
+from typing import Sequence
 
 import icontract_hypothesis
 
@@ -7,10 +8,15 @@ from correct_programs.aoc2020 import day_22_crab_combat
 
 
 class TestWithIcontractHypothesis(unittest.TestCase):
-    def test_compute_score(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(
-            day_22_crab_combat.compute_score
-        )
+    def test_functions(self) -> None:
+        for func in [day_22_crab_combat.compute_score]:
+            try:
+                icontract_hypothesis.test_with_inferred_strategy(func)
+            except Exception as error:
+                raise Exception(
+                    f"Automatically testing {func} with icontract-hypothesis failed "
+                    f"(please see the original error above)"
+                ) from error
 
 
 class TestManually(unittest.TestCase):

@@ -7,13 +7,18 @@ from correct_programs.aoc2020 import day_11_seating_system
 
 
 class TestWithIcontractHypothesis(unittest.TestCase):
-    def test_list_neighbourhood(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(
-            day_11_seating_system.list_neighbourhood
-        )
+    def test_functions(self) -> None:
+        for func in [day_11_seating_system.list_neighbourhood]:
+            try:
+                icontract_hypothesis.test_with_inferred_strategy(func)
+            except Exception as error:
+                raise Exception(
+                    f"Automatically testing {func} with icontract-hypothesis failed "
+                    f"(please see the original error above)"
+                ) from error
 
 
-class TestApply(unittest.TestCase):
+class TestManually(unittest.TestCase):
     def test_apply_on_case(self) -> None:
         steps = [
             textwrap.dedent(

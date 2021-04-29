@@ -4,6 +4,7 @@ from typing import List, Mapping, MutableMapping, Tuple, Final
 from icontract import require, ensure, DBC
 
 # crosshair: on
+from correct_programs import common
 
 MASK_RE = re.compile(r"^mask = (?P<mask>[01X]{36})\Z")
 
@@ -94,7 +95,7 @@ class Program(DBC):
 @require(lambda lines: all(WRITE_RE.match(line) for line in lines[1:]))
 @require(lambda lines: MASK_RE.match(lines[0]))
 @require(lambda lines: len(lines) > 2)
-def parse_lines(lines: List[str]) -> Program:
+def parse_lines(lines: common.Lines) -> Program:
     mask = parse_mask(text=lines[0])
     writes_as_tuples = [parse_write(line) for line in lines[1:]]
 

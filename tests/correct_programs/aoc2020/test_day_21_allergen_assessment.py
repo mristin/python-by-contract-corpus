@@ -3,22 +3,25 @@ import unittest
 
 import icontract_hypothesis
 
-from correct_programs.aoc2020.day_21_allergen_assessment import (
-    parse_list_of_foods,
-    solve,
-    is_equal_ingredient_list,
-)
+from correct_programs.aoc2020 import day_21_allergen_assessment
 
 
 class TestWithIcontractHypothesis(unittest.TestCase):
-    def test_parse_list_of_foods(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(parse_list_of_foods)
+    def test_functions(self) -> None:
+        for func in [
+            day_21_allergen_assessment.parse_list_of_foods,
+            day_21_allergen_assessment.is_equal_ingredient_list,
+        ]:
+            try:
+                icontract_hypothesis.test_with_inferred_strategy(func)  # type: ignore
+            except Exception as error:
+                raise Exception(
+                    f"Automatically testing {func} with icontract-hypothesis failed "
+                    f"(please see the original error above)"
+                ) from error
 
-    def test_is_equal_ingredient_list(self) -> None:
-        icontract_hypothesis.test_with_inferred_strategy(is_equal_ingredient_list)
 
-
-class ManualTests(unittest.TestCase):
+class TestManually(unittest.TestCase):
     def test_solve(self) -> None:
         puzzle_input = textwrap.dedent(
             """\
@@ -30,7 +33,9 @@ class ManualTests(unittest.TestCase):
 
         expected_output = {"kfcds", "nhms", "sbzzf", "trh"}
 
-        self.assertEqual(expected_output, solve(puzzle_input))
+        self.assertEqual(
+            expected_output, day_21_allergen_assessment.solve(puzzle_input)
+        )
 
 
 if __name__ == "__main__":
