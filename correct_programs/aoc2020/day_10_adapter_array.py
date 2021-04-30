@@ -43,7 +43,7 @@ def pairwise(iterable: Iterable[T]) -> Iterable[Tuple[T, T]]:
         previous = current
 
 
-class HistogramOfDeltas(DBC, Mapping[int, int]):
+class HistogramOfDeltas(DBC):
     @require(lambda mapping: all(delta > 0 for delta in mapping.keys()))
     @require(lambda mapping: all(count >= 0 for count in mapping.values()))
     def __new__(cls, mapping: Mapping[int, int]) -> "HistogramOfDeltas":

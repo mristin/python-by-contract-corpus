@@ -1,10 +1,10 @@
 """Provide common functionality shared among all the solutions."""
-from typing import Sequence, cast, overload, Union
+from typing import Sequence, cast, overload, Union, Iterator
 
 from icontract import DBC, require
 
 
-class Lines(DBC, Sequence[str]):
+class Lines(DBC):
     """Represent a sequence of text lines."""
 
     # fmt: off
@@ -64,4 +64,8 @@ class Lines(DBC, Sequence[str]):
 
     def __len__(self) -> int:
         """Return the number of the lines."""
+        raise NotImplementedError("Only for type annotations")
+
+    def __iter__(self) -> Iterator[str]:
+        """Iterate over the lines."""
         raise NotImplementedError("Only for type annotations")
