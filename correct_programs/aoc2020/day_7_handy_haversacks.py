@@ -43,14 +43,12 @@ def directly_contains(container: str, contained: str, rules: Rules) -> bool:
 
 # fmt: off
 @ensure(
-    lambda kind, result:
-    result is None or kind in result,
+    lambda kind, result: kind in result,
     "given kind is in the result"
 )
 @ensure(
     lambda kind, rules, result:
-    result is None
-    or all(
+    all(
         not directly_contains(non_container, container, rules)
         for non_container in (rules.keys() - result)
         for container in result
@@ -58,7 +56,7 @@ def directly_contains(container: str, contained: str, rules: Rules) -> bool:
     "Nothing else contains anything in the result",
 )
 # fmt: on
-def containers(kind: str, rules: Rules) -> Optional[Set[str]]:
+def containers(kind: str, rules: Rules) -> Set[str]:
     known_containers: Set[str] = {kind}
     last_size = 0
     while last_size < len(known_containers):
@@ -66,8 +64,6 @@ def containers(kind: str, rules: Rules) -> Optional[Set[str]]:
         for container_kind, subbags in rules.items():
             for (contents_kind, _ct) in subbags.items():
                 if contents_kind in known_containers:
-                    if container_kind in known_containers:
-                        return None
                     known_containers.add(container_kind)
     return known_containers
 
@@ -81,7 +77,7 @@ def count_containers(lines: common.Lines) -> int:
 
 def main() -> None:
     """Execute the main routine."""
-    lines = common.Lines(sys.stdin.readlines())
+    lines = common.Lines(sys.stdin.read().splitlines())
     print(count_containers(lines))
 
 
