@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List, Union, Optional, cast
 from dataclasses import dataclass
-import regex as re  # type: ignore
+import regex as re
 from icontract import require, ensure
 
 
