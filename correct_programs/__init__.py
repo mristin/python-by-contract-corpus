@@ -1,1 +1,1 @@
-"""Provide a subcorpus of programs with no obvious bugs."""
+"""Provide a sub-corpus of programs with no obvious bugs."""
