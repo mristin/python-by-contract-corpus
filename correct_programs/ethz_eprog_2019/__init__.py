@@ -24,4 +24,10 @@ ETH Zurich, which also bears the copyright.
 
 You can find the original exercises at:
 https://www.lst.inf.ethz.ch/education/archive/Fall2019/einfuehrung-in-die-programmierung-i--252-0027-.html
+
+The list of skipped problems:
+
+* Exercise 4
+    * Problem 4: focuses on programming graphical user interfaces (GUIs) in Java.
+
 """
