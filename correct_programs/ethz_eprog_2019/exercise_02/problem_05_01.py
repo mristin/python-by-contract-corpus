@@ -1,7 +1,7 @@
 """
 Draw the following pattern:
 
-.. code-block:
+.. code-block::
 
     **..**..**..
     ..**..**..**
@@ -12,6 +12,7 @@ Draw the following pattern:
     **..**..**..
     ..**..**..**
 
+You are given the size of the image (as width).
 """
 
 # TODO: implement
