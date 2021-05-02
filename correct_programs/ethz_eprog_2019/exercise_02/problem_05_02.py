@@ -1,7 +1,7 @@
 """
 Draw the following pattern:
 
-.. code-block:
+.. code-block::
 
     ....1....
     ...222...
@@ -13,4 +13,5 @@ Draw the following pattern:
     ...888...
     ....9....
 
+You are given the size of the image (as width).
 """

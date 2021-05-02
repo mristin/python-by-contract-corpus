@@ -1,7 +1,7 @@
 """
 Draw the Swiss flag:
 
-.. code-block:
+.. code-block::
 
     -----------------------------------
     |                                 |
@@ -19,6 +19,7 @@ Draw the Swiss flag:
     |                                 |
     -----------------------------------
 
+You are given the size of the image (as width).
 """
 
 # TODO: implement
