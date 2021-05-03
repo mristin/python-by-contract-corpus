@@ -20,7 +20,7 @@ The original problem statements are much longer and more elaborate. As our focus
 the source code, we shortened the text as much as possible and give it here only as
 orientation about the complexity of the exercises. The problems themselves were
 sometimes simplified to make for a more pointed and easier-to-read code (*e.g.*,
-exercise 6, problem 5). We explicitly marked the corresponding changes in
+Exercise 6, Problem 5). We explicitly marked the corresponding changes in
 the description of the problem.
 
 Please refer to the original text (in German) for more details about the exercises.
@@ -60,5 +60,9 @@ exclusion:
 
 * Exercise 7
     * Problem 3 is about EBNF and not a programming exercise.
+
+* Exercise 8
+    * Problem 4 concerns the black-box testing.
+
 
 """
