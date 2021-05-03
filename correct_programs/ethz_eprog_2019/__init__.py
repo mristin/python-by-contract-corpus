@@ -5,13 +5,13 @@ We translated the exercises from the lecture "Einführung in die Programmierung"
 (252-0027) held at ETH Zurich as part of the Computer Science curriculum in Fall 2019.
 
 We picked only the subset of the exercises. The original exercises encompassed broader
-topics than programming (such as EBNF), so we skipped them.
-Additionally, we skipped the exercises such as the Exercise 0 which introduced
-the students to version control and usage of IDEs. As the course was meant to teach
-Java, some exercises focused on Java-specific topics. Since we are collecting a corpus
-of Python programs annotated with contracts, we skipped such exercises as we did not
-deem them relevant for the corpus. Some of the exercises involve programming of the
-graphical user interfaces (GUIs). While contracts are indeed very useful in the GUI
+topics than programming (such as Extended Backus–Naur form, or short EBNF), so we
+skipped them. Additionally, we skipped the exercises such as the Exercise 0 which
+introduced the students to version control and usage of IDEs. As the course was meant to
+teach Java, some exercises focused on Java-specific topics. Since we are collecting
+a corpus of Python programs annotated with contracts, we skipped such exercises as we
+did not deem them relevant for the corpus. Some of the exercises involve programming of
+the graphical user interfaces (GUIs). While contracts are indeed very useful in the GUI
 programming, we consider GUI programming to be out-of-scope for the current corpus.
 Finally, we excluded the problems which we thought were too simple such as dealing with
 basic input/output operations (such as Exercise 2, Problem 4).
@@ -34,7 +34,8 @@ https://www.lst.inf.ethz.ch/education/archive/Fall2019/einfuehrung-in-die-progra
 We provide in the following the complete list of skipped problems and the reason for
 exclusion:
 
-* Exercise 0 and 1 are introductory exercises about how to use version control and IDE.
+* Exercise 0 and 1 are introductory exercises about EBNF, how to use version control and
+  IDE.
 * Exercise 2
     * Problem 1 introduces general debugging practices in IDE.
     * Problem 4 teaches console I/O which is too simple for contracts.
@@ -56,5 +57,8 @@ exclusion:
     * Problem 3 is about black-box testing with JUnit, hence no solution can be written
       in Python. However, it would be interesting in the future work to see how
       contracts can help black-box testing.
+
+* Exercise 7
+    * Problem 3 is about EBNF and not a programming exercise.
 
 """
