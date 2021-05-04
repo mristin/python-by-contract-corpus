@@ -64,5 +64,10 @@ exclusion:
 * Exercise 8
     * Problem 4 concerns the black-box testing.
 
-
+* Exercise 9
+    * Problem 1 teaches the class hierarchy in Java, so we exclude it as irrelevant
+      for the contracts.
+    * Problem 5 asks for implementation of a game. It would be really interesting to
+      see how contracts help game development, but this is out-of-scope for the current
+      corpus.
 """
