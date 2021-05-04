@@ -70,4 +70,15 @@ exclusion:
     * Problem 5 asks for implementation of a game. It would be really interesting to
       see how contracts help game development, but this is out-of-scope for the current
       corpus.
+
+* Exercise 10
+    * Problem 1 is focused on concepts of object-oriented programming such as interfaces
+      and classes. The problem statements was very complex to motivate complex class
+      hierarchies, but we found the solution to have a limited contribution in terms
+      of contracts.
+    * Problem 2 is about drawing a map in the GUI. Similar to other GUI-related
+      problems, we skip it and leave it for future work.
+    * Problem 3 makes the student practice exceptions, which is not relevant for our
+      corpus.
+
 """
