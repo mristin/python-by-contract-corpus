@@ -81,4 +81,16 @@ exclusion:
     * Problem 3 makes the student practice exceptions, which is not relevant for our
       corpus.
 
+* Exercise 11
+    * Problem 3 explains how to draw functions in GUI.
+
+    * Problem 4 focuses on interfaces and their application. It would be a nice example
+      for demonstrating inheritance of the contracts, but involves GUI programming, so
+      we exclude it.
+
+* Exercise 12
+    * Problem 2 requires drawing the shapes on the screen. We exclude the problem as
+      it is GUI-related.
+    * Problem 5 is not a programming problem (but concerns Hoare triples ;-)).
+
 """
