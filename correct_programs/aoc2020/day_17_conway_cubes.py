@@ -1,6 +1,6 @@
 import collections
 import re
-from typing import Tuple, List, Optional, Set, MutableMapping
+from typing import Tuple, List, Set, MutableMapping
 
 from icontract import require, ensure
 
