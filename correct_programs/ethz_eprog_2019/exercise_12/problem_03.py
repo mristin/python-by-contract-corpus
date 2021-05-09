@@ -1,3 +1,4 @@
+# pylint: disable=line-too-long
 """
 Implement a compiler for the interpreter developed in Exercise 12, Problem 1.
 

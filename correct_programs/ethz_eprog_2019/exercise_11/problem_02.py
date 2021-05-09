@@ -1,3 +1,5 @@
+# pylint: disable
+
 """
 Evaluate mathematical expressions.
 
@@ -15,3 +17,4 @@ An exception should be raised if a parameter has not been specified.
 .. _page 4: https://ethz.ch/content/dam/ethz/special-interest/infk/inst-cs/lst-dam/documents/Education/Classes/Fall2019/0027_Intro/Homework/u11.pdf?page=4
 
 """
+# pylint: enable
