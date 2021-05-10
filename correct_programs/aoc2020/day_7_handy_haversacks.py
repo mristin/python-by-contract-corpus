@@ -1,7 +1,7 @@
-from collections import defaultdict
 import re
 import sys
-from typing import Dict, Optional, Set, Tuple
+from collections import defaultdict
+from typing import Dict, Set, Tuple
 
 from icontract import require, ensure
 
