@@ -34,7 +34,7 @@ from icontract import require, ensure
 
 from correct_programs.common import Lines
 
-ONLY_DASHES_RE = re.compile(r"^[-]+\Z")
+ONLY_DASHES_RE = re.compile(r'^[-]+\Z')
 
 
 # fmt: off
@@ -69,6 +69,15 @@ ONLY_DASHES_RE = re.compile(r"^[-]+\Z")
 @ensure(lambda width, result: ONLY_DASHES_RE.match(result[0]), "top border")
 @ensure(lambda result: ONLY_DASHES_RE.match(result[-1]), "bottom border")
 @ensure(lambda height, result: len(result) == height)
+# ERROR:
+# icontract.errors.ViolationError:
+# all(len(line) == width for line in result):
+# all(len(line) == width for line in result) was False
+# result was ['-----', '|+|', '|  +++  |', '|+|', '-----']
+#
+# Falsifying example: execute(
+#     kwargs={'height': 5, 'width': 5},
+# )
 @ensure(lambda width, result: all(len(line) == width for line in result))
 @ensure(lambda result: len(result) > 0)
 # fmt: on
@@ -77,27 +86,30 @@ def draw(width: int, height: int) -> Lines:
 
     vertical_pad = int(height / 5) - 1
 
-    result.append("-" * width)
+    result.append('-' * width)
 
-    for _ in range(vertical_pad):
-        result.append("".join(["|", " " * (width - 2), "|"]))
+    for i in range(vertical_pad):
+        result.append(''.join(['|', ' ' * (width - 2), '|']))
 
     def draw_cross(cross_count: int) -> None:
-        space_count = int((width - cross_count - 2) / 2)
-        for _ in range(int(height / 5)):
-            result.append(
-                "".join(
-                    ["|", " " * space_count, "+" * cross_count, " " * space_count, "|"]
-                )
+        for i in range(int(height / 5)):
+            result.append(''.join(
+                [
+                    '|',
+                    ' ' * (cross_count - 1),
+                    '+' * cross_count,
+                    ' ' * (cross_count - 1),
+                    '|'
+                ])
             )
 
     draw_cross(cross_count=int(width / 5))
     draw_cross(cross_count=3 * int(width / 5))
     draw_cross(cross_count=int(width / 5))
 
-    for _ in range(vertical_pad):
-        result.append("".join(["|", " " * (width - 2), "|"]))
+    for i in range(vertical_pad):
+        result.append(''.join(['|', ' ' * (width - 2), '|']))
 
-    result.append("-" * width)
+    result.append('-' * width)
 
     return Lines(result)
