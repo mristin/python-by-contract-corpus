@@ -1,5 +1,15 @@
 """Provide common functionality shared among all the solutions."""
-from typing import Sequence, cast, overload, Union, Iterator
+from typing import (
+    Sequence,
+    cast,
+    overload,
+    Union,
+    Iterator,
+    TypeVar,
+    Iterable,
+    Tuple,
+    Optional,
+)
 
 from icontract import DBC, require
 
@@ -69,3 +79,30 @@ class Lines(DBC):
     def __iter__(self) -> Iterator[str]:
         """Iterate over the lines."""
         raise NotImplementedError("Only for type annotations")
+
+
+T = TypeVar("T")  # pylint: disable=invalid-name
+
+
+def pairwise(iterable: Iterable[T]) -> Iterable[Tuple[T, T]]:
+    """
+    Iterate over ``(s0, s1, s2, ...)`` as ``((s0, s1), (s1, s2), ...)``.
+
+    >>> list(pairwise([]))
+    []
+
+    >>> list(pairwise([1]))
+    []
+
+    >>> list(pairwise([1, 2]))
+    [(1, 2)]
+
+    >>> list(pairwise([1, 2, 3]))
+    [(1, 2), (2, 3)]
+    """
+    previous = None  # type: Optional[T]
+    for current in iterable:
+        if previous is not None:
+            yield previous, current
+
+        previous = current
