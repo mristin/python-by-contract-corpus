@@ -9,7 +9,7 @@ Given a series of measurements in centimeters, compute:
 """
 import math
 import statistics
-from typing import Tuple, Sequence, cast, overload, Union, Iterator, List
+from typing import Collection, Tuple, Sequence, cast, overload, Union, Iterator, List
 
 from icontract import require, ensure, DBC, invariant
 
@@ -19,10 +19,10 @@ from correct_programs import common
 class Measurements(DBC):
     @require(
         lambda values: all(0 < value < 400 for value in values),
-        "Only valid values; the tallest man on earth ever measured was 251cm tall.",
+        "Only valid values; the tallest man on earth ever measured was 251cm tall."
     )
     @require(lambda values: len(values) > 0)
-    def __new__(cls, values: Sequence[float]) -> "Measurements":
+    def __new__(cls, values: Sequence[float]) -> 'Measurements':
         return cast(Measurements, values)
 
     def __add__(self, other: "Measurements") -> "Measurements":
@@ -57,15 +57,15 @@ class Measurements(DBC):
 # fmt: off
 
 @ensure(
-    lambda measurements, result:
-    not (len(set(measurements)) == 1)
-    or result[0] == result[1] == result[2],
+    lambda result:
+    len(set(result)) == len(result)
+    and result[0] == result[1] == result[2],
     "Identical measurements all give the same min, average, max"
 )
 @ensure(
-    lambda measurements, result:
-    not (len(set(measurements)) != 1)
-    or result[0] < result[1] < result[2]
+    lambda result:
+    len(set(result)) != len(result)
+    and result[0] < result[1] < result[2]
 )
 # fmt: on
 def compute_stats(measurements: Measurements) -> Tuple[float, float, float]:
@@ -79,9 +79,6 @@ class Range:
     def __init__(self, start: float, end: float) -> None:
         self.start = start
         self.end = end
-
-    def __repr__(self) -> str:
-        return f"[{self.start}, {self.end})"
 
 
 class BinRanges(DBC):
@@ -144,13 +141,8 @@ class BinRanges(DBC):
     )
     # fmt: on
     def __new__(
-        cls,
-        bin_count: int,
-        lower_bound: float,
-        upper_bound: float,
-        include_minus_inf: bool,
-        include_inf: bool,
-    ) -> "BinRanges":
+            cls, bin_count: int, lower_bound: float, upper_bound: float,
+            include_minus_inf: bool, include_inf: bool) -> 'BinRanges':
         ranges = []  # type: List[Range]
 
         if include_minus_inf:
@@ -163,7 +155,7 @@ class BinRanges(DBC):
 
             # We need to account for numerical imprecision with summation
             # so that the last bin indeed matches the exact upper bound.
-            if i < bin_count - 1:
+            if i < bin_count -1:
                 ranges.append(Range(start=start, end=end))
             else:
                 ranges.append(Range(start=start, end=upper_bound))
@@ -181,7 +173,7 @@ class BinRanges(DBC):
         pass
 
     @overload
-    def __getitem__(self, index: slice) -> "BinRanges":
+    def __getitem__(self, index: slice) -> 'BinRanges':
         """Get the slice of the lines."""
         pass
 
@@ -200,6 +192,19 @@ class BinRanges(DBC):
 
 # fmt: off
 @require(lambda value: not math.isnan(value))
+# ERROR:
+# icontract.errors.ViolationError:
+# Index not found or it corresponds to the correct bin range.: result == -1 or ranges[result].start <= value < ranges[result].end:
+# ranges was [<problem_03.Range object at 0x000002612D18D1F0>, <problem_03.Range object at 0x000002612D18D5B0>, <problem_03.Range object at 0x000002612D18D3A0>, <problem_03.Range object at 0x000002612D18D670>, <problem_03.Range object at 0x000002612D18DB20>, <problem_03.Range object at 0x000002612D18DBB0>, <problem_03.Range object at 0x000002612D18DA90>, <problem_03.Range object at 0x000002612D18D550>, <problem_03.Range object at 0x000002612D18DF40>, <problem_03.Range object at 0x000002612D18DE20>, <problem_03.Range object at 0x000002612D18DAC0>, <problem_03.Range object at 0x000002612D18DFA0>]
+# ranges[result].end was 1.2000000000000002
+# ranges[result].start was 1.1
+# result was 2
+# value was 1.0
+#
+# Icontract-hypothesis on compute_histogram:
+# Falsifying example: execute(
+#     kwargs={'measurements': [1.0]},
+# )
 @ensure(
     lambda ranges, value, result:
     result == -1 or ranges[result].start <= value < ranges[result].end,
@@ -226,7 +231,7 @@ def bin_index(ranges: BinRanges, value: float) -> int:
     if value < ranges[0].start:
         return -1
 
-    if value >= ranges[-1].end:
+    if value > ranges[-1].end:
         return -1
 
     if len(ranges) == 1:
@@ -243,7 +248,7 @@ def bin_index(ranges: BinRanges, value: float) -> int:
 
     while True:
         # Cover the edge cases which are often coded wrong
-        if width <= 2:
+        if last - first <= 2:
             if ranges[first].start <= value < ranges[first].end:
                 return first
 
@@ -253,14 +258,11 @@ def bin_index(ranges: BinRanges, value: float) -> int:
         if ranges[middle].start <= value < ranges[middle].end:
             return middle
 
-        elif value < ranges[middle].start:
+        if value < ranges[middle].start:
             last = middle - 1
 
-        elif value >= ranges[middle].end:
+        elif value > ranges[middle].end:
             first = middle + 1
-
-        else:
-            raise AssertionError("Unexpected branch")
 
         old_width = width
         width = last - first + 1
@@ -305,7 +307,7 @@ def compute_histogram(measurements: Measurements) -> List[Tuple[Range, int]]:
         lower_bound=lower_bound,
         upper_bound=upper_bound,
         include_minus_inf=True,
-        include_inf=True,
+        include_inf=True
     )
 
     histogram = Histogram(ranges=ranges)

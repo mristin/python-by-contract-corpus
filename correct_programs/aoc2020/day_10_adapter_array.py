@@ -2,10 +2,6 @@ import collections
 import re
 from typing import (
     MutableMapping,
-    Iterable,
-    Tuple,
-    TypeVar,
-    Optional,
     Mapping,
     cast,
     List,
@@ -15,32 +11,6 @@ from typing import (
 from icontract import require, ensure, DBC
 
 from correct_programs import common
-
-T = TypeVar("T")  # pylint: disable=invalid-name
-
-
-def pairwise(iterable: Iterable[T]) -> Iterable[Tuple[T, T]]:
-    """
-    Iterate over ``(s0, s1, s2, ...)`` as ``((s0, s1), (s1, s2), ...)``.
-
-    >>> list(pairwise([]))
-    []
-
-    >>> list(pairwise([1]))
-    []
-
-    >>> list(pairwise([1, 2]))
-    [(1, 2)]
-
-    >>> list(pairwise([1, 2, 3]))
-    [(1, 2), (2, 3)]
-    """
-    previous = None  # type: Optional[T]
-    for current in iterable:
-        if previous is not None:
-            yield previous, current
-
-        previous = current
 
 
 class HistogramOfDeltas(DBC):
@@ -80,7 +50,7 @@ class HistogramOfDeltas(DBC):
 def histogram_differences(adapters: List[int]) -> HistogramOfDeltas:
     histo = collections.defaultdict(lambda: 0)  # type: MutableMapping[int, int]
 
-    for prev, current in pairwise(sorted([0] + adapters + [max(adapters) + 3])):
+    for prev, current in common.pairwise(sorted([0] + adapters + [max(adapters) + 3])):
         delta = current - prev
         histo[delta] += 1
 

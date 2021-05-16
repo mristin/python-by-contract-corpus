@@ -32,7 +32,15 @@ def naive_is_prime(number: int) -> bool:
 
     return result
 
-
+# ERROR:
+# icontract.errors.ViolationError:
+# all(problem_01.naive_is_prime(number) for number in result):
+# all(problem_01.naive_is_prime(number) for number in result) was False
+# result was [2, 3, 5, 7, 9]
+#
+# Falsifying example: execute(
+#     kwargs={'limit': 9},
+# )
 @require(lambda limit: limit > 1)
 @ensure(lambda result: all(number > 1 for number in result))
 def sieve(limit: int) -> List[int]:
@@ -46,10 +54,9 @@ def sieve(limit: int) -> List[int]:
 
         for i in range(2, limit):
             index = find(candidates, prime * i)
-            if index != -1:
-                candidates.pop(index)
-
-            if prime * i > limit:
+            if index == -1:
                 break
+
+            candidates.pop(index)
 
     return result
