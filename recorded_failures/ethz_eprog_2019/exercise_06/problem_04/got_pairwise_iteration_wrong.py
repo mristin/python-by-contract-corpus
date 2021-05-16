@@ -20,7 +20,7 @@ from icontract import require, ensure, invariant, snapshot, DBC
 
 
 class Node:
-    def __init__(self, value: int, next_node: Optional["Node"]) -> None:
+    def __init__(self, value: int, next_node: Optional['Node']) -> None:
         self.value = value
         self.next_node = next_node
 
@@ -64,8 +64,6 @@ class LinkedList(DBC):
     @ensure(lambda self, OLD: self.count() == OLD.count - 1)
     @ensure(lambda result, OLD: OLD.items[0] == result)
     def remove_first(self) -> int:
-        assert self._first is not None
-
         value = self._first.value
         self._first = self._first.next_node
         self._count -= 1
@@ -78,9 +76,6 @@ class LinkedList(DBC):
     @ensure(lambda self, OLD: self.count() == OLD.count - 1)
     @ensure(lambda result, OLD: OLD.items[-1] == result)
     def remove_last(self) -> int:
-        assert self._first is not None
-        assert self._last is not None
-
         if self._first == self._last:
             self._count -= 1
             value = self._first.value
@@ -91,12 +86,11 @@ class LinkedList(DBC):
         cursor = self._first
         prev = None  # type: Optional[Node]
         while cursor != self._last:
-            prev = cursor
-
-            assert cursor.next_node is not None
+            # ERROR (mristin):
+            # I got the assignment of prev wrong, it should come befure cursor is
+            # assigned to a new value.
             cursor = cursor.next_node
-
-        assert prev is not None
+            prev = cursor
 
         value = self._last.value
         self._last = prev
@@ -119,25 +113,17 @@ class LinkedList(DBC):
     @require(lambda self, index: 0 <= index < self.count())
     @ensure(lambda self, index, result: list(self.iterate())[index] == result)
     def get(self, index: int) -> int:
-        assert self._first is not None
-
         cursor = self._first
         for _ in range(index):
-            assert cursor.next_node is not None
             cursor = cursor.next_node
-
-        assert cursor is not None
 
         return cursor.value
 
     @require(lambda self, index: 0 <= index < self.count())
     @ensure(lambda self, index, value: list(self.iterate())[index] == value)
-    def set(self, index: int, value: int) -> None:
-        assert self._first is not None
-
+    def set(self, index: int, value: int):
         cursor = self._first
         for _ in range(index):
-            assert cursor.next_node is not None
             cursor = cursor.next_node
 
         cursor.value = value
