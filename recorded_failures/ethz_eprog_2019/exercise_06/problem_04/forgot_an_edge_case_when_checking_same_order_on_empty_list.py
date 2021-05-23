@@ -24,9 +24,11 @@ from icontract import require, ensure, snapshot
 @require(lambda lst, old_values: len(lst) <= len(old_values))
 def same_order(lst: List[int], old_values: List[int]) -> bool:
     """Check that the values in ``lst`` follow the order of the ``old_values``."""
-    if len(lst) == 0:
-        return True
-
+    # ERROR:
+    #     if value != lst[cur]:
+    # IndexError: list index out of range
+    #
+    # I forgot to check for empty lst here.
     cur = 0
     for value in old_values:
         if value != lst[cur]:
@@ -45,7 +47,9 @@ def same_order(lst: List[int], old_values: List[int]) -> bool:
 @ensure(lambda lst, OLD: same_order(list(lst.values()), OLD.values))
 @ensure(lambda lst, n: all(value < n for value in lst.values()))
 @ensure(lambda result, n: all(value >= n for value in result.values()))
-@ensure(lambda lst, result, OLD: lst.count() + result.count() == OLD.count)
+@ensure(
+    lambda lst, result, OLD: lst.count() + result.count() == OLD.count
+)
 def split(lst: LinkedList, n: int) -> LinkedList:
     result = LinkedList()
 
@@ -56,7 +60,8 @@ def split(lst: LinkedList, n: int) -> LinkedList:
         if value >= n:
             result.add_last(value)
             cursor.remove()
-        else:
+
+        if not cursor.done():
             cursor.move()
 
     return result

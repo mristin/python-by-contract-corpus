@@ -26,77 +26,46 @@ class Node:
         self.next_node = next_node
 
 
-def _values_except_node(linked_list: "LinkedList", node: Node) -> Iterator[int]:
-    if not linked_list.is_empty():
-        cursor = Cursor(linked_list)
-        while not cursor.done():
-            if cursor._node is not node:
-                yield cursor.value()
-
-            cursor.move()
-
-
 class Cursor:
-    def __init__(self, linked_list: "LinkedList") -> None:
+    def __init__(
+            self,
+            linked_list: 'LinkedList'
+    ) -> None:
         self._node = linked_list._first
         self._previous = None  # type: Optional[Node]
         self._linked_list = linked_list
 
     @require(lambda self: not self.done())
     def value(self) -> int:
-        assert self._node is not None
         return self._node.value
 
     @require(lambda self: not self.done())
     def set_value(self, value: int) -> None:
-        assert self._node is not None
         self._node.value = value
 
     @require(lambda self: not self.done())
     def move(self) -> None:
-        assert self._node is not None
         self._previous = self._node
         self._node = self._node.next_node
 
     def done(self) -> bool:
         return self._node is None
 
-    def is_last(self) -> bool:
+    def is_last(self)->bool:
         return self._node is self._linked_list._last
 
-    # fmt: off
     @require(lambda self: not self.done())
-    @snapshot(lambda self: self._linked_list.count(), name="count")
-    @snapshot(
-        lambda self:
-        list(_values_except_node(self._linked_list, self._node)), name="values_without"
-    )
-    @ensure(lambda self, OLD: list(self._linked_list.values()) == OLD.values_without)
-    # fmt: on
     def remove(self) -> int:
-        assert self._node is not None
         value = self._node.value
-
-        if self._linked_list.count() == 1:
-            self._node = None
-            self._linked_list._first = None
-            self._linked_list._last = None
-            self._linked_list._count = 0
-            return value
-
-        if self._previous is None:
-            assert self._node == self._linked_list._first
-            self._linked_list._first = self._node.next_node
-            self._node = self._node.next_node
-            self._linked_list._count -= 1
-            return value
-
-        self._previous.next_node = self._node.next_node
 
         if self._node == self._linked_list._last:
             self._linked_list._last = self._previous
 
-        self._node = self._node.next_node
+        if self._node == self._linked_list._first:
+            self._linked_list._first = self._previous
+
+        self._node = self._previous
+        self._previous = self._node.next
 
         self._linked_list._count -= 1
 
@@ -122,6 +91,19 @@ class LinkedList(DBC):
             for value in values:
                 self.add_last(value)
 
+    # ERROR:
+    # icontract.errors.ViolationError:
+    # OLD.values + [value] == list(self.values()):
+    # OLD was a bunch of OLD values
+    # OLD.values was [0]
+    # list(self.values()) was [0]
+    # self was <correct_programs.ethz_eprog_2019.exercise_06.problem_04.LinkedList object at 0x00000178E76C94C0>
+    # self.values() was <generator object LinkedList.values at 0x00000178E7629890>
+    # value was 0
+    #
+    # This was uncovered during the random initialization by Hypothesis.
+    # The problem was ``.next`` instead of ``.next_node`` — but the IDE did not warn me
+    # about it!
     @snapshot(lambda self: self.count(), name="count")
     @snapshot(lambda self: list(self.values()), name="values")
     @ensure(lambda value, self, OLD: [value] + OLD.values == list(self.values()))
@@ -146,11 +128,9 @@ class LinkedList(DBC):
             self._first = Node(value=value, next_node=None)
             self._last = self._first
         else:
-            assert self._last is not None
-
             old_last = self._last
             self._last = Node(value=value, next_node=None)
-            old_last.next_node = self._last
+            old_last.next = self._last
 
         self._count += 1
 
@@ -166,6 +146,7 @@ class LinkedList(DBC):
     def remove_first(self) -> int:
         cur = Cursor(linked_list=self)
         return cur.remove()
+
 
     @require(lambda self: not self.is_empty())
     @snapshot(lambda self: self.count(), name="count")
@@ -192,7 +173,7 @@ class LinkedList(DBC):
         return self._first is None
 
     @require(lambda self, index: 0 <= index < self.count())
-    @ensure(lambda self, index, result: list(self.values())[index] == result)
+    @ensure(lambda self, index, result: list(self.iterate())[index] == result)
     def get(self, index: int) -> int:
         cur = Cursor(linked_list=self)
         for _ in range(index):
@@ -201,7 +182,7 @@ class LinkedList(DBC):
         return cur.value()
 
     @require(lambda self, index: 0 <= index < self.count())
-    @ensure(lambda self, index, value: list(self.values())[index] == value)
+    @ensure(lambda self, index, value: list(self.iterate())[index] == value)
     def set(self, index: int, value: int) -> None:
         cur = Cursor(linked_list=self)
         for _ in range(index):

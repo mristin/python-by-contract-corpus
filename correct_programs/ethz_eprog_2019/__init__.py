@@ -59,6 +59,11 @@ exclusion:
       contracts can help black-box testing.
 
 * Exercise 7
+    * Problem 1 is almost identical to Exercise 6, Problem 4. Namely, a double-linked
+      list needs to be implemented instead of a single-linked list. Since the interfaces
+      and the contracts are the same, the solution to this problem would bring about
+      nothing new in terms of contracts, so we decided to exclude it.
+
     * Problem 3 is about EBNF and not a programming exercise.
 
 * Exercise 8
