@@ -7,7 +7,21 @@ from correct_programs.ethz_eprog_2019.exercise_06 import problem_04
 
 
 class TestWithIcontractHypothesis(unittest.TestCase):
-    def test_functions(self) -> None:
+    def test_methods(self) -> None:
+        for func in [
+            problem_04.LinkedList.add_first,
+            problem_04.LinkedList.add_last,
+            problem_04.LinkedList.count,
+        ]:
+            try:
+                icontract_hypothesis.test_with_inferred_strategy(func)  # type: ignore
+            except Exception as error:
+                raise Exception(
+                    f"Automatically testing {func} with icontract-hypothesis failed "
+                    f"(please see the original error above)"
+                ) from error
+
+    def test_with_state(self) -> None:
         lst = problem_04.LinkedList()
 
         all_methods_set = {
