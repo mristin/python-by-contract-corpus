@@ -24,47 +24,49 @@ Provide the following metrics of the simulation:
 * ``max_queue_lengths``: A list of the maximum length of each queue during
   the simulation
 """
+import dataclasses
 import random
 import statistics
-from typing import List, cast
+from typing import List
 
 from icontract import require, ensure, DBC
 
 
-class Probability(DBC, float):
-    @require(lambda value: 0 <= value < 1)
-    def __new__(cls, value: float) -> "Probability":
-        return cast(Probability, value)
-
-
 class Specs(DBC):
+
     # fmt: off
     @require(
-        lambda max_cart_size:
-        max_cart_size >= 1
+        lambda checkout_efficiencies:
+        all(
+            0 <= eff < 1
+            for eff in checkout_efficiencies
+        )
     )
     @require(
-        lambda checkout_efficiencies:
-        len(checkout_efficiencies) > 0
+        lambda new_customer_probability:
+        0 <= new_customer_probability < 1
+    )
+    @require(
+        lambda max_cart_size:
+        max_cart_size > 0
     )
     # fmt: on
     def __init__(
-        self,
-        checkout_efficiencies: List[Probability],
-        new_customer_probability: Probability,
-        max_cart_size: int,
-    ) -> None:
+            self,
+            checkout_efficiencies: List[float],
+            new_customer_probability: float,
+            max_cart_size: int) -> None:
         self.checkout_efficiencies = checkout_efficiencies
         self.new_customer_probability = new_customer_probability
         self.max_cart_size = max_cart_size
 
     def __repr__(self) -> str:
         return (
-            f"Specs(\n"
-            f"    checkout_efficiencies={self.checkout_efficiencies!r},\n"
-            f"    new_customer_probability={self.new_customer_probability!r},\n"
-            f"    max_cart_size={self.max_cart_size!r}\n"
-            f")"
+            f'Specs(\n'
+            f'    checkout_efficiencies={self.checkout_efficiencies!r},\n'
+            f'    new_customer_probability={self.new_customer_probability!r},\n'
+            f'    max_cart_size={self.max_cart_size!r}\n'
+            f')'
         )
 
 
@@ -87,11 +89,10 @@ class Stats(DBC):
     )
     # fmt: on
     def __init__(
-        self,
-        finished: int,
-        avg_queue_lengths: List[float],
-        max_queue_lengths: List[float],
-    ) -> None:
+            self,
+            finished: int,
+            avg_queue_lengths: List[float],
+            max_queue_lengths: List[float]) -> None:
         self.finished = finished
         self.avg_queue_lengths = avg_queue_lengths
         self.max_queue_lengths = max_queue_lengths
@@ -105,21 +106,49 @@ class Customer:
 
 # fmt: off
 @require(lambda steps: steps >= 0)
-@ensure(
-    lambda result:
-    all(
-        avg_queue_length <= max_queue_length
-        for avg_queue_length, max_queue_length in zip(
-            result.avg_queue_lengths, result.max_queue_lengths)
-    )
-)
+@require(lambda specs: len(specs.checkout_efficiencies) > 0)
 @ensure(
     lambda specs, result:
     len(result.avg_queue_lengths) == len(specs.checkout_efficiencies)
 )
 @ensure(
+    lambda result:
+    all(
+        an_avg < result.finished
+        for an_avg in result.avg_queue_lengths
+    )
+)
+@ensure(
     lambda specs, result:
     len(result.max_queue_lengths) == len(specs.checkout_efficiencies)
+)
+# ERROR:
+# Falsifying example: execute(
+#     kwargs={'specs': Specs(
+#          checkout_efficiencies=[0.0],
+#          new_customer_probability=5e-324,
+#          max_cart_size=1
+#      ), 'steps': 1},
+# )
+#
+# icontract.errors.ViolationError:
+# all(
+#         a_max < result.finished
+#         for a_max in result.max_queue_lengths
+#     ):
+# all(
+#         a_max < result.finished
+#         for a_max in result.max_queue_lengths
+#     ) was False, e.g., with
+#   a_max = 0
+# result was <correct_programs.ethz_eprog_2019.exercise_08.problem_03.Stats object at 0x000002BAF02F2700>
+# result.max_queue_lengths was [0]
+@ensure(
+    lambda result:
+    all(
+        a_max < result.finished
+        for a_max in result.max_queue_lengths
+    )
 )
 # fmt: on
 def simulate(specs: Specs, steps: int) -> Stats:
@@ -133,7 +162,8 @@ def simulate(specs: Specs, steps: int) -> Stats:
 
     for _ in range(steps):
         # Process an item
-        for queue, efficiency in zip(queues, specs.checkout_efficiencies):
+        for i, (queue, efficiency) in enumerate(
+                zip(queues, specs.checkout_efficiencies)):
             if len(queue) > 0:
                 customer = queue[0]
                 assert customer.items_in_cart > 0
@@ -148,7 +178,7 @@ def simulate(specs: Specs, steps: int) -> Stats:
         if random.random() < specs.new_customer_probability:
             queue_index = random.randint(0, len(queues) - 1)
             queues[queue_index].append(
-                Customer(items_in_cart=random.randint(1, specs.max_cart_size))
+                Customer(items_in_cart=random.randint(0, specs.max_cart_size))
             )
 
         # Compute stats for the step
@@ -166,5 +196,5 @@ def simulate(specs: Specs, steps: int) -> Stats:
     return Stats(
         finished=finished,
         avg_queue_lengths=[statistics.mean(lengths) for lengths in queue_lengths],
-        max_queue_lengths=[max(lengths) for lengths in queue_lengths],
+        max_queue_lengths=[max(lengths) for lengths in queue_lengths]
     )
