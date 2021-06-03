@@ -17,7 +17,7 @@ in the GUI.)
 """
 import dataclasses
 import random
-from typing import Set, Sequence, Optional
+from typing import Set, Tuple, Iterator, Iterable, Sequence, Optional
 
 from icontract import require, ensure
 
@@ -66,7 +66,7 @@ def list_next_positions(pos: Position) -> Sequence[Position]:
 
 
 @require(lambda trials: trials > 0)
-@require(lambda grid_size: grid_size > 1)
+@require(lambda grid_size: grid_size > 0)
 @require(lambda grid_size: grid_size % 2 == 1)
 @ensure(lambda result: 0 <= result <= 1)
 def simulate(trials: int, grid_size: int) -> float:
@@ -82,17 +82,22 @@ def simulate(trials: int, grid_size: int) -> float:
 
         success = None  # type: Optional[bool]
         while True:
-            assert position.x < half_grid_size, (
-                f"position invariant for x: "
+            # ERROR:
+            # Falsifying example: execute(
+            #     kwargs={'grid_size': 1, 'trials': 1},
+            # )
+            #
+            # AssertionError: position invariant for x: position=Position(x=0, y=0), half_grid_size=0, grid_size=1
+            #
+            # The grid size must be larger than 1, otherwise the simulation does not make any sense.
+            assert position.x < half_grid_size, \
+                f"position invariant for x: " \
                 f"{position=}, {half_grid_size=}, {grid_size=}"
-            )
-            assert position.y < half_grid_size, (
-                f"position invariant for y: "
+            assert position.y < half_grid_size, \
+                f"position invariant for y: " \
                 f"{position=}, {half_grid_size=}, {grid_size=}"
-            )
-            assert (
-                position not in visited
-            ), f"visited invariant: {visited=}, {grid_size=}"
+            assert position not in visited, \
+                f"visited invariant: {visited=}, {grid_size=}"
 
             old_visited_len = len(visited)
             visited.add(position)
