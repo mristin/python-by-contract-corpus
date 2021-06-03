@@ -17,7 +17,7 @@ in the GUI.)
 """
 import dataclasses
 import random
-from typing import Set, Sequence, Optional
+from typing import Set, Tuple, Iterator, Iterable, Sequence, Optional
 
 from icontract import require, ensure
 
@@ -66,13 +66,13 @@ def list_next_positions(pos: Position) -> Sequence[Position]:
 
 
 @require(lambda trials: trials > 0)
-@require(lambda grid_size: grid_size > 1)
+@require(lambda grid_size: grid_size > 0)
 @require(lambda grid_size: grid_size % 2 == 1)
 @ensure(lambda result: 0 <= result <= 1)
 def simulate(trials: int, grid_size: int) -> float:
     success_count = 0
 
-    half_grid_size = grid_size // 2
+    half_grid_size = grid_size / 2
     border = (-half_grid_size, half_grid_size)
 
     for _ in range(trials):
@@ -82,17 +82,9 @@ def simulate(trials: int, grid_size: int) -> float:
 
         success = None  # type: Optional[bool]
         while True:
-            assert position.x < half_grid_size, (
-                f"position invariant for x: "
-                f"{position=}, {half_grid_size=}, {grid_size=}"
-            )
-            assert position.y < half_grid_size, (
-                f"position invariant for y: "
-                f"{position=}, {half_grid_size=}, {grid_size=}"
-            )
-            assert (
-                position not in visited
-            ), f"visited invariant: {visited=}, {grid_size=}"
+            assert position.x < half_grid_size, "position invariant for x"
+            assert position.y < half_grid_size, "position invariant for y"
+            assert position not in visited, "visited invariant"
 
             old_visited_len = len(visited)
             visited.add(position)
@@ -110,7 +102,13 @@ def simulate(trials: int, grid_size: int) -> float:
                 success = True
                 break
 
-            assert len(visited) == old_visited_len + 1, "Loop invariant"
+            # ERROR:
+            # Falsifying example: execute(
+            #     kwargs={'grid_size': 1, 'trials': 1},
+            # )
+            #
+            # AssertionError
+            assert len(visited) == old_visited_len - 1, "Loop invariant"
 
         assert success is not None
 
