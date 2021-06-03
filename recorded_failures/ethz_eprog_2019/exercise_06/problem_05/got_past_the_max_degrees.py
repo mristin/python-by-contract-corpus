@@ -14,11 +14,20 @@ from typing import Tuple
 
 from icontract import require, ensure
 
-
 # fmt: off
 @require(lambda hour: 0 <= hour <= 23)
 @require(lambda minute: 0 <= minute < 60)
 @require(lambda second: 0 <= second < 60)
+# ERROR:
+# Falsifying example: execute(
+#     kwargs={'hour': 12, 'minute': 1, 'second': 1},
+# )
+#
+# icontract.errors.ViolationError:
+# all(0 <= angle < 360 for angle in result):
+# all(0 <= angle < 360 for angle in result) was False, e.g., with
+#   angle = 360.5083333333333
+# result was (360.5083333333333, 6.1, 6.0)
 @ensure(lambda result: all(0 <= angle < 360 for angle in result))
 @ensure(
     lambda hour, minute, second, result:
@@ -32,11 +41,7 @@ from icontract import require, ensure
     "All hands of a clock move when the hand for seconds moves"
 )
 @ensure(
-    lambda hour, result:
-    (
-            clock_hour := hour if hour < 12 else hour - 12,
-            clock_hour / 12 * 360 <= result[0] < (clock_hour + 1) / 12 * 360
-    ),
+    lambda hour, result: hour / 12 * 360 <= result[0] < (hour + 1) / 12 * 360,
     "Hour hand between two hour ticks"
 )
 @ensure(
@@ -58,7 +63,6 @@ def compute_angles(hour: int, minute: int, second: int) -> Tuple[float, float, f
 
     angle_minute = (minute + second / 60) / 60 * 360
 
-    clock_hour = hour if hour < 12 else hour - 12
-    angle_hour = (clock_hour + minute / 60 + second / 3600) / 12 * 360
+    angle_hour = (hour + minute / 60 + second / 3600) / 12 * 360
 
     return angle_hour, angle_minute, angle_second
