@@ -54,16 +54,16 @@ The parameter ``limit`` is always greater than 0. Both ``bound1`` and ``bound2``
 expected in the range ``[0.0, 100.0]``.
 
 """
-import re
+import math
 from decimal import Decimal
-from numbers import Rational
-from typing import List, Pattern, AnyStr, cast, Union
+import re
+from typing import List, Pattern, AnyStr, cast, TypeVar, Iterable, Tuple, Optional
 
 from icontract import require, ensure, DBC
 
 from correct_programs.common import Lines
 
-ALL_GRADES = [Decimal("0.25") * i for i in range(0, 25)]
+ALL_GRADES = [Decimal('0.25') * i for i in range(0, 25)]
 ALL_GRADES_SET = set(ALL_GRADES)
 
 # fmt: off
@@ -72,52 +72,55 @@ assert all(
     for grade in ALL_GRADES
 )
 # fmt: on
-assert min(ALL_GRADES) == Decimal("0.0")
-assert max(ALL_GRADES) == Decimal("6.0")
+assert min(ALL_GRADES) == Decimal('0.0')
+assert max(ALL_GRADES) == Decimal('6.0')
 
 
 class Grade(DBC, Decimal):
     @require(lambda value: value in ALL_GRADES_SET)
     @require(lambda value: not value.is_nan())
-    def __new__(cls, value: Decimal) -> "Grade":
+    def __new__(cls, value: Decimal) -> 'Grade':
         return cast(Grade, value)
 
-    def __le__(self, other: Union[Decimal, float, Rational, "Grade"]) -> bool:
+    def __le__(self, other: 'Grade') -> bool:
         return self < other
 
-    def __add__(self, other: Union[Decimal, int, "Grade"]) -> Decimal:
+    def __add__(self, other: 'Grade') -> Decimal:
         return self + other
 
 
 class Grading:
     def __init__(
-        self, identifier: str, grade1: Grade, grade2: Grade, grade3: Grade
-    ) -> None:
+            self, identifier: str, grade1: Grade, grade2: Grade, grade3: Grade) -> None:
         self.identifier = identifier
         self.grade1 = grade1
         self.grade2 = grade2
         self.grade3 = grade3
 
-    @ensure(lambda result: result >= 0)
+    # ERROR:
+    # icontract.errors.ViolationError:
+    # result > 0: result was Decimal('0')
+    #
+    # Falsifying example: execute(
+    #     kwargs={'gradings': [<correct_programs.ethz_eprog_2019.exercise_11.problem_01.Grading at 0x1eaf34cefd0>],
+    #      'limit': 1},
+    # )
+    #
+    # mristin: I forgot the edge case where all grades are zero.
+    @ensure(lambda result: result > 0)
     def sum_grades(self) -> Decimal:
         return self.grade1 + self.grade2 + self.grade3
 
 
 def compile_grading_re() -> Pattern[AnyStr]:
-    id_re = "([a-zA-Z0-9]+)"
+    identifier = '([a-zA-Z0-9]+)'
 
-    grade_parts = []  # type: List[str]
-    for grade in ALL_GRADES:
-        if grade % 1 == Decimal("0.0"):
-            grade_parts.append(f"{grade.normalize()}.0")
-        else:
-            grade_parts.append(str(grade.normalize()))
+    grade = ''.join(
+        ['('] +
+        ['|'.join(str(grade) for grade in ALL_GRADES)] +
+        [')'])
 
-    grade_re = "".join(["("] + ["|".join(part for part in grade_parts)] + [")"])
-
-    complete_re = f"^{id_re} +{grade_re} +{grade_re} +{grade_re}$"
-
-    return re.compile(complete_re)  # type: ignore
+    return re.compile(f'^{identifier} {grade} {grade} {grade}$')  # type: ignore
 
 
 GRADING_RE = compile_grading_re()
@@ -125,19 +128,18 @@ GRADING_RE = compile_grading_re()
 
 @require(lambda lines: all(GRADING_RE.match(line) for line in lines))
 @ensure(
-    lambda result: (
-        identifiers := [grading.identifier for grading in result],
-        len(identifiers) == len(set(identifiers)),
-    ),
-    "Unique identifiers",
+    lambda result:
+    (identifiers := [grading.identifier for grading in result],
+     len(identifiers) == len(set(identifiers))),
+    "Unique identifiers"
 )
 @ensure(lambda lines, result: len(result) == len(lines))
 def parse(lines: Lines) -> List[Grading]:
     result = []  # type: List[Grading]
 
     for line in lines:
-        parts = [part for part in line.split(" ") if part.strip() != ""]
-        assert len(parts) == 4, f"{parts=}"
+        parts = line.split(' ')
+        assert len(parts) == 4
         identifier = parts[0]
         grades = [Grade(Decimal(part)) for part in parts[1:]]
 
@@ -146,7 +148,7 @@ def parse(lines: Lines) -> List[Grading]:
                 identifier=identifier,
                 grade1=grades[0],
                 grade2=grades[1],
-                grade3=grades[2],
+                grade3=grades[2]
             )
         )
 
@@ -154,6 +156,7 @@ def parse(lines: Lines) -> List[Grading]:
 
 
 # fmt: off
+@require(lambda bound2: Decimal(0.0) <= bound2 <= Decimal(6.0))
 @require(
     lambda gradings:
     (identifiers := [grading.identifier for grading in gradings],
@@ -204,7 +207,10 @@ def critical(gradings: List[Grading], bound1: Grade, bound2: Decimal) -> List[Gr
 # fmt: on
 def top(gradings: List[Grading], limit: int) -> List[Grading]:
     sorted_gradings = sorted(
-        gradings, key=lambda grading: grading.sum_grades(), reverse=True
-    )
+        gradings,
+        key=lambda grading: grading.sum_grades(),
+        reverse=True)
 
-    return sorted_gradings[:limit]
+    return sorted_gradings
+
+# TODO: test
