@@ -1,8 +1,6 @@
 import unittest
-from typing import Set
 
 import icontract_hypothesis
-from icontract import require
 
 from correct_programs.ethz_eprog_2019.exercise_09 import problem_02
 
