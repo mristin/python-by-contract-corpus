@@ -6,7 +6,7 @@ from icontract import ensure, snapshot
 from correct_programs.ethz_eprog_2019.exercise_06.problem_04 import LinkedList, Node
 
 
-class ReversableLinkedList(LinkedList):
+class ReversibleLinkedList(LinkedList):
 
     # fmt: off
     @snapshot(lambda self: list(self.values()), name="values")
