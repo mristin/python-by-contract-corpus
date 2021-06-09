@@ -54,16 +54,16 @@ The parameter ``limit`` is always greater than 0. Both ``bound1`` and ``bound2``
 expected in the range ``[0.0, 100.0]``.
 
 """
-import re
+import math
 from decimal import Decimal
-from numbers import Rational
-from typing import List, Pattern, AnyStr, cast, Union
+import re
+from typing import List, Pattern, AnyStr, cast, TypeVar, Iterable, Tuple, Optional
 
 from icontract import require, ensure, DBC
 
 from correct_programs.common import Lines
 
-ALL_GRADES = [Decimal("0.25") * i for i in range(0, 25)]
+ALL_GRADES = [Decimal('0.25') * i for i in range(0, 25)]
 ALL_GRADES_SET = set(ALL_GRADES)
 
 # fmt: off
@@ -72,27 +72,26 @@ assert all(
     for grade in ALL_GRADES
 )
 # fmt: on
-assert min(ALL_GRADES) == Decimal("0.0")
-assert max(ALL_GRADES) == Decimal("6.0")
+assert min(ALL_GRADES) == Decimal('0.0')
+assert max(ALL_GRADES) == Decimal('6.0')
 
 
 class Grade(DBC, Decimal):
     @require(lambda value: value in ALL_GRADES_SET)
     @require(lambda value: not value.is_nan())
-    def __new__(cls, value: Decimal) -> "Grade":
+    def __new__(cls, value: Decimal) -> 'Grade':
         return cast(Grade, value)
 
-    def __le__(self, other: Union[Decimal, float, Rational, "Grade"]) -> bool:
+    def __le__(self, other: 'Grade') -> bool:
         return self < other
 
-    def __add__(self, other: Union[Decimal, int, "Grade"]) -> Decimal:
+    def __add__(self, other: 'Grade') -> Decimal:
         return self + other
 
 
 class Grading:
     def __init__(
-        self, identifier: str, grade1: Grade, grade2: Grade, grade3: Grade
-    ) -> None:
+            self, identifier: str, grade1: Grade, grade2: Grade, grade3: Grade) -> None:
         self.identifier = identifier
         self.grade1 = grade1
         self.grade2 = grade2
@@ -104,18 +103,21 @@ class Grading:
 
 
 def compile_grading_re() -> Pattern[AnyStr]:
-    id_re = "([a-zA-Z0-9]+)"
+    id_re = '([a-zA-Z0-9]+)'
 
     grade_parts = []  # type: List[str]
     for grade in ALL_GRADES:
-        if grade % 1 == Decimal("0.0"):
-            grade_parts.append(f"{grade.normalize()}.0")
+        if grade % 1 == Decimal('0.0'):
+            grade_parts.append(f'{grade.normalize()}.0')
         else:
             grade_parts.append(str(grade.normalize()))
 
-    grade_re = "".join(["("] + ["|".join(part for part in grade_parts)] + [")"])
+    grade_re = ''.join(
+        ['('] +
+        ['|'.join(part for part in grade_parts)] +
+        [')'])
 
-    complete_re = f"^{id_re} +{grade_re} +{grade_re} +{grade_re}$"
+    complete_re = f'^{id_re} +{grade_re} +{grade_re} +{grade_re}$'
 
     return re.compile(complete_re)  # type: ignore
 
@@ -125,19 +127,18 @@ GRADING_RE = compile_grading_re()
 
 @require(lambda lines: all(GRADING_RE.match(line) for line in lines))
 @ensure(
-    lambda result: (
-        identifiers := [grading.identifier for grading in result],
-        len(identifiers) == len(set(identifiers)),
-    ),
-    "Unique identifiers",
+    lambda result:
+    (identifiers := [grading.identifier for grading in result],
+     len(identifiers) == len(set(identifiers))),
+    "Unique identifiers"
 )
 @ensure(lambda lines, result: len(result) == len(lines))
 def parse(lines: Lines) -> List[Grading]:
     result = []  # type: List[Grading]
 
     for line in lines:
-        parts = [part for part in line.split(" ") if part.strip() != ""]
-        assert len(parts) == 4, f"{parts=}"
+        parts = [part for part in line.split(' ') if part.strip() != '']
+        assert len(parts) == 4, f'{parts=}'
         identifier = parts[0]
         grades = [Grade(Decimal(part)) for part in parts[1:]]
 
@@ -146,7 +147,7 @@ def parse(lines: Lines) -> List[Grading]:
                 identifier=identifier,
                 grade1=grades[0],
                 grade2=grades[1],
-                grade3=grades[2],
+                grade3=grades[2]
             )
         )
 
@@ -190,6 +191,17 @@ def critical(gradings: List[Grading], bound1: Grade, bound2: Decimal) -> List[Gr
      len(identifiers) == len(set(identifiers))),
     "Students appear only once"
 )
+# ERROR:
+# icontract.errors.ViolationError:
+# len(result) == min(limit, len(gradings)):
+# gradings was [<correct_programs.ethz_eprog_2019.exercise_11.problem_01.Grading object at 0x0000019A6A8C9CA0>, <correct_programs.ethz_eprog_2019.exercise_11.problem_01.Grading object at 0x0000019A6A8C9DF0>, <correct_programs.ethz_eprog_2019.exercise_11.problem_01.Grading object at 0x0000019A6B2F2580>]
+# len(gradings) was 3
+# len(result) was 3
+# limit was 2
+# min(limit, len(gradings)) was 2
+# result was [<correct_programs.ethz_eprog_2019.exercise_11.problem_01.Grading object at 0x0000019A6A8C9CA0>, <correct_programs.ethz_eprog_2019.exercise_11.problem_01.Grading object at 0x0000019A6A8C9DF0>, <correct_programs.ethz_eprog_2019.exercise_11.problem_01.Grading object at 0x0000019A6B2F2580>]
+#
+# This case came from a unit test.
 @ensure(
     lambda gradings, limit, result:
     len(result) == min(limit, len(gradings))
@@ -204,7 +216,10 @@ def critical(gradings: List[Grading], bound1: Grade, bound2: Decimal) -> List[Gr
 # fmt: on
 def top(gradings: List[Grading], limit: int) -> List[Grading]:
     sorted_gradings = sorted(
-        gradings, key=lambda grading: grading.sum_grades(), reverse=True
-    )
+        gradings,
+        key=lambda grading: grading.sum_grades(),
+        reverse=True)
 
-    return sorted_gradings[:limit]
+    return sorted_gradings
+
+# TODO: test
