@@ -16,16 +16,16 @@ order.
 
 """
 import re
-from typing import List, Dict, cast
+from typing import List, Pattern, Dict, cast
 
 from icontract import require, DBC, ensure
 
-WORD_RE = re.compile(r"^[a-z]+(-[a-z])*$")
+WORD_RE = re.compile(r'^[a-z]+(-[a-z])*$')
 
 
 class Token(DBC, str):
     @require(lambda text: WORD_RE.match(text))
-    def __new__(cls, text: str) -> "Token":
+    def __new__(cls, text: str) -> 'Token':
         return cast(Token, text)
 
 
@@ -38,32 +38,24 @@ class Word(DBC):
     @require(lambda first_occurrence: first_occurrence >= 0)
     @require(lambda last_occurrence: last_occurrence >= 0)
     # fmt: on
-    def __init__(
-        self, first_occurrence: int, last_occurrence: int, text: Token
-    ) -> None:
+    def __init__(self, first_occurrence: int, last_occurrence: int,
+                 text: Token) -> None:
         self.first_occurrence = first_occurrence
         self.last_occurrence = last_occurrence
         self.text = text
 
-    def __lt__(self, other: "Word") -> bool:
+    def __lt__(self, other: 'Word') -> bool:
         return (
-            self.last_occurrence - self.first_occurrence
-            < other.last_occurrence - other.first_occurrence
+                self.last_occurrence - self.first_occurrence
+                < other.last_occurrence - other.first_occurrence
         )
 
-    def __le__(self, other: "Word") -> bool:
+    def __repr__(self)->str:
         return (
-            self.last_occurrence - self.first_occurrence
-            <= other.last_occurrence - other.first_occurrence
+                f"Word("
+                f"{self.first_occurrence!r}, {self.last_occurrence!r}, {self.text!r}"
+                f")"
         )
-
-    def __repr__(self) -> str:
-        return (
-            f"Word("
-            f"{self.first_occurrence!r}, {self.last_occurrence!r}, {self.text!r}"
-            f")"
-        )
-
 
 # fmt: off
 @ensure(
@@ -103,19 +95,14 @@ def tokens_to_words(tokens: List[Token]) -> List[Word]:
     assert set(first_occurrences.keys()) == set(last_occurrences.keys())
 
     words = []  # type: List[Word]
-    for token, first_occurrence in first_occurrences.items():
+    for token in first_occurrences.keys():
         words.append(
-            Word(
-                first_occurrence=first_occurrence,
-                last_occurrence=last_occurrences[token],
-                text=token,
-            )
+            Word(first_occurrence=first_occurrences[token],
+                 last_occurrence=last_occurrences[token],
+                 text=token)
         )
 
     return words
-
-
-TOKEN_RE = re.compile("[a-zA-Z]+(-[a-zA-Z])*")
 
 
 # fmt: off
@@ -125,11 +112,7 @@ TOKEN_RE = re.compile("[a-zA-Z]+(-[a-zA-Z])*")
 )
 # fmt: on
 def tokenize(text: str) -> List[Token]:
-    result = []  # type: List[Token]
-    for match in TOKEN_RE.finditer(text):
-        result.append(Token(match.group().lower()))
-
-    return result
+    return [Token(part.lower()) for part in text.split() if WORD_RE.match(part)]
 
 
 # fmt: off
@@ -138,14 +121,32 @@ def tokenize(text: str) -> List[Token]:
     lambda words, result:
     (word_set := set(words),
      all(
-         word in word_set  # pylint: disable=used-before-assignment
+         word in word_set
          for word in result
      ))
 )
+# ERROR:
+# icontract.errors.ViolationError:
+# all(
+#         result[i] > result[i + 1]
+#         for i in range(len(result) - 1)
+#     ):
+# all(
+#         result[i] > result[i + 1]
+#         for i in range(len(result) - 1)
+#     ) was False, e.g., with
+#   i = 0
+# len(result) was 2
+# range(len(result) - 1) was range(0, 1)
+# result was [Word(1, 1, 'a'), Word(1, 1, 'a')]
+#
+# Falsifying example: execute(
+#     kwargs={'limit': 2, 'words': [Word(1, 1, 'a'), Word(1, 1, 'a')]},
+# )
 @ensure(
     lambda result:
     all(
-        result[i] >= result[i + 1]
+        result[i] > result[i + 1]
         for i in range(len(result) - 1)
     )
 )
