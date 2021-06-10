@@ -9,7 +9,6 @@ import re
 from enum import Enum
 
 
-# TODO introduce variable for regex
 """
 Falsifying example: execute(
     kwargs={'current_position': east 0, north 0, orientation EAST,

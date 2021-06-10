@@ -9,7 +9,6 @@ import re
 from enum import Enum
 
 
-# TODO introduce variable for regex
 """
 Error
 ValueError: 3.977777777777778 is not a valid Orientation

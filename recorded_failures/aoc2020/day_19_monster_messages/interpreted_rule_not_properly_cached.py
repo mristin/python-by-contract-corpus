@@ -173,8 +173,8 @@ def interpret_rule_0(rule_trees: Mapping[int, Node]) -> Rule:
     @ensure(
         lambda rule_tree, result:
         not (isinstance(rule_tree, NodeReference) or (
-                rule_tree.identifier in interpreted_rules
-                and result == interpreted_rules[rule_tree.identifier]
+                rule_tree.name in interpreted_rules
+                and result == interpreted_rules[rule_tree.name]
         ))
     )
     # fmt: on

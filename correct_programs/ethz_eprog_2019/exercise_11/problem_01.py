@@ -126,7 +126,7 @@ GRADING_RE = compile_grading_re()
 @require(lambda lines: all(GRADING_RE.match(line) for line in lines))
 @ensure(
     lambda result: (
-        identifiers := [grading.identifier for grading in result],
+        identifiers := [grading.name for grading in result],
         len(identifiers) == len(set(identifiers)),
     )[1],
     "Unique identifiers",
@@ -157,7 +157,7 @@ def parse(lines: Lines) -> List[Grading]:
 @require(
     lambda gradings:
     (
-            identifiers := [grading.identifier for grading in gradings],
+            identifiers := [grading.name for grading in gradings],
             len(identifiers) == len(set(identifiers))
     )[1],
     "Students appear only once"
@@ -165,7 +165,7 @@ def parse(lines: Lines) -> List[Grading]:
 @ensure(
     lambda result:
     (
-            identifiers := [grading.identifier for grading in result],
+            identifiers := [grading.name for grading in result],
             len(identifiers) == len(set(identifiers))
     )[1],
     "Students appear only once"
@@ -184,7 +184,7 @@ def critical(gradings: List[Grading], bound1: Grade, bound2: Decimal) -> List[Gr
 @require(
     lambda gradings:
     (
-            identifiers := [grading.identifier for grading in gradings],
+            identifiers := [grading.name for grading in gradings],
             len(identifiers) == len(set(identifiers))
     )[1],
     "Students appear only once"
@@ -193,7 +193,7 @@ def critical(gradings: List[Grading], bound1: Grade, bound2: Decimal) -> List[Gr
 @ensure(
     lambda result:
     (
-            identifiers := [grading.identifier for grading in result],
+            identifiers := [grading.name for grading in result],
             len(identifiers) == len(set(identifiers))
     )[1],
     "Students appear only once"
