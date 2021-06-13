@@ -50,14 +50,32 @@ ONLY_DASHES_RE = re.compile(r"^[-]+\Z")
     ),
     "Vertical symmetry"
 )
+# ERROR:
+# icontract.errors.ViolationError:
+# Horizontal symmetry: all(
+#         (
+#                 center := int(len(line) / 2),
+#                 line[:center] == line[center + 1:]
+#         )[1]
+#         for line in result
+#     ):
+# all(
+#         (
+#                 center := int(len(line) / 2),
+#                 line[:center] == line[center + 1:]
+#         )[1]
+#         for line in result
+#     ) was False, e.g., with
+#   line = '| + |'
+# height was 5
+# result was ['-----', '| + |', '|+++|', '| + |', '-----']
+# width was 5
 @ensure(
     lambda result:
     all(
         (
-                center := len(line) // 2,
-                line[:center] == line[center + 1:][::-1]
-                if len(line) % 2 == 1
-                else line[:center] == line[center:][::-1]
+                center := int(len(line) / 2),
+                line[:center] == line[center + 1:]
         )[1]
         for line in result
     ),
