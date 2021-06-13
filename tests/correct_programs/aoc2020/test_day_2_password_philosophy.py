@@ -8,11 +8,12 @@ from correct_programs.aoc2020 import day_2_password_philosophy
 class TestWithIcontractHypothesis(unittest.TestCase):
     def test_functions(self) -> None:
         for func in [
-            day_2_password_philosophy.verify,
+            # NOTE: test ``verify`` once icontract-hypothesis is more powerful.
+            # day_2_password_philosophy.verify,
             day_2_password_philosophy.verify_line,
         ]:
             try:
-                icontract_hypothesis.test_with_inferred_strategy(func)  # type: ignore
+                icontract_hypothesis.test_with_inferred_strategy(func)
             except Exception as error:
                 raise Exception(
                     f"Automatically testing {func} with icontract-hypothesis failed "

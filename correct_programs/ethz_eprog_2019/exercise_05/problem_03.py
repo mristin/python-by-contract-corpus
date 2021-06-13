@@ -16,46 +16,17 @@ from icontract import require, ensure, DBC, invariant
 from correct_programs import common
 
 
-class Measurements(DBC):
+class Measurement(DBC, float):
     @require(
-        lambda values: all(0 < value < 400 for value in values),
-        "Only valid values; the tallest man on earth ever measured was 251cm tall.",
+        lambda value: 0 < value < 400,
+        "Only valid value; the tallest man on earth ever measured was 251cm tall.",
     )
-    @require(lambda values: len(values) > 0)
-    def __new__(cls, values: Sequence[float]) -> "Measurements":
-        return cast(Measurements, values)
-
-    def __add__(self, other: "Measurements") -> "Measurements":
-        """Concatenate two list of measurements."""
-        raise NotImplementedError("Only for type annotations")
-
-    # pylint: disable=function-redefined
-
-    @overload
-    def __getitem__(self, index: int) -> float:
-        """Get the item at the given integer index."""
-        pass
-
-    @overload
-    def __getitem__(self, index: slice) -> "Measurements":
-        """Get the slice of the lines."""
-        pass
-
-    def __getitem__(self, index: Union[int, slice]) -> Union[float, "Measurements"]:
-        """Get the line(s) at the given index."""
-        raise NotImplementedError("Only for type annotations")
-
-    def __len__(self) -> int:
-        """Return the number of the lines."""
-        raise NotImplementedError("Only for type annotations")
-
-    def __iter__(self) -> Iterator[float]:
-        """Iterate over the lines."""
-        raise NotImplementedError("Only for type annotations")
+    def __new__(cls, value: float) -> "Measurement":
+        return cast(Measurement, value)
 
 
 # fmt: off
-
+@require(lambda measurements: len(measurements) > 0)
 @ensure(
     lambda measurements, result:
     not (len(set(measurements)) == 1)
@@ -68,7 +39,7 @@ class Measurements(DBC):
     or result[0] < result[1] < result[2]
 )
 # fmt: on
-def compute_stats(measurements: Measurements) -> Tuple[float, float, float]:
+def compute_stats(measurements: List[Measurement]) -> Tuple[float, float, float]:
     return min(measurements), statistics.mean(measurements), max(measurements)
 
 
@@ -290,12 +261,13 @@ class Histogram:
 
 
 # fmt: off
+@require(lambda measurements: len(measurements) > 0)
 @ensure(
     lambda measurements, result:
     len(measurements) == sum(item[1] for item in result)
 )
 # fmt: on
-def compute_histogram(measurements: Measurements) -> List[Tuple[Range, int]]:
+def compute_histogram(measurements: Sequence[Measurement]) -> List[Tuple[Range, int]]:
     lower_bound = math.floor(min(measurements))
     upper_bound = math.ceil(max(measurements))
 
