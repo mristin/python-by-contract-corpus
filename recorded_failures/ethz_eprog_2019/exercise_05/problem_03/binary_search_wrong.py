@@ -97,8 +97,10 @@ class BinRanges(DBC):
     )
     @require(
         lambda lower_bound, upper_bound, bin_count:
-        (bin_width := (upper_bound - lower_bound) / bin_count,
-         bin_width != 0),
+        (
+                bin_width := (upper_bound - lower_bound) / bin_count,
+                bin_width != 0
+        )[1],
         "Bin width not numerically zero"
     )
     @ensure(
@@ -155,7 +157,7 @@ class BinRanges(DBC):
 
             # We need to account for numerical imprecision with summation
             # so that the last bin indeed matches the exact upper bound.
-            if i < bin_count -1:
+            if i < bin_count - 1:
                 ranges.append(Range(start=start, end=end))
             else:
                 ranges.append(Range(start=start, end=upper_bound))

@@ -107,8 +107,10 @@ class BinRanges(DBC):
     )
     @require(
         lambda lower_bound, upper_bound, bin_count:
-        (bin_width := (upper_bound - lower_bound) / bin_count,
-         bin_width != 0),
+        (
+                bin_width := (upper_bound - lower_bound) / bin_count,
+                bin_width != 0
+        )[1],
         "Bin width not numerically zero"
     )
     @ensure(
@@ -193,6 +195,7 @@ class BinRanges(DBC):
         """Iterate over the lines."""
         raise NotImplementedError("Only for type annotations")
 
+
 # fmt: off
 @require(lambda value: not math.isnan(value))
 @ensure(
@@ -216,7 +219,7 @@ class BinRanges(DBC):
     "value not covered in ranges => bin not found"
 )
 # fmt: on
-def bin_index(ranges: BinRanges, value: float)->int:
+def bin_index(ranges: BinRanges, value: float) -> int:
     # Edge cases
     if value < ranges[0].start:
         return -1
@@ -258,6 +261,7 @@ def bin_index(ranges: BinRanges, value: float)->int:
         width = last - first + 1
         assert width < old_width, "Loop invariant: the index range is getting smaller"
 
+
 @invariant(lambda self: all(count >= 0 for count in self.counts))
 class Histogram:
     @require(lambda ranges: len(ranges) > 0)
@@ -267,15 +271,16 @@ class Histogram:
 
     @require(lambda value: math.isnan(value))
     @require(lambda self, value: self.ranges[0].start <= value < self.ranges[-1].end)
-    def add(self, value: float)->None:
+    def add(self, value: float) -> None:
         index = bin_index(self.ranges, value)
         assert 0 <= index < len(self.counts)
 
         self.counts[index] += 1
 
-    def items(self)->Iterator[Tuple[Range, int]]:
+    def items(self) -> Iterator[Tuple[Range, int]]:
         assert len(self.ranges) == len(self.counts)
         return zip(self.ranges, self.counts)
+
 
 # fmt: off
 @ensure(
@@ -285,7 +290,7 @@ class Histogram:
 # fmt: on
 def compute_histogram(measurements: Measurements) -> List[Tuple[Range, int]]:
     lower_bound = math.floor(min(measurements))
-    upper_bound= math.ceil(max(measurements))
+    upper_bound = math.ceil(max(measurements))
 
     if lower_bound == upper_bound:
         upper_bound += 1

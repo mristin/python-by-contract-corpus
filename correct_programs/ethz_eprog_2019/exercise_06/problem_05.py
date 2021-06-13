@@ -36,7 +36,7 @@ from icontract import require, ensure
     (
             clock_hour := hour if hour < 12 else hour - 12,
             clock_hour / 12 * 360 <= result[0] < (clock_hour + 1) / 12 * 360
-    ),
+    )[1],
     "Hour hand between two hour ticks"
 )
 @ensure(

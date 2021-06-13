@@ -33,15 +33,19 @@ PATTERN_RE = re.compile(r"^(?P<leftpad>[.]*)\d+(?P<rightpad>[.]*)$")
 @require(lambda height: height <= 9)
 @ensure(
     lambda height, result:
-    (middle := int(height / 2),
-     ALL_NUMBERS_RE.match(result[middle]))
+    (
+            middle := int(height / 2),
+            ALL_NUMBERS_RE.match(result[middle])
+    )[1]
 )
 @ensure(
     lambda height, result:
     all(
-        (mtch := PATTERN_RE.match(line),
-         mtch is not None
-         and mtch.group('leftpad') == mtch.group('rightpad'))
+        (
+                mtch := PATTERN_RE.match(line),
+                mtch is not None
+                and mtch.group('leftpad') == mtch.group('rightpad')
+        )[1]
         for line in result))
 @ensure(lambda height, result: all(len(line) == height for line in result))
 @ensure(lambda height, result: len(result) == height)

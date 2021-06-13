@@ -97,8 +97,10 @@ class BinRanges(DBC):
     )
     @require(
         lambda lower_bound, upper_bound, bin_count:
-        (bin_width := (upper_bound - lower_bound) / bin_count,
-         bin_width != 0),
+        (
+                bin_width := (upper_bound - lower_bound) / bin_count,
+                bin_width != 0
+        )[1],
         "Bin width not numerically zero"
     )
     @ensure(

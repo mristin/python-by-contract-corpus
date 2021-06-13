@@ -128,8 +128,10 @@ GRADING_RE = compile_grading_re()
 @require(lambda lines: all(GRADING_RE.match(line) for line in lines))
 @ensure(
     lambda result:
-    (identifiers := [grading.identifier for grading in result],
-     len(identifiers) == len(set(identifiers))),
+    (
+            identifiers := [grading.identifier for grading in result],
+            len(identifiers) == len(set(identifiers))
+    )[1],
     "Unique identifiers"
 )
 @ensure(lambda lines, result: len(result) == len(lines))
@@ -157,14 +159,18 @@ def parse(lines: Lines) -> List[Grading]:
 # fmt: off
 @require(
     lambda gradings:
-    (identifiers := [grading.identifier for grading in gradings],
-     len(identifiers) == len(set(identifiers))),
+    (
+            identifiers := [grading.identifier for grading in gradings],
+            len(identifiers) == len(set(identifiers))
+    )[1],
     "Students appear only once"
 )
 @ensure(
     lambda result:
-    (identifiers := [grading.identifier for grading in result],
-     len(identifiers) == len(set(identifiers))),
+    (
+            identifiers := [grading.identifier for grading in result],
+            len(identifiers) == len(set(identifiers))
+    )[1],
     "Students appear only once"
 )
 # fmt: on
@@ -180,15 +186,19 @@ def critical(gradings: List[Grading], bound1: Grade, bound2: Decimal) -> List[Gr
 # fmt: off
 @require(
     lambda gradings:
-    (identifiers := [grading.identifier for grading in gradings],
-     len(identifiers) == len(set(identifiers))),
+    (
+            identifiers := [grading.identifier for grading in gradings],
+            len(identifiers) == len(set(identifiers))
+    )[1],
     "Students appear only once"
 )
 @require(lambda limit: limit > 0)
 @ensure(
     lambda result:
-    (identifiers := [grading.identifier for grading in result],
-     len(identifiers) == len(set(identifiers))),
+    (
+            identifiers := [grading.identifier for grading in result],
+            len(identifiers) == len(set(identifiers))
+    )[1],
     "Students appear only once"
 )
 # ERROR:

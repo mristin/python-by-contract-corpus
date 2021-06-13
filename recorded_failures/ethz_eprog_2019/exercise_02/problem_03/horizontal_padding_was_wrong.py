@@ -53,7 +53,10 @@ ONLY_DASHES_RE = re.compile(r'^[-]+\Z')
 @ensure(
     lambda result:
     all(
-        (center := int(len(line) / 2), line[:center] == line[center + 1:])
+        (
+                center := int(len(line) / 2),
+                line[:center] == line[center + 1:]
+        )[1]
         for line in result
     ),
     "Horizontal symmetry"
