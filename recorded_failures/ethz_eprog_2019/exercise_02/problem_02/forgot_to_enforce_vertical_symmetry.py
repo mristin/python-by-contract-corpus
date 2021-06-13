@@ -58,9 +58,13 @@ TRAILING_SPACE_RE = re.compile(r'\s$')
 @ensure(
     lambda result:
     all(
-        (stripped := line.strip(),
-         (half := len(stripped),
-          line[:half] == line[half:]))
+        (
+                stripped := line.strip(),
+                (
+                        half := len(stripped),
+                        line[:half] == line[half:]
+                )[1]
+        )[1]
         for line in result
     ),
     "Horizontal symmetry"

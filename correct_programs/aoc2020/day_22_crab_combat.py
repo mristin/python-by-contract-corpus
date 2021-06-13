@@ -67,7 +67,7 @@ class Deck(DBC):
         (
                 sum := list(self.cards) + other.cards,
                 len(set(sum)) == len(sum)
-        ),
+        )[1],
         "Unique cards after the addition")
     # fmt: on
     def __add__(self, other: "Deck") -> "Deck":

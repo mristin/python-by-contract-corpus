@@ -50,18 +50,21 @@ class Word(DBC):
                 < other.last_occurrence - other.first_occurrence
         )
 
-    def __repr__(self)->str:
+    def __repr__(self) -> str:
         return (
-                f"Word("
-                f"{self.first_occurrence!r}, {self.last_occurrence!r}, {self.text!r}"
-                f")"
+            f"Word("
+            f"{self.first_occurrence!r}, {self.last_occurrence!r}, {self.text!r}"
+            f")"
         )
+
 
 # fmt: off
 @ensure(
     lambda result:
-    (word_texts := [word.text for word in result],
-     len(word_texts) == len(set(word_texts))),
+    (
+            word_texts := [word.text for word in result],
+            len(word_texts) == len(set(word_texts))
+    )[1],
     "No duplicates in words"
 )
 @ensure(
@@ -119,11 +122,13 @@ def tokenize(text: str) -> List[Token]:
 @require(lambda limit: limit > 0)
 @ensure(
     lambda words, result:
-    (word_set := set(words),
-     all(
-         word in word_set
-         for word in result
-     ))
+    (
+            word_set := set(words),
+            all(
+                word in word_set
+                for word in result
+            )
+    )[1]
 )
 # ERROR:
 # icontract.errors.ViolationError:
