@@ -129,7 +129,6 @@ def parse(lines: Lines) -> List[Block]:
 
     accumulator = []  # type: List[str]
     for line in lines:
-        print(f"line is {line!r}")  # TODO: debug
         if line == ".":
             if accumulator:
                 list_of_block_lines.append(Lines(accumulator))

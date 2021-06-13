@@ -41,7 +41,7 @@ class Node:
 @require(lambda expr: expr.startswith('('))
 @require(lambda expr: expr.count('(') == expr.count(')'))
 @ensure(lambda expr, result: result in expr)
-def extract_expression(expr: str) -> str:  # TODO find better name
+def extract_expression(expr: str) -> str:
     parenthesis_balance = 0
     result = ''
 
