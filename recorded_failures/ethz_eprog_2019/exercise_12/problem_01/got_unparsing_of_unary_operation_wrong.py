@@ -31,8 +31,7 @@ from typing import (
     Iterator,
     Generic,
     TypeVar,
-    Set,
-    MutableMapping,
+    Set, MutableMapping,
 )
 
 from icontract import require, ensure, DBC
@@ -64,9 +63,7 @@ class TokenizationRule:
 
 
 TOKENIZATION = [
-    TokenizationRule(
-        TokenKind.NUM, re.compile(r"(inf|0|[1-9][0-9]*)(\.[0-9]+)?(e[+\-]?[0-9]+)?")
-    ),
+    TokenizationRule(TokenKind.NUM, re.compile(r"(0|[1-9][0-9]*)(\.[0-9]+)?")),
     TokenizationRule(TokenKind.VAR, re.compile(r"[a-zA-Z_][a-zA-Z_0-9]*")),
     TokenizationRule(TokenKind.OP, re.compile(r"[+\-*/^]")),
     TokenizationRule(TokenKind.OPEN, re.compile(r"\(")),
@@ -98,17 +95,17 @@ class Token(DBC):
         self.end = end
         self.kind = kind
 
-        self.value = self.text[self.start : self.end]
+        self.value = self.text[self.start: self.end]
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Token):
             raise NotImplementedError()
 
         return (
-            self.text == other.text
-            and self.start == other.start
-            and self.end == other.end
-            and self.kind == other.kind
+                self.text == other.text
+                and self.start == other.start
+                and self.end == other.end
+                and self.kind == other.kind
         )
 
     def __repr__(self) -> str:
@@ -216,7 +213,7 @@ class Expr(Node):
 
 class Constant(Expr, DBC):
     @require(lambda value: value >= 0.0)
-    @require(lambda value: not math.isnan(value))
+    @require(lambda value: math.isnan(value))
     def __init__(self, value: float) -> None:
         self.value = value
 
@@ -247,9 +244,9 @@ class UnaryOperation(Expr, DBC):
 
     def __eq__(self, other: object) -> bool:
         return (
-            isinstance(other, UnaryOperation)
-            and self.target == other.target
-            and self.operator == other.operator
+                isinstance(other, UnaryOperation)
+                and self.target == other.target
+                and self.operator == other.operator
         )
 
     def __repr__(self) -> str:
@@ -268,10 +265,10 @@ class BinaryOperation(Expr, DBC):
 
     def __eq__(self, other: object) -> bool:
         return (
-            isinstance(other, BinaryOperation)
-            and self.left == other.left
-            and self.operator == other.operator
-            and self.right == other.right
+                isinstance(other, BinaryOperation)
+                and self.left == other.left
+                and self.operator == other.operator
+                and self.right == other.right
         )
 
     def __repr__(self) -> str:
@@ -292,9 +289,9 @@ class Call(Expr, DBC):
 
     def __eq__(self, other: object) -> bool:
         return (
-            isinstance(other, Call)
-            and self.name == other.name
-            and self.argument == other.argument
+                isinstance(other, Call)
+                and self.name == other.name
+                and self.argument == other.argument
         )
 
     def __repr__(self) -> str:
@@ -319,9 +316,9 @@ class Assign(Statement, DBC):
 
     def __eq__(self, other: object) -> bool:
         return (
-            isinstance(other, Assign)
-            and self.target == other.target
-            and self.expr == other.expr
+                isinstance(other, Assign)
+                and self.target == other.target
+                and self.expr == other.expr
         )
 
 
@@ -402,7 +399,7 @@ class TokensWoWhitespace(DBC):
         pass
 
     def __getitem__(
-        self, index: Union[int, slice]
+            self, index: Union[int, slice]
     ) -> Union[Token, "TokensWoWhitespace"]:
         raise NotImplementedError("Only for type annotations")
 
@@ -432,9 +429,9 @@ def _parse_atom(tokens: TokensWoWhitespace, cursor: int) -> Tuple[Expr, int]:
         return UnaryOperation(target=target, operator=UnOp.MINUS), cursor
 
     elif (
-        remaining >= 2
-        and tokens[cursor].kind == TokenKind.VAR
-        and tokens[cursor + 1].kind == TokenKind.OPEN
+            remaining >= 2
+            and tokens[cursor].kind == TokenKind.VAR
+            and tokens[cursor + 1].kind == TokenKind.OPEN
     ):
         identifier = Identifier(tokens[cursor].value)
         cursor += 2
@@ -505,7 +502,7 @@ def _parse_atom(tokens: TokensWoWhitespace, cursor: int) -> Tuple[Expr, int]:
 @ensure(lambda cursor, result: cursor < result[1], "Cursor moved")
 # fmt: on
 def _parse_expr(
-    tokens: TokensWoWhitespace, min_precedence: int, cursor: int
+        tokens: TokensWoWhitespace, min_precedence: int, cursor: int
 ) -> Tuple[Expr, int]:
     atom_lhs, cursor = _parse_atom(tokens=tokens, cursor=cursor)
 
@@ -540,37 +537,28 @@ def _parse_expr(
 # fmt: on
 def _parse_stmt(tokens: TokensWoWhitespace, cursor: int) -> Tuple[Statement, int]:
     """Parse a statement at the given ``cursor`` in the ``tokens``."""
-    if cursor >= len(tokens) - 3:
+    if cursor >= len(tokens) - 2:
         raise SyntaxError(
-            f"Expected at least four tokens for the assignment at cursor {cursor}, "
-            f"but len(tokens) was {len(tokens)}: {tokens[cursor:]}"
-        )
+            f"Expected at least three tokens for the assignment at cursor {cursor}, "
+            f"but len(tokens) was {len(tokens)}: {tokens[cursor:]}")
 
     if tokens[cursor].kind != TokenKind.VAR:
         raise SyntaxError(
-            f"Expected a variable as the assignment target, but got: {tokens[cursor]}"
-        )
+            f"Expected a variable as the assignment target, but got: {tokens[cursor]}")
 
     target = Identifier(tokens[cursor].value)
     cursor += 1
 
     if tokens[cursor].kind != TokenKind.ASSIGN:
         raise SyntaxError(
-            f"Expected an assignment ('=') at {cursor}, but got: {tokens[cursor]}"
-        )
+            f"Expected an assignment ('=') at {cursor}, but got: {tokens[cursor]}")
     cursor += 1
 
     expr, cursor = _parse_expr(tokens=tokens, min_precedence=1, cursor=cursor)
 
-    if cursor >= len(tokens):
-        raise SyntaxError(
-            f"Expected a semi-colon (';') at {cursor}, but got end of input"
-        )
-
     if tokens[cursor].kind != TokenKind.SEMICOLON:
         raise SyntaxError(
-            f"Expected a semi-colon (';') at {cursor}, but got: {tokens[cursor]}"
-        )
+            f"Expected a semi-colon (';') at {cursor}, but got: {tokens[cursor]}")
     cursor += 1
 
     return Assign(target=target, expr=expr), cursor
@@ -617,28 +605,27 @@ class _UnparseVisitor(_Visitor[None]):
         self._writer.write(str(node.identifier))
 
     def visit_unary_operation(self, node: UnaryOperation) -> None:
-        self._writer.write(str(node.operator.value))
-        self._writer.write("(")
+        self._writer.write('(')
         self.visit(node.target)
-        self._writer.write(")")
+        self._writer.write(')')
 
     def visit_binary_operation(self, node: BinaryOperation) -> None:
-        self._writer.write("(")
+        self._writer.write('(')
         self.visit(node.left)
-        self._writer.write(")")
+        self._writer.write(')')
         self._writer.write(str(node.operator.value))
-        self._writer.write("(")
+        self._writer.write('(')
         self.visit(node.right)
-        self._writer.write(")")
+        self._writer.write(')')
 
     def visit_call(self, node: Call) -> None:
         self._writer.write(node.name)
-        self._writer.write("(")
+        self._writer.write('(')
         self.visit(node.argument)
-        self._writer.write(")")
+        self._writer.write(')')
 
     def visit_assign(self, node: Assign) -> None:
-        self._writer.write(f"{node.target} = ")
+        self._writer.write(f'{node.target} = ')
         self.visit(node.expr)
         self._writer.write(";")
 
@@ -650,7 +637,17 @@ class _UnparseVisitor(_Visitor[None]):
     def visit_default(self, node: Node) -> None:
         raise NotImplementedError(repr(node))
 
-
+# ERROR:
+# icontract.errors.ViolationError:
+# parse_program(tokenize(result)) == program:
+# parse_program(tokenize(result)) was Program([Assign('A', Call('sin', Variable('A')))])
+# program was Program([Assign('A', Call('sin', UnaryOperation(Variable('A'), operator='-')))])
+# result was 'A = sin((A));\n'
+# tokenize(result) was [Token('A = sin((A));\n', 0, 1, <TokenKind.VAR: 2>), Token('A = sin((A));\n', 1, 2, <TokenKind.WHITESPACE: 7>), Token('A = sin((A));\n', 2, 3, <TokenKind.ASSIGN: 8>), Token('A = sin((A));\n', 3, 4, <TokenKind.WHITESPACE: 7>), Token('A = sin((A));\n', 4, 7, <TokenKind.VAR: 2>), Token('A = sin((A));\n', 7, 8, <TokenKind.OPEN: 5>), Token('A = sin((A));\n', 8, 9, <TokenKind.OPEN: 5>), Token('A = sin((A));\n', 9, 10, <TokenKind.VAR: 2>), Token('A = sin((A));\n', 10, 11, <TokenKind.CLOSE: 6>), Token('A = sin((A));\n', 11, 12, <TokenKind.CLOSE: 6>), Token('A = sin((A));\n', 12, 13, <TokenKind.SEMICOLON: 9>), Token('A = sin((A));\n', 13, 14, <TokenKind.WHITESPACE: 7>)]
+#
+# Falsifying example: execute(
+#     kwargs={'program': Program([Assign('A', Call('sin', UnaryOperation(Variable('A'), operator='-')))])},
+# )
 @ensure(lambda program, result: parse_program(tokenize(result)) == program)
 def unparse(program: Program) -> str:
     """Convert the AST to the source code."""
@@ -674,8 +671,7 @@ class _EvaluateVisitor(_Visitor[float]):
         value = self.lookup.get(node.identifier, None)
         if value is None:
             raise NameError(
-                f"The variable {node.identifier} has not been provided a value."
-            )
+                f"The variable {node.identifier} has not been provided a value.")
 
         return value
 

@@ -65,7 +65,8 @@ class TokenizationRule:
 
 TOKENIZATION = [
     TokenizationRule(
-        TokenKind.NUM, re.compile(r"(inf|0|[1-9][0-9]*)(\.[0-9]+)?(e[+\-]?[0-9]+)?")
+        TokenKind.NUM,
+        re.compile(r"(inf|0|[1-9][0-9]*)(\.[0-9]+)?(e-?[0-9]+)?")
     ),
     TokenizationRule(TokenKind.VAR, re.compile(r"[a-zA-Z_][a-zA-Z_0-9]*")),
     TokenizationRule(TokenKind.OP, re.compile(r"[+\-*/^]")),
@@ -564,8 +565,7 @@ def _parse_stmt(tokens: TokensWoWhitespace, cursor: int) -> Tuple[Statement, int
 
     if cursor >= len(tokens):
         raise SyntaxError(
-            f"Expected a semi-colon (';') at {cursor}, but got end of input"
-        )
+            f"Expected a semi-colon (';') at {cursor}, but got end of input")
 
     if tokens[cursor].kind != TokenKind.SEMICOLON:
         raise SyntaxError(
@@ -650,7 +650,12 @@ class _UnparseVisitor(_Visitor[None]):
     def visit_default(self, node: Node) -> None:
         raise NotImplementedError(repr(node))
 
-
+# ERROR:
+# SyntaxError: Unmatched '(', got: 'e' at column 8
+#
+# Falsifying example: execute(
+#     kwargs={'program': Program([Assign('A', Constant(1e+16))])},
+# )
 @ensure(lambda program, result: parse_program(tokenize(result)) == program)
 def unparse(program: Program) -> str:
     """Convert the AST to the source code."""
