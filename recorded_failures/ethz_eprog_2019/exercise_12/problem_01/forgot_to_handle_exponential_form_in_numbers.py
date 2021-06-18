@@ -64,9 +64,7 @@ class TokenizationRule:
 
 
 TOKENIZATION = [
-    TokenizationRule(
-        TokenKind.NUM, re.compile(r"(inf|0|[1-9][0-9]*)(\.[0-9]+)?(e[+\-]?[0-9]+)?")
-    ),
+    TokenizationRule(TokenKind.NUM, re.compile(r"(0|[1-9][0-9]*)(\.[0-9]+)?")),
     TokenizationRule(TokenKind.VAR, re.compile(r"[a-zA-Z_][a-zA-Z_0-9]*")),
     TokenizationRule(TokenKind.OP, re.compile(r"[+\-*/^]")),
     TokenizationRule(TokenKind.OPEN, re.compile(r"\(")),
@@ -540,9 +538,9 @@ def _parse_expr(
 # fmt: on
 def _parse_stmt(tokens: TokensWoWhitespace, cursor: int) -> Tuple[Statement, int]:
     """Parse a statement at the given ``cursor`` in the ``tokens``."""
-    if cursor >= len(tokens) - 3:
+    if cursor >= len(tokens) - 2:
         raise SyntaxError(
-            f"Expected at least four tokens for the assignment at cursor {cursor}, "
+            f"Expected at least three tokens for the assignment at cursor {cursor}, "
             f"but len(tokens) was {len(tokens)}: {tokens[cursor:]}"
         )
 
@@ -561,11 +559,6 @@ def _parse_stmt(tokens: TokensWoWhitespace, cursor: int) -> Tuple[Statement, int
     cursor += 1
 
     expr, cursor = _parse_expr(tokens=tokens, min_precedence=1, cursor=cursor)
-
-    if cursor >= len(tokens):
-        raise SyntaxError(
-            f"Expected a semi-colon (';') at {cursor}, but got end of input"
-        )
 
     if tokens[cursor].kind != TokenKind.SEMICOLON:
         raise SyntaxError(
@@ -650,7 +643,12 @@ class _UnparseVisitor(_Visitor[None]):
     def visit_default(self, node: Node) -> None:
         raise NotImplementedError(repr(node))
 
-
+# ERROR:
+# SyntaxError: Unmatched '(', got: 'e' at column 7
+#
+# Falsifying example: execute(
+#     kwargs={'program': Program([Assign('A', BinaryOperation(Constant(5e-324), '+', Constant(5e-324)))])},
+# )
 @ensure(lambda program, result: parse_program(tokenize(result)) == program)
 def unparse(program: Program) -> str:
     """Convert the AST to the source code."""

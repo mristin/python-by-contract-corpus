@@ -6,6 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.hypothesis" />
       <excludeFolder url="file://$MODULE_DIR$/.mypy_cache" />
       <excludeFolder url="file://$MODULE_DIR$/htmlcov" />
+      <excludeFolder url="file://$MODULE_DIR$/recorded_failures" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.8 (python-by-contract-corpus)" jdkType="Python SDK" />
