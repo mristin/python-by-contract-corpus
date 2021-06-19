@@ -20,7 +20,7 @@ Please see `page 5`_ of the exercise for an example.
 import math
 from typing import List, MutableMapping, Mapping
 
-from icontract import DBC, snapshot, ensure, require
+from icontract import DBC, snapshot, ensure, require, ViolationError
 
 from correct_programs.ethz_eprog_2019.exercise_12 import problem_01
 
@@ -35,20 +35,12 @@ class Const(Instruction, DBC):
     def __init__(self, value: float) -> None:
         self.value = value
 
-    def __repr__(self) -> str:
-        """Represent the instance as a string for debugging."""
-        return f"{self.__class__.__name__}({self.value})"
-
 
 class Load(Instruction, DBC):
     """Load a variable from the registry and push it on the stack."""
 
     def __init__(self, identifier: problem_01.Identifier) -> None:
         self.identifier = identifier
-
-    def __repr__(self) -> str:
-        """Represent the instance as a string for debugging."""
-        return f"{self.__class__.__name__}({self.identifier!r})"
 
 
 class Store(Instruction, DBC):
@@ -58,10 +50,6 @@ class Store(Instruction, DBC):
         """Initialize with the given values."""
         self.identifier = identifier
 
-    def __repr__(self) -> str:
-        """Represent the instance as a string for debugging."""
-        return f"{self.__class__.__name__}({self.identifier!r})"
-
 
 class UnaryOperation(Instruction, DBC):
     """Pop the value from the stack, apply the operation and push the result."""
@@ -69,10 +57,6 @@ class UnaryOperation(Instruction, DBC):
     def __init__(self, operator: problem_01.UnOp) -> None:
         """Initialize with the given values."""
         self.operator = operator
-
-    def __repr__(self) -> str:
-        """Represent the instance as a string for debugging."""
-        return f"{self.__class__.__name__}({self.operator!r})"
 
 
 class BinaryOperation(Instruction, DBC):
@@ -82,10 +66,6 @@ class BinaryOperation(Instruction, DBC):
         """Initialize with the given values."""
         self.operator = operator
 
-    def __repr__(self) -> str:
-        """Represent the instance as a string for debugging."""
-        return f"{self.__class__.__name__}({self.operator!r})"
-
 
 class Call(Instruction, DBC):
     """Pop the value from the stack, apply the function and push the result."""
@@ -93,10 +73,6 @@ class Call(Instruction, DBC):
     def __init__(self, function: problem_01.Function) -> None:
         """Initialize with the given values."""
         self.function = function
-
-    def __repr__(self) -> str:
-        """Represent the instance as a string for debugging."""
-        return f"{self.__class__.__name__}({self.function!r})"
 
 
 class _CompileVisitor(problem_01._Visitor[None]):
@@ -144,7 +120,6 @@ def compile_program(program: problem_01.Program) -> List[Instruction]:
 
 @snapshot(lambda stack: stack[:])
 @ensure(lambda instr, stack, OLD: stack == OLD.stack + [instr.value])
-@ensure(lambda stack, OLD: len(stack) == len(OLD.stack) + 1)
 def _execute_const(instr: Const, stack: List[float]) -> None:
     stack.append(instr.value)
 
@@ -162,12 +137,26 @@ def _execute_const(instr: Const, stack: List[float]) -> None:
     stack == OLD.stack + [variables[instr.identifier]]
 )
 # fmt: on
-def _execute_load(
-    instr: Load, variables: Mapping[problem_01.Identifier, float], stack: List[float]
-) -> None:
+def _execute_load(instr: Load, variables: Mapping[str, float],
+                  stack: List[float]) -> None:
     stack.append(variables[instr.identifier])
 
-
+# ERROR:
+# icontract.errors.ViolationError:
+# variables[instr.identifier] == OLD.stack[-1]:
+# OLD was a bunch of OLD values
+# OLD.stack was [nan]
+# instr was <correct_programs.ethz_eprog_2019.exercise_12.problem_03.Store object at 0x000002200B622760>
+# instr.identifier was 'A'
+# result was None
+# stack was []
+# variables was {'A': nan}
+#
+# Falsifying example: execute(
+#     kwargs={'instr': <correct_programs.ethz_eprog_2019.exercise_12.problem_03.Store at 0x2200b622760>,
+#      'stack': [nan],
+#      'variables': {}},
+# )
 # fmt: off
 @require(
     lambda stack: len(stack) > 0,
@@ -176,20 +165,12 @@ def _execute_load(
         f"to variable: {instr.identifier}")
 )
 @snapshot(lambda stack: stack[:])
-@ensure(
-    lambda stack, OLD:
-    all(
-        (math.isnan(old) and math.isnan(new)) or old == new
-        for old, new in zip(OLD.stack[:-1], stack)
-    )
-)
-@ensure(lambda stack, OLD: len(stack) == len(OLD.stack) - 1)
+@ensure(lambda stack, OLD: stack == OLD.stack[:-1])
+@ensure(lambda instr, variables, OLD: variables[instr.identifier] == OLD.stack[-1])
 @ensure(lambda instr, variables: instr.identifier in variables)
 # fmt: on
 def _execute_store(
-    instr: Store,
-    variables: MutableMapping[problem_01.Identifier, float],
-    stack: List[float],
+        instr: Store, variables: MutableMapping[str, float], stack: List[float]
 ) -> None:
     value = stack.pop()
     variables[instr.identifier] = value
@@ -202,14 +183,8 @@ def _execute_store(
         f"Unexpected empty stack on unary operation {instr.operator}")
 )
 @snapshot(lambda stack: stack[:])
-@ensure(
-    lambda stack, OLD:
-    all(
-        (math.isnan(old) and math.isnan(new)) or old == new
-        for old, new in zip(OLD.stack[:-1], stack[:-1])
-    )
-)
 @ensure(lambda stack, OLD: len(stack) == len(OLD.stack))
+@ensure(lambda stack, OLD: stack[:-1] == OLD.stack[:-1])
 # fmt: on
 def _execute_unary_operation(instr: UnaryOperation, stack: List[float]) -> None:
     value = stack.pop()
@@ -229,18 +204,12 @@ def _execute_unary_operation(instr: UnaryOperation, stack: List[float]) -> None:
         f"on binary operation {instr.operator}")
 )
 @snapshot(lambda stack: stack[:])
-@ensure(
-    lambda stack, OLD:
-    all(
-        (math.isnan(old) and math.isnan(new)) or old == new
-        for old, new in zip(OLD.stack[:-2], stack[:-2])
-    )
-)
 @ensure(lambda stack, OLD: len(stack) == len(OLD.stack) - 1)
+@ensure(lambda stack, OLD: stack[:-2] == OLD.stack[:-2])
 # fmt: on
 def _execute_binary_operation(instr: BinaryOperation, stack: List[float]) -> None:
-    right_value = stack.pop()
     left_value = stack.pop()
+    right_value = stack.pop()
 
     if instr.operator == problem_01.BinOp.ADD:
         result = left_value + right_value
@@ -265,14 +234,8 @@ def _execute_binary_operation(instr: BinaryOperation, stack: List[float]) -> Non
         f"Unexpected empty stack on call to function {instr.function}")
 )
 @snapshot(lambda stack: stack[:])
-@ensure(
-    lambda stack, OLD:
-    all(
-        (math.isnan(old) and math.isnan(new)) or old == new
-        for old, new in zip(OLD.stack[:-1], stack[:-1])
-    )
-)
 @ensure(lambda stack, OLD: len(stack) == len(OLD.stack))
+@ensure(lambda stack, OLD: stack[:-1] == OLD.stack[:-1])
 # fmt: on
 def _execute_call(instr: Call, stack: List[float]) -> None:
     value = stack.pop()
@@ -288,11 +251,9 @@ def _execute_call(instr: Call, stack: List[float]) -> None:
     stack.append(result)
 
 
-def execute(
-    instructions: List[Instruction],
-) -> MutableMapping[problem_01.Identifier, float]:
+def execute(instructions: List[Instruction]) -> MutableMapping[str, float]:
     """Execute the given instructions."""
-    variables = dict()  # type: MutableMapping[problem_01.Identifier, float]
+    variables = dict()  # type: MutableMapping[str, float]
 
     if len(instructions) == 0:
         return variables
@@ -314,39 +275,3 @@ def execute(
             _execute_call(instr=instr, stack=stack)
         else:
             raise NotImplementedError(f"{instr=}")
-
-    return variables
-
-
-def compare_against_interpret(
-    program: problem_01.Program, result: Mapping[problem_01.Identifier, float]
-) -> bool:
-    """Compare against the interpret implementation."""
-    interpreted = problem_01.interpret(program)
-
-    if len(interpreted) != len(result):
-        return False
-
-    if interpreted.keys() != result.keys():
-        return False
-
-    for key in interpreted:
-        interpreted_value = interpreted[key]
-        our_value = result[key]
-
-        if math.isnan(interpreted_value) ^ math.isnan(our_value):
-            return False
-
-        if not math.isnan(interpreted_value) and interpreted_value != our_value:
-            return False
-
-    return True
-
-
-@ensure(lambda program, result: compare_against_interpret(program, result))
-def compile_and_execute(
-    program: problem_01.Program,
-) -> MutableMapping[problem_01.Identifier, float]:
-    """Compile and execute the given program."""
-    instructions = compile_program(program)
-    return execute(instructions)

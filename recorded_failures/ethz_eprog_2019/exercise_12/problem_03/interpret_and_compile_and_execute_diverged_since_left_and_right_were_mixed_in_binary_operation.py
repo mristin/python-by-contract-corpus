@@ -20,7 +20,7 @@ Please see `page 5`_ of the exercise for an example.
 import math
 from typing import List, MutableMapping, Mapping
 
-from icontract import DBC, snapshot, ensure, require
+from icontract import DBC, snapshot, ensure, require, ViolationError
 
 from correct_programs.ethz_eprog_2019.exercise_12 import problem_01
 
@@ -35,20 +35,12 @@ class Const(Instruction, DBC):
     def __init__(self, value: float) -> None:
         self.value = value
 
-    def __repr__(self) -> str:
-        """Represent the instance as a string for debugging."""
-        return f"{self.__class__.__name__}({self.value})"
-
 
 class Load(Instruction, DBC):
     """Load a variable from the registry and push it on the stack."""
 
     def __init__(self, identifier: problem_01.Identifier) -> None:
         self.identifier = identifier
-
-    def __repr__(self) -> str:
-        """Represent the instance as a string for debugging."""
-        return f"{self.__class__.__name__}({self.identifier!r})"
 
 
 class Store(Instruction, DBC):
@@ -58,10 +50,6 @@ class Store(Instruction, DBC):
         """Initialize with the given values."""
         self.identifier = identifier
 
-    def __repr__(self) -> str:
-        """Represent the instance as a string for debugging."""
-        return f"{self.__class__.__name__}({self.identifier!r})"
-
 
 class UnaryOperation(Instruction, DBC):
     """Pop the value from the stack, apply the operation and push the result."""
@@ -69,10 +57,6 @@ class UnaryOperation(Instruction, DBC):
     def __init__(self, operator: problem_01.UnOp) -> None:
         """Initialize with the given values."""
         self.operator = operator
-
-    def __repr__(self) -> str:
-        """Represent the instance as a string for debugging."""
-        return f"{self.__class__.__name__}({self.operator!r})"
 
 
 class BinaryOperation(Instruction, DBC):
@@ -82,10 +66,6 @@ class BinaryOperation(Instruction, DBC):
         """Initialize with the given values."""
         self.operator = operator
 
-    def __repr__(self) -> str:
-        """Represent the instance as a string for debugging."""
-        return f"{self.__class__.__name__}({self.operator!r})"
-
 
 class Call(Instruction, DBC):
     """Pop the value from the stack, apply the function and push the result."""
@@ -93,10 +73,6 @@ class Call(Instruction, DBC):
     def __init__(self, function: problem_01.Function) -> None:
         """Initialize with the given values."""
         self.function = function
-
-    def __repr__(self) -> str:
-        """Represent the instance as a string for debugging."""
-        return f"{self.__class__.__name__}({self.function!r})"
 
 
 class _CompileVisitor(problem_01._Visitor[None]):
@@ -144,7 +120,6 @@ def compile_program(program: problem_01.Program) -> List[Instruction]:
 
 @snapshot(lambda stack: stack[:])
 @ensure(lambda instr, stack, OLD: stack == OLD.stack + [instr.value])
-@ensure(lambda stack, OLD: len(stack) == len(OLD.stack) + 1)
 def _execute_const(instr: Const, stack: List[float]) -> None:
     stack.append(instr.value)
 
@@ -162,9 +137,8 @@ def _execute_const(instr: Const, stack: List[float]) -> None:
     stack == OLD.stack + [variables[instr.identifier]]
 )
 # fmt: on
-def _execute_load(
-    instr: Load, variables: Mapping[problem_01.Identifier, float], stack: List[float]
-) -> None:
+def _execute_load(instr: Load, variables: Mapping[str, float],
+                  stack: List[float]) -> None:
     stack.append(variables[instr.identifier])
 
 
@@ -187,9 +161,7 @@ def _execute_load(
 @ensure(lambda instr, variables: instr.identifier in variables)
 # fmt: on
 def _execute_store(
-    instr: Store,
-    variables: MutableMapping[problem_01.Identifier, float],
-    stack: List[float],
+        instr: Store, variables: MutableMapping[str, float], stack: List[float]
 ) -> None:
     value = stack.pop()
     variables[instr.identifier] = value
@@ -239,8 +211,8 @@ def _execute_unary_operation(instr: UnaryOperation, stack: List[float]) -> None:
 @ensure(lambda stack, OLD: len(stack) == len(OLD.stack) - 1)
 # fmt: on
 def _execute_binary_operation(instr: BinaryOperation, stack: List[float]) -> None:
-    right_value = stack.pop()
     left_value = stack.pop()
+    right_value = stack.pop()
 
     if instr.operator == problem_01.BinOp.ADD:
         result = left_value + right_value
@@ -289,7 +261,7 @@ def _execute_call(instr: Call, stack: List[float]) -> None:
 
 
 def execute(
-    instructions: List[Instruction],
+        instructions: List[Instruction]
 ) -> MutableMapping[problem_01.Identifier, float]:
     """Execute the given instructions."""
     variables = dict()  # type: MutableMapping[problem_01.Identifier, float]
@@ -318,34 +290,19 @@ def execute(
     return variables
 
 
-def compare_against_interpret(
-    program: problem_01.Program, result: Mapping[problem_01.Identifier, float]
-) -> bool:
-    """Compare against the interpret implementation."""
-    interpreted = problem_01.interpret(program)
-
-    if len(interpreted) != len(result):
-        return False
-
-    if interpreted.keys() != result.keys():
-        return False
-
-    for key in interpreted:
-        interpreted_value = interpreted[key]
-        our_value = result[key]
-
-        if math.isnan(interpreted_value) ^ math.isnan(our_value):
-            return False
-
-        if not math.isnan(interpreted_value) and interpreted_value != our_value:
-            return False
-
-    return True
-
-
-@ensure(lambda program, result: compare_against_interpret(program, result))
+# ERROR:
+# icontract.errors.ViolationError:
+# result == problem_01.interpret(program):
+# problem_01.interpret(program) was {'x': -1.0}
+# program was Program([Assign('x', BinaryOperation(Constant(5e-324), '-', Constant(1.0)))])
+# result was {'x': 1.0}
+#
+# Falsifying example: execute(
+#     kwargs={'left': 5e-324, 'operator': <BinOp.SUB: '-'>, 'right': 1.0},
+# )
+@ensure(lambda program, result: result == problem_01.interpret(program))
 def compile_and_execute(
-    program: problem_01.Program,
+        program: problem_01.Program
 ) -> MutableMapping[problem_01.Identifier, float]:
     """Compile and execute the given program."""
     instructions = compile_program(program)

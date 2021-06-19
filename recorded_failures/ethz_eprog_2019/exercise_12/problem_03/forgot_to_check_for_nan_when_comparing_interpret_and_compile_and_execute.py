@@ -20,7 +20,7 @@ Please see `page 5`_ of the exercise for an example.
 import math
 from typing import List, MutableMapping, Mapping
 
-from icontract import DBC, snapshot, ensure, require
+from icontract import DBC, snapshot, ensure, require, ViolationError
 
 from correct_programs.ethz_eprog_2019.exercise_12 import problem_01
 
@@ -317,33 +317,17 @@ def execute(
 
     return variables
 
-
-def compare_against_interpret(
-    program: problem_01.Program, result: Mapping[problem_01.Identifier, float]
-) -> bool:
-    """Compare against the interpret implementation."""
-    interpreted = problem_01.interpret(program)
-
-    if len(interpreted) != len(result):
-        return False
-
-    if interpreted.keys() != result.keys():
-        return False
-
-    for key in interpreted:
-        interpreted_value = interpreted[key]
-        our_value = result[key]
-
-        if math.isnan(interpreted_value) ^ math.isnan(our_value):
-            return False
-
-        if not math.isnan(interpreted_value) and interpreted_value != our_value:
-            return False
-
-    return True
-
-
-@ensure(lambda program, result: compare_against_interpret(program, result))
+# ERROR:
+# icontract.errors.ViolationError:
+# result == problem_01.interpret(program):
+# problem_01.interpret(program) was {'x': nan}
+# program was Program([Assign('x', BinaryOperation(Constant(inf), '-', Constant(inf)))])
+# result was {'x': nan}
+#
+# Falsifying example: execute(
+#     kwargs={'left': inf, 'operator': <BinOp.SUB: '-'>, 'right': inf},
+# )
+@ensure(lambda program, result: result == problem_01.interpret(program))
 def compile_and_execute(
     program: problem_01.Program,
 ) -> MutableMapping[problem_01.Identifier, float]:

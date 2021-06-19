@@ -282,24 +282,34 @@ class BinaryOperation(Expr, DBC):
         )
 
 
+class Function(enum.Enum):
+    """Represent the available functions."""
+
+    SIN = "sin"
+    COS = "cos"
+    TAN = "tan"
+
+
+_STR_TO_FUNCTION = {literal.value: literal for literal in Function}
+
+
 class Call(Expr, DBC):
     """Represent a function call in the expression."""
 
-    @require(lambda name: re.fullmatch(r"(sin|cos|tan)", name))
-    def __init__(self, name: str, argument: "Expr") -> None:
-        self.name = name
+    def __init__(self, function: Function, argument: "Expr") -> None:
+        self.function = function
         self.argument = argument
 
     def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, Call)
-            and self.name == other.name
+            and self.function == other.function
             and self.argument == other.argument
         )
 
     def __repr__(self) -> str:
         """Represent the instance as a string for debugging."""
-        return f"{self.__class__.__name__}({self.name!r}, {self.argument!r})"
+        return f"{self.__class__.__name__}({self.function.value!r}, {self.argument!r})"
 
 
 class Statement(Node):
@@ -452,7 +462,13 @@ def _parse_atom(tokens: TokensWoWhitespace, cursor: int) -> Tuple[Expr, int]:
             )
 
         cursor += 1
-        return Call(name=identifier, argument=argument), cursor
+
+        if identifier not in _STR_TO_FUNCTION:
+            raise SyntaxError(f"Unexpected function: {identifier}")
+
+        function = _STR_TO_FUNCTION[identifier]
+
+        return Call(function=function, argument=argument), cursor
 
     elif remaining >= 1 and tokens[cursor].kind == TokenKind.VAR:
         atom = Variable(
@@ -632,7 +648,7 @@ class _UnparseVisitor(_Visitor[None]):
         self._writer.write(")")
 
     def visit_call(self, node: Call) -> None:
-        self._writer.write(node.name)
+        self._writer.write(str(node.function.value))
         self._writer.write("(")
         self.visit(node.argument)
         self._writer.write(")")
@@ -712,11 +728,11 @@ class _EvaluateVisitor(_Visitor[float]):
     def visit_call(self, node: Call) -> float:
         argument = self.visit(node.argument)
 
-        if node.name == "sin":
+        if node.function == Function.SIN:
             return math.sin(argument)
-        elif node.name == "cos":
+        elif node.function == Function.COS:
             return math.cos(argument)
-        elif node.name == "tan":
+        elif node.function == Function.TAN:
             return math.tan(argument)
         else:
             raise NotImplementedError(repr(node))
