@@ -19,6 +19,7 @@ from icontract import ensure
     "A duplicated result was produced from different input items",
 )
 def find_pair_with_sum(items: List[int], total: int) -> Optional[Tuple[int, int]]:
+    """Find the two entries that sum to ``total``."""
     for i, x in enumerate(items):
         for y in items[i + 1 :]:
             if x + y == total:

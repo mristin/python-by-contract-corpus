@@ -1,3 +1,4 @@
 icontract>=2.5.3
 icontract-hypothesis>=1.1.4
 crosshair-tool>=0.0.11
+regex>=2021.4.4

@@ -9,8 +9,9 @@ from correct_programs.aoc2020 import day_21_allergen_assessment
 class TestWithIcontractHypothesis(unittest.TestCase):
     def test_functions(self) -> None:
         for func in [
-            day_21_allergen_assessment.parse_list_of_foods,
-            day_21_allergen_assessment.is_equal_ingredient_list,
+            day_21_allergen_assessment.serialize_entry,
+            day_21_allergen_assessment.find_non_allergenic_ingredients,
+            day_21_allergen_assessment.solve,
         ]:
             try:
                 icontract_hypothesis.test_with_inferred_strategy(func)  # type: ignore
@@ -23,13 +24,18 @@ class TestWithIcontractHypothesis(unittest.TestCase):
 
 class TestManually(unittest.TestCase):
     def test_solve(self) -> None:
-        puzzle_input = textwrap.dedent(
+        text = textwrap.dedent(
             """\
             mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
             trh fvjkl sbzzf mxmxvkd (contains dairy)
             sqjhc fvjkl (contains soy)
             sqjhc mxmxvkd sbzzf (contains fish)"""
         )
+
+        puzzle_input = [
+            day_21_allergen_assessment.IngredientLine(line)
+            for line in text.splitlines()
+        ]
 
         expected_output = {"kfcds", "nhms", "sbzzf", "trh"}
 

@@ -17,7 +17,7 @@ The program answers the following questions:
 * What is the total revenue of the hotel for the year?
 """
 import collections
-from typing import MutableMapping, Collection
+from typing import MutableMapping, Collection, List
 
 from icontract import require, ensure, DBC
 
@@ -50,7 +50,7 @@ class Entry(DBC):
 
 @require(lambda entries: len(entries) > 0)
 @ensure(lambda entries, result: result in {entry.room_number for entry in entries})
-def most_booked_room(entries: Collection[Entry]) -> int:
+def most_booked_room(entries: List[Entry]) -> int:
     histo = collections.defaultdict(lambda: 0)  # type: MutableMapping[int, int]
     for entry in entries:
         histo[entry.room_number] += 1

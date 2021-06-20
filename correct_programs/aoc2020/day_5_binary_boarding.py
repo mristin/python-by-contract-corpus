@@ -34,6 +34,11 @@ from icontract import require, ensure
     "next last always not divisible by 2 unless the last step",
 )
 def apply(first: int, last: int, directive: str) -> Tuple[int, int]:
+    """
+    Apply the ``directive`` given the range as ``[first, last]`` (inclusive).
+
+    :return: new first, new last
+    """
     half = int((last - first + 1) / 2)
 
     if directive in "FL":
@@ -49,6 +54,7 @@ def apply(first: int, last: int, directive: str) -> Tuple[int, int]:
 @require(lambda identifier: re.match(r"^[FB]{7}\Z", identifier))
 @ensure(lambda result: 0 <= result <= 127)
 def determine_row(identifier: str) -> int:
+    """Compute the row of the seat identified by the ``identifier``."""
     first = 0
     last = 127
 
@@ -62,6 +68,7 @@ def determine_row(identifier: str) -> int:
 @require(lambda identifier: re.match(r"^[LR]{3}\Z", identifier))
 @ensure(lambda result: 0 <= result <= 127)
 def determine_column(identifier: str) -> int:
+    """Compute the column of the seat identified by the ``identifier``."""
     first = 0
     last = 7
 
@@ -76,6 +83,7 @@ def determine_column(identifier: str) -> int:
 @ensure(lambda result: 0 <= result[0] <= 127)
 @ensure(lambda result: 0 <= result[1] <= 8)
 def determine_row_and_column(identifier: str) -> Tuple[int, int]:
+    """Compute the ``(row, column)`` of the seat identified by the ``identifier``."""
     row_identifier = identifier[:7]
     column_identifier = identifier[7:]
     row = determine_row(identifier=row_identifier)
@@ -87,4 +95,5 @@ def determine_row_and_column(identifier: str) -> Tuple[int, int]:
 @require(lambda column: 0 <= column <= 8)
 @ensure(lambda result: result <= 127 * 8 + 8, "The highest seat ID")
 def determine_id(row: int, column: int) -> int:
+    """Compute the identifier of the seat given its ``row`` and ``column``."""
     return row * 8 + column

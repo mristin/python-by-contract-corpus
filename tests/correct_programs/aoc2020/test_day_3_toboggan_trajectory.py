@@ -16,9 +16,12 @@ class TestWithIcontractHypothesis(unittest.TestCase):
             try:
                 icontract_hypothesis.test_with_inferred_strategy(func)
             except Exception as error:
+                strategy = icontract_hypothesis.infer_strategy(func)
+
                 raise Exception(
                     f"Automatically testing {func} with icontract-hypothesis failed "
-                    f"(please see the original error above)"
+                    f"(please see the original error above).\n\n"
+                    f"The inferred strategy was: {strategy}"
                 ) from error
 
 
@@ -39,10 +42,15 @@ class TestManually(unittest.TestCase):
             .#..#...#.#"""
         )
 
+        lines = [
+            day_3_toboggan_trajectory.InputLine(line)
+            for line in example_input.splitlines()
+        ]
+
         self.assertEqual(
             7,
             day_3_toboggan_trajectory.count_trees(
-                *day_3_toboggan_trajectory.parse_input(example_input)
+                *day_3_toboggan_trajectory.parse_input(lines)
             ),
         )
 

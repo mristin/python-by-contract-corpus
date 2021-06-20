@@ -4,6 +4,8 @@ from typing import List, Set, Tuple
 
 from icontract import require, ensure
 
+from correct_programs.common import Lines
+
 
 @require(lambda min_time: min_time >= 0)
 @require(lambda bus_id: bus_id > 0)
@@ -14,6 +16,7 @@ from icontract import require, ensure
     "All buses leave at time zero.",
 )
 def next_departure(bus_id: int, min_time: int) -> int:
+    """Compute the next departure of ``bus_id`` leaving earliest at ``min_time``."""
     missed_last_bus_by = min_time % bus_id
     if missed_last_bus_by == 0:
         return min_time
@@ -30,18 +33,21 @@ def next_departure(bus_id: int, min_time: int) -> int:
     "Departure time matches at least one bus.",
 )
 def find_departure(start_time: int, bus_ids: Set[int]) -> Tuple[int, int]:
+    """Find the earliest bus to catch after ``start_time``."""
     return min([(next_departure(bid, start_time), bid) for bid in bus_ids])
 
 
+# fmt: off
 @require(lambda lines: len(lines) == 2)
 @require(
-    lambda lines: (
-        len(lines) == 2
-        and re.match(r"\d+", lines[0])
-        and re.match(r"(\d+|x)(,(\d+|x))*", lines[1])
-    )
+    lambda lines:
+    len(lines) == 2
+    and re.match(r"\d+", lines[0])
+    and re.match(r"(\d+|x)(,(\d+|x))*", lines[1])
 )
-def parse_input(lines: List[str]) -> Tuple[int, Set[int]]:
+# fmt: on
+def parse_input(lines: Lines) -> Tuple[int, Set[int]]:
+    """Parse the input into (earliest departure time, bus IDs)."""
     min_time_text, bus_ids_text = lines
     bus_ids = {int(bid) for bid in bus_ids_text.split(",") if bid != "x"}
     return (int(min_time_text), bus_ids)
@@ -49,7 +55,7 @@ def parse_input(lines: List[str]) -> Tuple[int, Set[int]]:
 
 def main() -> None:
     """Execute the main routine."""
-    min_time, bus_ids = parse_input(sys.stdin.readlines())
+    min_time, bus_ids = parse_input(Lines(sys.stdin.readlines()))
     departure_time, bus_id = find_departure(min_time, bus_ids)
     wait_time = departure_time - min_time
     print(wait_time * bus_id)

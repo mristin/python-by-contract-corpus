@@ -4,6 +4,7 @@ import unittest
 import icontract_hypothesis
 
 from correct_programs.aoc2020 import day_17_conway_cubes
+from correct_programs.common import Lines
 
 
 class TestWithIcontractHypothesis(unittest.TestCase):
@@ -25,12 +26,14 @@ class TestWithIcontractHypothesis(unittest.TestCase):
 
 class TestManually(unittest.TestCase):
     def test_case(self) -> None:
-        lines = textwrap.dedent(
-            """\
+        lines = Lines(
+            textwrap.dedent(
+                """\
             .#.
             ..#
             ###"""
-        ).splitlines()
+            ).splitlines()
+        )
 
         activity = day_17_conway_cubes.parse_initial(lines=lines)
 

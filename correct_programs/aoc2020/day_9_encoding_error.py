@@ -17,6 +17,13 @@ from itertools import combinations
     ]
 )
 def solve(puzzle_input: List[int], preamble_length: int) -> Optional[Tuple[int, int]]:
+    """
+    Parse the data of the XMAS protocol, ``puzzle_input``, and find a weakness.
+
+    :return:
+        offset of the number,
+        first number *after* the preamble which uncovers the weakness
+    """
     for index, number in enumerate(puzzle_input[preamble_length:]):
         preamble = puzzle_input[index : index + preamble_length]
         valid = False
@@ -28,31 +35,3 @@ def solve(puzzle_input: List[int], preamble_length: int) -> Optional[Tuple[int, 
             return preamble_length + index, number
 
     return None
-
-
-_example_input = [
-    35,
-    20,
-    15,
-    25,
-    47,
-    40,
-    62,
-    55,
-    65,
-    95,
-    102,
-    117,
-    150,
-    182,
-    127,
-    219,
-    299,
-    277,
-    309,
-    576,
-]
-
-
-if __name__ == "__main__":
-    print(solve(_example_input, 5))

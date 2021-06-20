@@ -7,22 +7,33 @@ from typing import (
     Tuple,
     Optional,
     Dict,
-    Iterable,
     TypeVar,
     Generic,
     Final,
+    Iterator,
 )
 
 from icontract import require, ensure, DBC
 
 # crosshair: on
-from correct_programs import common
+from correct_programs.common import Lines
 
 
 class Rule(DBC):
-    @ensure(lambda text, result: not (result is not None) or (len(text) > len(result)))
-    @ensure(lambda text, result: not (result is not None) or (text.endswith(result)))
+    """Represent a rule that valid messages should obey."""
+
+    # fmt: off
+    @ensure(
+        lambda text, result:
+        not (result is not None)
+        or (len(text) > len(result))
+    )
+    @ensure(
+        lambda text, result:
+        not (result is not None) or (text.endswith(result))
+    )
     @abc.abstractmethod
+    # fmt: on
     def match(self, text: str) -> Optional[str]:
         """
         Match the ``text`` and return the remaining unmatched text.
@@ -33,12 +44,16 @@ class Rule(DBC):
 
 
 class RuleOr(Rule):
-    rules: Final[List[Rule]]
+    """Represent an union composition of rules (at least one rule matches)."""
+
+    rules: Final[List[Rule]]  #: Union of rules
 
     def __init__(self, rules: List[Rule]) -> None:
+        """Initialize with the given values."""
         self.rules = rules
 
     def match(self, text: str) -> Optional[str]:
+        """Check whether at least one rule from :py:attr:`rules` matches."""
         for rule in self.rules:
             remaining_suffix = rule.match(text)
             if remaining_suffix is not None:
@@ -48,12 +63,16 @@ class RuleOr(Rule):
 
 
 class RuleSequence(Rule):
-    rules: Final[List[Rule]]
+    """Represent a chain of rules where all rules need to match in sequence."""
+
+    rules: Final[List[Rule]]  #: Rule chain
 
     def __init__(self, rules: List[Rule]) -> None:
+        """Initialize with the given values."""
         self.rules = rules
 
     def match(self, text: str) -> Optional[str]:
+        """Check whether ``text`` matches the whole sequence of :py:attr:`rules`."""
         remaining = text  # type: Optional[str]
         for rule in self.rules:
             assert remaining is not None
@@ -65,9 +84,12 @@ class RuleSequence(Rule):
 
 
 class RuleLiteral(Rule):
-    literal: Final[str]
+    """Represent a rule where a literal is exactly matched."""
+
+    literal: Final[str]  #: Literal to be matched
 
     def __init__(self, literal: str) -> None:
+        """Initialize with the given values."""
         self.literal = literal
 
     # fmt: off
@@ -77,6 +99,7 @@ class RuleLiteral(Rule):
     )
     # fmt: on
     def match(self, text: str) -> Optional[str]:
+        """Check whether ``text`` matches exactly the :py:attr:`literal`."""
         if not text.startswith(self.literal):
             return None
 
@@ -90,30 +113,42 @@ class Node(DBC):
 
 
 class NodeLiteral(Node):
-    literal: Final[str]
+    """Represent a literal in the rule syntax."""
+
+    literal: Final[str]  #: Parsed literal
 
     def __init__(self, literal: str) -> None:
+        """Initialize with the given values."""
         self.literal = literal
 
 
 class NodeReference(Node):
-    identifier: Final[int]
+    """Represent a reference to a rule."""
+
+    identifier: Final[int]  #: Identifier of the referenced rule
 
     def __init__(self, identifier: int) -> None:
+        """Initialize with the given values."""
         self.identifier = identifier
 
 
 class NodeSequence(Node):
-    references: Final[List[NodeReference]]
+    """Represent a parsed sequence of node references."""
+
+    references: Final[List[NodeReference]]  #: Parsed references
 
     def __init__(self, references: List[NodeReference]) -> None:
+        """Initialize with the given values."""
         self.references = references
 
 
 class NodeOr(Node):
-    sequences: Final[List[NodeSequence]]
+    """Represent a parsed union of node sequences."""
+
+    sequences: Final[List[NodeSequence]]  #: Union
 
     def __init__(self, sequences: List[NodeSequence]) -> None:
+        """Initialize with the given values."""
         self.sequences = sequences
 
 
@@ -137,6 +172,7 @@ RULE_COMPOSITE_RE = re.compile(
 
 @require(lambda line: RULE_RE.match(line))
 def parse_rule(line: str) -> Tuple[int, Node]:
+    """Parse the rule from the ``line`` into (rule identifier, abstract syntax tree)."""
     mtch = RULE_RE.match(line)
     assert mtch is not None
 
@@ -175,7 +211,8 @@ def parse_rule(line: str) -> Tuple[int, Node]:
 
 
 @require(lambda lines: all(RULE_RE.match(line) for line in lines))
-def parse_rules(lines: common.Lines) -> MutableMapping[int, Node]:
+def parse_rules(lines: Lines) -> MutableMapping[int, Node]:
+    """Parse the rules from ``lines`` into a dictionary of identifier 🠒 AST."""
     rule_trees = dict()  # type: Dict[int, Node]
 
     for line in lines:
@@ -188,7 +225,9 @@ def parse_rules(lines: common.Lines) -> MutableMapping[int, Node]:
 T = TypeVar("T")
 
 
-class AbstractVisitor(abc.ABC, Generic[T]):
+class _AbstractVisitor(abc.ABC, Generic[T]):
+    """Structure a general visitor to an abstract syntax tree of rules."""
+
     @abc.abstractmethod
     def visit_literal(self, node: NodeLiteral) -> T:
         raise NotImplementedError()
@@ -218,31 +257,35 @@ class AbstractVisitor(abc.ABC, Generic[T]):
             raise NotImplementedError(node)
 
 
-class _VisitorIterable(AbstractVisitor[Iterable[Node]]):
-    def visit_literal(self, node: NodeLiteral) -> Iterable[Node]:
+class _VisitorIterable(_AbstractVisitor[Iterator[Node]]):
+    """Iterate over all the nodes in prefix order."""
+
+    def visit_literal(self, node: NodeLiteral) -> Iterator[Node]:
         yield node
 
-    def visit_reference(self, node: NodeReference) -> Iterable[Node]:
+    def visit_reference(self, node: NodeReference) -> Iterator[Node]:
         yield node
 
-    def visit_sequence(self, node: NodeSequence) -> Iterable[Node]:
+    def visit_sequence(self, node: NodeSequence) -> Iterator[Node]:
         yield node
         for reference in node.references:
             yield from self.visit(reference)
 
-    def visit_or(self, node: NodeOr) -> Iterable[Node]:
+    def visit_or(self, node: NodeOr) -> Iterator[Node]:
         yield node
         for sequence in node.sequences:
             yield from self.visit(sequence)
 
 
-def iterate(rule_tree: Node) -> Iterable[Node]:
+def iterate(rule_tree: Node) -> Iterator[Node]:
     """Yield the ``rule_tree`` and all its descendants."""
     visitor = _VisitorIterable()
     yield from visitor.visit(rule_tree)
 
 
-class _VisitorStr(AbstractVisitor[str]):
+class _VisitorStr(_AbstractVisitor[str]):
+    """Represent the abstract syntax tree as string for easier inspection."""
+
     def visit_literal(self, node: NodeLiteral) -> str:
         return f'Lit("{node.literal}")'
 
@@ -259,11 +302,12 @@ class _VisitorStr(AbstractVisitor[str]):
 
 
 def repr_rule_tree(rule_tree: Node) -> str:
+    """Represent the abstract syntax tree ``rule_tree`` as a string for inspection."""
     visitor = _VisitorStr()
     return visitor.visit(rule_tree)
 
 
-@require(lambda rule_trees: 0 in rule_trees)
+@require(lambda rule_trees: 0 in rule_trees, "The initial rule is present.")
 # fmt: off
 @require(
     lambda rule_trees:
@@ -333,6 +377,7 @@ def interpret_rule_0(rule_trees: Mapping[int, Node]) -> Rule:
 
 @ensure(lambda messages, result: 0 <= result <= len(messages))
 def count_matching_messages(rule_0: Rule, messages: List[str]) -> int:
+    """Count the ``messages`` that match the rules starting from ``rule_0``."""
     result = 0
     for message in messages:
         remaining_suffix = rule_0.match(message)

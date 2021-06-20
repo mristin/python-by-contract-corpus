@@ -5,12 +5,14 @@ Output: position, Manhattan distance
 import dataclasses
 import re
 from enum import Enum
-from typing import List
 
 from icontract import require, ensure
 
+from correct_programs.common import Lines
+
 
 class Orientation(Enum):
+    "Represent the facing orientation of the ship."
     EAST = 0
     SOUTH = 1
     WEST = 2
@@ -19,9 +21,11 @@ class Orientation(Enum):
 
 @dataclasses.dataclass
 class ShipPosition:
-    horizontal: int
-    vertical: int
-    orientation: Orientation
+    """Represent the current ferry position."""
+
+    horizontal: int  #: Position of the ship in horizontal direction
+    vertical: int  #: Position of the ship in vertical direction
+    orientation: Orientation  #: Orientation of the ship
 
     def __repr__(self) -> str:
         result = ""
@@ -37,22 +41,28 @@ class ShipPosition:
         return result
 
 
+# fmt: off
 @require(
-    lambda puzzle_input: re.match(
-        r"^[NSEWLRF][0-9]+(\n[NSEWLRF][0-9]+)*$", puzzle_input
-    )
+    lambda puzzle_input:
+    re.fullmatch(r"[NSEWLRF][0-9]+(\n[NSEWLRF][0-9]+)*", puzzle_input)
 )
 @ensure(lambda result, puzzle_input: "\n".join(result) == puzzle_input)
-def parse_input(puzzle_input: str) -> List[str]:
-    return list(map(lambda l: l, puzzle_input.split("\n")))
+# fmt: on
+def parse_input(puzzle_input: str) -> Lines:
+    """Split the puzzle input along the newlines."""
+    return Lines(puzzle_input.splitlines())
 
 
+# fmt: off
 @require(lambda move: re.match(r"^[NSEWLRF][0-9]+$", move))
 @require(
-    lambda move: not (move[0] == "L" or move[0] == "R")
+    lambda move:
+    not (move[0] == "L" or move[0] == "R")
     or int(move[1:]) in [0, 90, 180, 270, 360]
 )
+# fmt: on
 def update_position(current_position: ShipPosition, move: str) -> ShipPosition:
+    """Execute a single ``move`` on ``current_position`` and return a new position."""
     action, value = move[0], int(move[1:])
     next_position = current_position
     if action == "N":
@@ -92,13 +102,8 @@ def update_position(current_position: ShipPosition, move: str) -> ShipPosition:
     )
 )
 def solve(puzzle_input: str) -> ShipPosition:
+    """Execute the instructions and return the final ship's position."""
     current_position = ShipPosition(0, 0, Orientation.EAST)
     for command in parse_input(puzzle_input):
         current_position = update_position(current_position, command)
     return current_position
-
-
-example_input = """L0"""
-
-if __name__ == "__main__":
-    print(solve(example_input))

@@ -10,22 +10,32 @@ from icontract import require, ensure, DBC
 
 
 class Cell(DBC):
-    x: Final[int]
-    y: Final[int]
-    z: Final[int]
+    """
+    Represent a hexagonal cell of the layout using cube coordinates.
+
+    See https://www.redblobgames.com/grids/hexagons/.
+    """
+
+    x: Final[int]  #: X-coordinate (south-east, north-west)
+    y: Final[int]  #: Y-coordinate (south-west, north-east)
+    z: Final[int]  #: Z-coordinate (east, west)
 
     @require(lambda x, y, z: x + y + z == 0)
     def __init__(self, x: int, y: int, z: int) -> None:
+        """Initialize with the given values."""
         self.x = x
         self.y = y
         self.z = z
 
 
 def cell_as_tuple(cell: Cell) -> Tuple[int, int, int]:
+    """Convert the :py:class:`cell` into a tuple of x, y and z coordinates."""
     return cell.x, cell.y, cell.z
 
 
 class Direction(enum.Enum):
+    """Enumerate the possible directions from a hexagonal cell."""
+
     EAST = "e"
     SOUTH_EAST = "se"
     SOUTH_WEST = "sw"
@@ -35,10 +45,13 @@ class Direction(enum.Enum):
 
 
 assert len(set(entry.value for entry in Direction)) == len(Direction)
+
+#: Map string literal of :py:class:`Direction` 🠒 :py:class:`Direction`.
 VALUE_TO_DIRECTION = dict((entry.value, entry) for entry in Direction)
 
 
 def next_cell(cell: Cell, direction: Direction) -> Cell:
+    """Retrieve the next cell starting from ``cell`` in the ``direction``."""
     if direction == Direction.EAST:
         result = Cell(cell.x + 1, cell.y - 1, cell.z)
     elif direction == Direction.SOUTH_EAST:
@@ -58,6 +71,11 @@ def next_cell(cell: Cell, direction: Direction) -> Cell:
 
 
 def follow_directions(start: Cell, directions: List[Direction]) -> Cell:
+    """
+    Walk the ``directions`` from the ``start``.
+
+    :return: The final :py:class:`Cell` of the journey
+    """
     cursor = start
     for direction in directions:
         cursor = next_cell(cell=cursor, direction=direction)
@@ -65,14 +83,15 @@ def follow_directions(start: Cell, directions: List[Direction]) -> Cell:
     return cursor
 
 
-DIRECTIONS_RE = re.compile(r"^(se|sw|nw|ne|w|e)+\Z")
-ONE_DIRECTION_RE = re.compile(r"(se|sw|nw|ne|w|e)")
+DIRECTIONS_RE = re.compile(r"^(se|sw|nw|ne|w|e)+\Z")  #: Express a list of directions
+ONE_DIRECTION_RE = re.compile(r"(se|sw|nw|ne|w|e)")  #: Express a single direction
 
 
 @require(lambda line: not (len(line) > 0) or DIRECTIONS_RE.match(line))
 @ensure(lambda line, result: not (len(line) == 0) or len(result) == 0)
 @ensure(lambda line, result: stringify_directions(result) == line)  # type: ignore
 def parse_line(line: str) -> List[Direction]:
+    """Parse the input line."""
     if len(line) == 0:
         return []
 
@@ -86,10 +105,16 @@ def parse_line(line: str) -> List[Direction]:
 
 @ensure(lambda directions, result: parse_line(result) == directions)
 def stringify_directions(directions: List[Direction]) -> str:
+    """Represent the directions as a concatenated text."""
     return "".join(direction.value for direction in directions)
 
 
 def count_flips(plan: List[List[Direction]]) -> int:
+    """
+    Count how many cells had to flip for the given ``plan``.
+
+    The ``plan`` consists of different journeys, all starting from the cell zero.
+    """
     # True means white.
     state = collections.defaultdict(
         lambda: True

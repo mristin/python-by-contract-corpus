@@ -2,32 +2,46 @@ import math
 import re
 import sys
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Set, Tuple, Final
+from typing import (
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Final,
+    Sequence,
+    cast,
+    overload,
+    Union,
+    Iterator,
+)
 
 from icontract import require, ensure, DBC
 
-
-def valid_side(side: str) -> bool:
-    return re.fullmatch(r"[.#]{10}", side) is not None
+VALID_SIDE_RE = re.compile(r"[.#]{10}")  #: Express the edge of a tile
 
 
-@require(lambda side: valid_side(side))
-@ensure(lambda result: valid_side(result))
+@require(lambda side: VALID_SIDE_RE.fullmatch(side))
+@ensure(lambda result: re.fullmatch(r"[.#]{10}", result))
 def reverse_side(side: str) -> str:
+    """Flip the side."""
     return "".join(reversed(side))
 
 
 class Tile(DBC):
-    top: Final[str]
-    right: Final[str]
-    bottom: Final[str]
-    left: Final[str]
+    """Represent a tile of the puzzle."""
+
+    top: Final[str]  #: Top side
+    right: Final[str]  #: Right side
+    bottom: Final[str]  #: Bottom side
+    left: Final[str]  #: Left side
 
     # fmt: off
     @require(
         lambda top, right, bottom, left:
         all(
-            valid_side(s) for s in (top, right, bottom, left)
+            VALID_SIDE_RE.fullmatch(side)
+            for side in (top, right, bottom, left)
         )
     )
     @require(lambda top, right: top[-1] == right[0])
@@ -36,15 +50,18 @@ class Tile(DBC):
     @require(lambda left, top: left[-1] == top[0])
     # fmt: on
     def __init__(self, top: str, right: str, bottom: str, left: str) -> None:
+        """Initialize with the given values."""
         self.top = top
         self.right = right
         self.bottom = bottom
         self.left = left
 
     def rotate(self) -> "Tile":
+        """Copy the tile and rotate it clock-wise."""
         return Tile(self.left, self.top, self.right, self.bottom)
 
     def flip_vertical(self) -> "Tile":
+        """Copy the tile and flip the it along the vertical axis."""
         return Tile(
             reverse_side(self.bottom),
             reverse_side(self.right),
@@ -53,6 +70,7 @@ class Tile(DBC):
         )
 
     def flip_horizontal(self) -> "Tile":
+        """Copy the tile and flip it along the horizontal axis."""
         return Tile(
             reverse_side(self.top),
             reverse_side(self.left),
@@ -61,6 +79,7 @@ class Tile(DBC):
         )
 
     def __repr__(self) -> str:
+        """Represent the tile as string for easier debugging."""
         return (
             f"top={self.top}, "
             f"right={self.right}, "
@@ -69,6 +88,11 @@ class Tile(DBC):
         )
 
     def __eq__(self, other: object) -> bool:
+        """
+        Compare by sides, if ``other`` is a :py:class:`Tile`.
+
+        Otherwise, by equality.
+        """
         if isinstance(other, Tile):
             return (
                 self.top == other.top
@@ -84,6 +108,7 @@ class Tile(DBC):
 
 
 def transform_tile(tile: Tile) -> Set[Tile]:
+    """Produce the tile transformations by rotating and flipping it."""
     ret: Set[Tile] = set()
     for cur in (tile, tile.flip_vertical(), tile.flip_horizontal()):
         ret.add(cur)
@@ -98,13 +123,21 @@ def transform_tile(tile: Tile) -> Set[Tile]:
 
 @dataclass
 class Image(DBC):
-    width: int
-    tiles: List[Tuple[int, Tile]]
+    """Represent a (partially or fully) assembled puzzle of tiles."""
+
+    width: int  #: Total width of the image
+    tiles: List[Tuple[int, Tile]]  #: Assembled tiles
 
     def pop(self) -> Tuple[int, Tile]:
+        """Remove the last tile from the puzzle."""
         return self.tiles.pop()
 
     def attempt_add(self, tile_id: int, tile: Tile) -> bool:
+        """
+        Try to add the tile into the image.
+
+        :return: True if successful
+        """
         tiles, width = self.tiles, self.width
         count = len(tiles)
         if count == 0:
@@ -125,6 +158,11 @@ class Image(DBC):
 
 
 def place_remaining_tiles(image: Image, tiles: Dict[int, Set[Tile]]) -> bool:
+    """
+    Try to assemble the remaining tiles into the image.
+
+    :return: True if there are no more tiles left, or if the assembly was possible.
+    """
     if not tiles:
         return True
     for tile_id, variants in list(tiles.items()):
@@ -140,9 +178,14 @@ def place_remaining_tiles(image: Image, tiles: Dict[int, Set[Tile]]) -> bool:
 
 @require(
     lambda tiles: int(math.sqrt(len(tiles))) ** 2 == len(tiles),
-    "number of tiles must be a perfect square",
+    "Number of tiles must be a perfect square",
 )
 def place_tiles(tiles: Dict[int, Set[Tile]]) -> Optional[Image]:
+    """
+    Assemble the tiles given as ID 🠒 tile transformations into an image.
+
+    :return: Image, if possible; None if no puzzle could be assembled
+    """
     width = int(math.sqrt(len(tiles)))
     image = Image(width, [])
     if place_remaining_tiles(image, tiles):
@@ -150,16 +193,50 @@ def place_tiles(tiles: Dict[int, Set[Tile]]) -> Optional[Image]:
     return None
 
 
-def valid_tile_text(lines: List[str]) -> bool:
-    return (
+class ValidTileText(DBC):
+    """Represent lines to conform to valid tile text."""
+
+    # fmt: off
+    @require(
+        lambda lines:
         len(lines) == 11
         and re.match(r"Tile (\d+)", lines[0]) is not None
-        and all(map(valid_side, lines[1:]))
+        and all(VALID_SIDE_RE.fullmatch(line) for line in lines[1:]),
+        error=ValueError,
+        enabled=True
     )
+    # fmt: on
+    def __new__(cls, lines: Sequence[str]) -> "ValidTileText":
+        """Ensure the properties on the ``lines``."""
+        return cast(ValidTileText, lines)
+
+    # pylint: disable=function-redefined
+
+    @overload
+    def __getitem__(self, index: int) -> str:
+        """Get the item at the given integer index."""
+        pass
+
+    @overload
+    def __getitem__(self, index: slice) -> "ValidTileText":
+        """Get the slice of the lines."""
+        pass
+
+    def __getitem__(self, index: Union[int, slice]) -> Union[str, "ValidTileText"]:
+        """Get the line(s) at the given index."""
+        raise NotImplementedError("Only for type annotations")
+
+    def __len__(self) -> int:
+        """Return the number of the lines."""
+        raise NotImplementedError("Only for type annotations")
+
+    def __iter__(self) -> Iterator[str]:
+        """Iterate over the lines."""
+        raise NotImplementedError("Only for type annotations")
 
 
-@require(lambda lines: valid_tile_text(lines))
-def parse_tile(lines: List[str]) -> Tuple[int, Tile]:
+def parse_tile(lines: ValidTileText) -> Tuple[int, Tile]:
+    """Parse the ``lines`` into (ID number, tile """
     match = re.match(r"Tile (\d+)", lines[0])
     assert match
     tile_id = int(match.group(1))
@@ -167,17 +244,17 @@ def parse_tile(lines: List[str]) -> Tuple[int, Tile]:
     bottom = lines[-1][::-1]
     right = "".join(line[-1] for line in lines[1:])
     left = "".join([line[0] for line in lines[1:]][::-1])
-    return (tile_id, Tile(top, right, bottom, left))
+    return tile_id, Tile(top, right, bottom, left)
 
 
 def parse_tiles(text: str) -> Dict[int, Set[Tile]]:
+    """Parse the input ``text`` into ID number 🠒 possible tile transformations."""
     tiles: Dict[int, Set[Tile]] = {}
     sections = [section.strip().splitlines() for section in text.split("\n\n")]
     for section in sections:
-        if not valid_tile_text(section):
-            raise ValueError
-        tile_id, tile = parse_tile(section)
+        tile_id, tile = parse_tile(ValidTileText(section))
         tiles[tile_id] = transform_tile(tile)
+
     return tiles
 
 

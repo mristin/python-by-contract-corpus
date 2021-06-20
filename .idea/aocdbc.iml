@@ -5,9 +5,11 @@
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.hypothesis" />
       <excludeFolder url="file://$MODULE_DIR$/.mypy_cache" />
+      <excludeFolder url="file://$MODULE_DIR$/docs/build" />
       <excludeFolder url="file://$MODULE_DIR$/htmlcov" />
       <excludeFolder url="file://$MODULE_DIR$/recorded_failures" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/venv-doc" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.8 (python-by-contract-corpus)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
