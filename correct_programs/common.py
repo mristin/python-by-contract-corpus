@@ -1,4 +1,5 @@
 """Provide common functionality shared among all the solutions."""
+
 from typing import (
     Sequence,
     cast,
@@ -30,7 +31,7 @@ class Lines(DBC):
         Please make sure that you transfer the "ownership" immediately to Lines
         and don't modify the original list of strings any more:
 
-        .. code-block: python
+        .. code-block:: python
 
             ##
             # OK

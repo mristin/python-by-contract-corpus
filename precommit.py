@@ -113,7 +113,7 @@ def main() -> int:
             [
                 "coverage", "run",
                 "--source", "correct_programs",
-                "-m", "unittest", "discover"
+                "-m", "unittest", "discover", "--failfast"
             ],
             cwd=str(repo_root),
             env=env,

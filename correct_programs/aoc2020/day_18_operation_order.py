@@ -9,26 +9,33 @@ NUMBER_RE = re.compile(r"^(-?\d+)")
 
 
 class Operation(Enum):
-    ADD = "+"
-    MUL = "*"
+    """Represent a mathematical operation."""
+
+    ADD = "+"  #: Addition
+    MUL = "*"  #: Multiplication
 
 
 @dataclass(frozen=True)
 class Tail:
-    op: Operation
-    right: Union[int, "Node"]
+    """Represent the tail of an expression."""
+
+    op: Operation  #: Operation of the mathematical expression
+    right: Union[int, "Node"]  #: Right-hand side of the expression
 
 
 @dataclass(frozen=True)
 class Node:
-    head: Union[int, "Node"]
-    tail: List[Tail]
+    """Represent a node of the abstract syntax tree of a mathematical expression."""
+
+    head: Union[int, "Node"]  #: Constant or left-hand side expression
+    tail: List[Tail]  #: Remaining expressions on the right-hand side
 
 
 @require(lambda expr: re.match(r"^\(.+\)", expr))
 @require(lambda expr: expr.count("(") == expr.count(")"))
 @ensure(lambda expr, result: result in expr)
 def extract_expression(expr: str) -> str:
+    """Extract the sub-expression surrounded by parentheses in ``expr``."""
     parenthesis_balance = 0
     result = ""
 
@@ -46,6 +53,7 @@ def extract_expression(expr: str) -> str:
 
 
 def parse(expression: str) -> Optional[Node]:
+    """Parse the ``expression`` into an abstract syntax tree."""
     if not expression:
         return None
     head: Union[int, Node]
@@ -59,7 +67,7 @@ def parse(expression: str) -> Optional[Node]:
         head = int(head_str)
         rest_expr = expression[len(head_str) :]
     else:
-        raise Exception
+        raise ValueError(f"Unexpected expression: {expression!r}")
 
     tails: List[Tail] = []
 
@@ -76,15 +84,19 @@ def parse(expression: str) -> Optional[Node]:
             right = int(right_str)
             rest_expr = rest_expr[len(right_str) + 1 :]
         else:
-            raise Exception
+            raise ValueError(f"Unexpected rest expression: {rest_expr}")
+
         tails.append(Tail(op=op, right=right))
+
     if not tails:
         return Node(head=head, tail=[])
+
     return Node(head=head, tail=tails)
 
 
 @ensure(lambda result, node: parse(result) == node)
 def serialize(node: Node) -> str:
+    """Serialize the abstraction syntax tree given as ``node`` to a string."""
     result = ""
     if isinstance(node.head, int):
         result += str(node.head)
@@ -102,6 +114,7 @@ def serialize(node: Node) -> str:
 
 
 def compute(node: Node) -> int:
+    """Evaluate the parsed expression given as ``node``."""
     if isinstance(node.head, int):
         result = node.head
     else:

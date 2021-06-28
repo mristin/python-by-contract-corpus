@@ -6,10 +6,12 @@ from typing import Mapping, List, Optional, Set
 from icontract import require, ensure
 
 # crosshair: on
-from correct_programs import common
+from correct_programs.common import Lines
 
 
 class Operation(enum.Enum):
+    """Represent an operation corresponding to an instruction."""
+
     NOP = "nop"
     ACC = "acc"
     JMP = "jmp"
@@ -21,10 +23,13 @@ VALUE_TO_OPERATION = {op.value: op for op in Operation}  # type: Mapping[str, Op
 
 @dataclasses.dataclass(frozen=True)
 class Instruction:
-    operation: Operation
-    argument: int
+    """Represent an instruction of the boot code."""
+
+    operation: Operation  #: the corresponding operation
+    argument: int  #: the argument to the operation
 
     def __repr__(self) -> str:
+        """Represent the instruction as a string for debugging."""
         return f"{self.operation.value} {self.argument}"
 
 
@@ -35,6 +40,7 @@ INSTRUCTION_RE = re.compile(
 
 @require(lambda line: INSTRUCTION_RE.match(line))
 def parse_line(line: str) -> Instruction:
+    """Parse a ``line`` of the boot code into an instruction."""
     mtch = INSTRUCTION_RE.match(line)
     assert mtch is not None
 
@@ -45,7 +51,8 @@ def parse_line(line: str) -> Instruction:
 
 @require(lambda lines: all(INSTRUCTION_RE.match(line) for line in lines))
 @ensure(lambda lines, result: len(lines) == len(result))
-def parse(lines: common.Lines) -> List[Instruction]:
+def parse(lines: Lines) -> List[Instruction]:
+    """Parse the boot code given as ``lines``."""
     return [parse_line(line) for line in lines]
 
 
@@ -57,6 +64,13 @@ def parse(lines: common.Lines) -> List[Instruction]:
     )
 )
 def execute_instructions(instructions: List[Instruction]) -> Optional[int]:
+    """
+    Execute the boot code given as ``instructions``.
+
+    :return:
+        The value in the accumulator just before an instruction is run
+        for the second time
+    """
     visited_lines = set()  # type: Set[int]
 
     current_line = 0

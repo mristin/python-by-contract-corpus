@@ -5,6 +5,7 @@ from icontract import require, ensure
 @require(lambda subject: subject >= 0)
 @ensure(lambda result: 0 <= result < 20201227)
 def transform(subject: int, loop_size: int) -> int:
+    """Transform the ``subject`` in ``loop_size`` steps of a hard-coded algorithm."""
     value = 1
     for _ in range(loop_size):
         value *= subject
@@ -20,6 +21,11 @@ def transform(subject: int, loop_size: int) -> int:
 )
 # fmt: on
 def deduce_loop_size(subject: int, public_key: int) -> int:
+    """
+    Deduce the loop size for ``public_key`` by transforming the ``subject``.
+
+    :return: The loop size, or -1 if no success
+    """
     value = 1
     for loop_ct in range(100000000):
         if value == public_key:
@@ -29,8 +35,9 @@ def deduce_loop_size(subject: int, public_key: int) -> int:
     return -1
 
 
-@require(lambda door_pk: door_pk >= 0)
-@require(lambda card_pk: card_pk >= 0)
-def deduce_encryption_key(door_pk: int, card_pk: int) -> int:
-    card_loop_size = deduce_loop_size(7, card_pk)
-    return transform(door_pk, card_loop_size)
+@require(lambda door_public_key: door_public_key >= 0)
+@require(lambda card_public_key: card_public_key >= 0)
+def deduce_encryption_key(door_public_key: int, card_public_key: int) -> int:
+    """Figure out the subject number."""
+    card_loop_size = deduce_loop_size(7, card_public_key)
+    return transform(door_public_key, card_loop_size)

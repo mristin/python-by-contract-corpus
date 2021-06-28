@@ -34,31 +34,37 @@ class Deck(DBC):
 
     """
 
-    cards: Final[Sequence[int]]
+    cards: Final[Sequence[int]]  #: Cards in the deck
 
     @require(lambda cards: all(card >= 0 for card in cards))
     @require(lambda cards: len(set(cards)) == len(cards), "Unique cards")
     def __init__(self, cards: Sequence[int]) -> None:
+        """Initialize with the given values."""
         self.cards = cards
 
     @overload
     def __getitem__(self, index: int) -> int:
-        pass
+        """Get the item at the given integer index."""
+        raise NotImplementedError("Only for type annotation.")
 
     @overload
     def __getitem__(self, index: slice) -> "Deck":
-        pass
+        """Get the slice of the deck."""
+        raise NotImplementedError("Only for type annotation.")
 
     def __getitem__(self, index: Union[int, slice]) -> Union[int, "Deck"]:
+        """Get the card(s) at the given index."""
         if isinstance(index, slice):
             return Deck(cards=self.cards[index])
         else:
             return self.cards[index]
 
     def __len__(self) -> int:
+        """Return the number of the cards in the deck."""
         return len(self.cards)
 
     def __iter__(self) -> Iterator[int]:
+        """Iterate through the cards in the deck."""
         return self.cards.__iter__()
 
     # fmt: off
@@ -71,14 +77,22 @@ class Deck(DBC):
         "Unique cards after the addition")
     # fmt: on
     def __add__(self, other: "Deck") -> "Deck":
+        """Join two decks together."""
         sum_of_cards = list(self.cards)
         sum_of_cards.extend(other.cards)
         return Deck(cards=sum_of_cards)
 
     def __repr__(self) -> str:
+        """Represent the deck for easier debugging."""
         return repr(self.cards)
 
     def __eq__(self, other: object) -> bool:
+        """
+        Compare with ``other`` by :py:attr:`.cards`.
+
+        If ``other`` is not a :py:class:`Deck` or :py:class:`List:, propagate to generic
+        ``__eq__``.
+        """
         if isinstance(other, Deck):
             return self.cards.__eq__(other.cards)
         elif isinstance(other, list):
@@ -88,13 +102,16 @@ class Deck(DBC):
 
 
 class Split(DBC):
-    deck1: Final[Deck]
-    deck2: Final[Deck]
+    """Represent a split of one big deck of cards into two sub-decks."""
+
+    deck1: Final[Deck]  #: The deck for the player 1
+    deck2: Final[Deck]  #: The deck for the player 2
 
     @require(
         lambda deck1, deck2: not set(deck1).intersection(deck2), "No overlapping cards"
     )
     def __init__(self, deck1: Deck, deck2: Deck) -> None:
+        """Initialize with the given values."""
         self.deck1 = deck1
         self.deck2 = deck2
 
@@ -129,6 +146,11 @@ class Split(DBC):
 )
 # fmt: on
 def play_a_round(split: Split) -> Split:
+    """
+    Play a round of the game given the current ``split``.
+
+    :return: A new split after the round
+    """
     card1 = split.deck1[0]
     card2 = split.deck2[0]
 
@@ -157,6 +179,7 @@ def play_a_round(split: Split) -> Split:
 @require(lambda lines: lines[0] == 'Player 1:')
 @require(lambda lines: len(lines) > 3)
 def parse_lines(lines: List[str]) -> Tuple[List[int], List[int]]:
+    """Parse the input lines into two decks, as list of cards."""
     deck1 = []  # type: List[int]
     deck2 = []  # type: List[int]
 
@@ -175,6 +198,7 @@ def parse_lines(lines: List[str]) -> Tuple[List[int], List[int]]:
 
 @ensure(lambda result: result >= 0)
 def compute_score(deck: Deck) -> int:
+    """Compute the score for the given deck based on its cards."""
     score = 0
     for i, card in enumerate(deck):
         score += (len(deck) - i) * card
@@ -202,6 +226,7 @@ def compute_score(deck: Deck) -> int:
 )
 # fmt: on
 def play(split: Split) -> Split:
+    """Play the game starting with the ``split`` until one of the players wins."""
     while True:
         split = play_a_round(split=split)
 

@@ -4,18 +4,21 @@ from typing import List, Mapping, MutableMapping, Tuple, Final
 from icontract import require, ensure, DBC
 
 # crosshair: on
-from correct_programs import common
+from correct_programs.common import Lines
 
 MASK_RE = re.compile(r"^mask = (?P<mask>[01X]{36})\Z")
 
 
 class Mask(DBC):
-    clearing: Final[int]
-    setting: Final[int]
+    """Represent the bitmask of the initialization program."""
+
+    clearing: Final[int]  #: mask of the bits to be cleared (``AND``'ed)
+    setting: Final[int]  #: mask of the bits to be set (``OR``'ed)
 
     @require(lambda clearing: 0 <= clearing <= 2 ** 36 - 1)
     @require(lambda setting: 0 <= setting <= 2 ** 36 - 1)
     def __init__(self, clearing: int, setting: int) -> None:
+        """Initialize with the given values."""
         self.clearing = clearing
         self.setting = setting
 
@@ -55,12 +58,15 @@ def parse_mask(text: str) -> Mask:
 
 
 class Write(DBC):
-    address: Final[int]
-    value: Final[int]
+    """Represent a write to the memory."""
+
+    address: Final[int]  #: Address (offset) in the memory
+    value: Final[int]  #: Value to be written
 
     @require(lambda address: address >= 0)
     @require(lambda value: 0 <= value <= 2 ** 36 - 1, "The value in expected range")
     def __init__(self, address: int, value: int) -> None:
+        """Initialize with the given values."""
         self.address = address
         self.value = value
 
@@ -84,10 +90,13 @@ def parse_write(text: str) -> Tuple[int, int]:
 
 
 class Program(DBC):
-    mask: Final[Mask]
-    writes: Final[List[Write]]
+    """Represent the initialization program."""
+
+    mask: Final[Mask]  #: Mask used throughout the program
+    writes: Final[List[Write]]  #: Write instructions
 
     def __init__(self, mask: Mask, writes: List[Write]) -> None:
+        """Initialize with the given values."""
         self.mask = mask
         self.writes = writes
 
@@ -95,7 +104,8 @@ class Program(DBC):
 @require(lambda lines: all(WRITE_RE.match(line) for line in lines[1:]))
 @require(lambda lines: MASK_RE.match(lines[0]))
 @require(lambda lines: len(lines) > 2)
-def parse_lines(lines: common.Lines) -> Program:
+def parse_lines(lines: Lines) -> Program:
+    """Parse the input into an initialization program."""
     mask = parse_mask(text=lines[0])
     writes_as_tuples = [parse_write(line) for line in lines[1:]]
 
@@ -111,7 +121,9 @@ def parse_lines(lines: common.Lines) -> Program:
 
 
 class Memory(DBC):
-    slots: Final[Mapping[int, int]]
+    """Represent the state of the memory."""
+
+    slots: Final[Mapping[int, int]]  #: Slot map as address 🠒 value
 
     @require(
         lambda slots: all(value >= 0 for value in slots.values()), "Values non-negative"
@@ -120,6 +132,7 @@ class Memory(DBC):
         lambda slots: all(key >= 0 for key in slots.keys()), "Addresses non-negative"
     )
     def __init__(self, slots: Mapping[int, int]) -> None:
+        """Initialize with the given values."""
         self.slots = slots
 
 
@@ -135,4 +148,5 @@ def execute(program: Program) -> Memory:
 
 @ensure(lambda result: result >= 0)
 def sum_memory(memory: Memory) -> int:
+    """Sum the values in the memory slots."""
     return sum(memory.slots.values())

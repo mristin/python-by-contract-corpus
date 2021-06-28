@@ -8,6 +8,7 @@ from correct_programs.aoc2020.day_20_jurassic_jigsaw import (
     parse_tile,
     parse_tiles,
     place_tiles,
+    ValidTileText,
 )
 
 
@@ -71,19 +72,21 @@ class TestManually(unittest.TestCase):
 
     def test_parse_tile(self) -> None:
         tile_id, tile = parse_tile(
-            [
-                "Tile 2311:",
-                "..##.#..#.",
-                "##..#.....",
-                "#...##..#.",
-                "####.#...#",
-                "##.##.###.",
-                "##...#.###",
-                ".#.#.#..##",
-                "..#....#..",
-                "###...#.#.",
-                "..###..###",
-            ]
+            ValidTileText(
+                [
+                    "Tile 2311:",
+                    "..##.#..#.",
+                    "##..#.....",
+                    "#...##..#.",
+                    "####.#...#",
+                    "##.##.###.",
+                    "##...#.###",
+                    ".#.#.#..##",
+                    "..#....#..",
+                    "###...#.#.",
+                    "..###..###",
+                ]
+            )
         )
         self.assertEqual(tile_id, 2311)
         self.assertEqual(tile.right, "...#.##..#")
