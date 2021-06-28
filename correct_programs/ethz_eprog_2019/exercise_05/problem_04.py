@@ -23,12 +23,28 @@ from icontract import require, ensure, DBC
 
 
 class Entry(DBC):
+    """Represent an entry in the booking data."""
+
+    # fmt: off
     @require(lambda room_number: room_number > 0)
-    @require(lambda start: 1 <= start <= 366)
-    @require(lambda end: 1 <= end <= 366)
-    @require(lambda start, end: start <= end)
+    @require(
+        lambda start: 1 <= start <= 366,
+        "The start denotes the day of year."
+    )
+    @require(
+        lambda end: 1 <= end <= 366,
+        "The end denotes the day of year."
+    )
+    @require(
+        lambda start, end: start <= end,
+        "The start and end must occur in the same year"
+    )
     @require(lambda price_per_day: price_per_day > 0)
-    @require(lambda price_discount: 0 <= price_discount <= 100)
+    @require(
+        lambda price_discount: 0 <= price_discount <= 100,
+        "The price discount is given as a percentage."
+    )
+    # fmt: on
     def __init__(
         self,
         room_number: int,
@@ -37,6 +53,7 @@ class Entry(DBC):
         price_per_day: float,
         price_discount: float,
     ) -> None:
+        """Initialize with the given values."""
         self.room_number = room_number
         self.start = start
         self.end = end
@@ -45,12 +62,14 @@ class Entry(DBC):
 
     @ensure(lambda result: result > 0)
     def duration(self) -> int:
+        """Compute the duration of the stay."""
         return self.end - self.start + 1
 
 
 @require(lambda entries: len(entries) > 0)
 @ensure(lambda entries, result: result in {entry.room_number for entry in entries})
 def most_booked_room(entries: List[Entry]) -> int:
+    """Find the number of the most booked room in the ``entries``."""
     histo = collections.defaultdict(lambda: 0)  # type: MutableMapping[int, int]
     for entry in entries:
         histo[entry.room_number] += 1
@@ -61,6 +80,9 @@ def most_booked_room(entries: List[Entry]) -> int:
 @require(lambda entries: len(entries) > 0)
 @ensure(lambda entries, result: result in {entry.room_number for entry in entries})
 def longest_booked_room(entries: Collection[Entry]) -> int:
+    """
+    Find the room booked for the longest accumulated time according to ``entries``.
+    """
     histo = collections.defaultdict(lambda: 0)  # type: MutableMapping[int, int]
     for entry in entries:
         histo[entry.room_number] += entry.duration()
@@ -71,6 +93,7 @@ def longest_booked_room(entries: Collection[Entry]) -> int:
 @require(lambda entries: len(entries) > 0)
 @ensure(lambda entries, result: result in {entry.room_number for entry in entries})
 def room_with_most_revenue(entries: Collection[Entry]) -> int:
+    """Find the room which brought in the most revenue according to ``entries``."""
     histo = collections.defaultdict(lambda: 0)  # type: MutableMapping[int, float]
     for entry in entries:
         histo[entry.room_number] += (
@@ -83,6 +106,7 @@ def room_with_most_revenue(entries: Collection[Entry]) -> int:
 @require(lambda entries: len(entries) > 0)
 @ensure(lambda result: result >= 0)
 def total_revenue(entries: Collection[Entry]) -> float:
+    """Compute the total revenue of the hotel based on ``entries``."""
     return sum(
         entry.duration() * entry.price_per_day * entry.price_discount
         for entry in entries

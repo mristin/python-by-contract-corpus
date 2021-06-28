@@ -23,7 +23,10 @@ from icontract import require, ensure
 
 from correct_programs.common import Lines
 
-ALL_NUMBERS_RE = re.compile(r"^\d+$")
+#: Express a sequence of digits
+DIGITS_RE = re.compile(r"\d+")
+
+#: Express the output line
 PATTERN_RE = re.compile(r"^(?P<leftpad>[.]*)\d+(?P<rightpad>[.]*)$")
 
 
@@ -35,7 +38,7 @@ PATTERN_RE = re.compile(r"^(?P<leftpad>[.]*)\d+(?P<rightpad>[.]*)$")
     lambda height, result:
     (
             middle := int(height / 2),
-            ALL_NUMBERS_RE.match(result[middle])
+            DIGITS_RE.fullmatch(result[middle])
     )[1]
 )
 @ensure(
@@ -51,6 +54,7 @@ PATTERN_RE = re.compile(r"^(?P<leftpad>[.]*)\d+(?P<rightpad>[.]*)$")
 @ensure(lambda height, result: len(result) == height)
 # fmt: on
 def draw(height: int) -> Lines:
+    """Draw the pattern of size given as ``height`` and return the text lines."""
     if height == 1:
         return Lines(["1"])
 

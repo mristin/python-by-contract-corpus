@@ -26,6 +26,8 @@ from icontract import require, ensure
 @require(lambda subtext, text: len(subtext) <= len(text))
 def is_subsequence(subtext: str, text: str) -> bool:
     """
+    Check if the ``subtext`` is a subsequence of ``text``.
+
     >>> is_subsequence('pe', 'apple')
     True
 
@@ -60,6 +62,8 @@ def is_subsequence(subtext: str, text: str) -> bool:
 )
 def list_subsequences(text: str, length: int) -> Set[str]:
     """
+    List all subsequences of size ``length`` in ``text``.
+
     >>> sorted(list_subsequences("apple", 2))
     ['ae', 'al', 'ap', 'le', 'pe', 'pl', 'pp']
     """

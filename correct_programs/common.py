@@ -62,12 +62,12 @@ class Lines(DBC):
     @overload
     def __getitem__(self, index: int) -> str:
         """Get the item at the given integer index."""
-        pass
+        raise NotImplementedError("Only for type annotations")
 
     @overload
     def __getitem__(self, index: slice) -> "Lines":
         """Get the slice of the lines."""
-        pass
+        raise NotImplementedError("Only for type annotations")
 
     def __getitem__(self, index: Union[int, slice]) -> Union[str, "Lines"]:
         """Get the line(s) at the given index."""

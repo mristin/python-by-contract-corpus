@@ -7,6 +7,7 @@ from correct_programs.ethz_eprog_2019.exercise_06.problem_04 import LinkedList, 
 
 
 class ReversibleLinkedList(LinkedList):
+    """Extend a :py:class:`LinkedList` with reverse operation."""
 
     # fmt: off
     @snapshot(lambda self: list(self.values()), name="values")
@@ -21,6 +22,7 @@ class ReversibleLinkedList(LinkedList):
     )
     # fmt: on
     def reverse(self) -> None:
+        """Reverse the elements of the list."""
         prev = None  # type: Optional[Node]
         cur = self._first
 

@@ -20,47 +20,52 @@ from typing import List, Dict, cast
 
 from icontract import require, DBC, ensure
 
-WORD_RE = re.compile(r"^[a-z]+(-[a-z])*$")
+WORD_RE = re.compile(r"^[a-z]+(-[a-z])*$")  #: Express a normalized word of a text.
 
 
 class Token(DBC, str):
+    """Represent a word as a token of the text."""
+
     @require(lambda text: WORD_RE.match(text))
     def __new__(cls, text: str) -> "Token":
+        """Enforce the properties on the ``text`` of the word."""
         return cast(Token, text)
 
 
-class Word(DBC):
+class WordOccurrence(DBC):
+    """Represent a word occurence in the text."""
+
     # fmt: off
     @require(
-        lambda first_occurrence, last_occurrence:
-        first_occurrence <= last_occurrence
+        lambda first, last:
+        first <= last
     )
-    @require(lambda first_occurrence: first_occurrence >= 0)
-    @require(lambda last_occurrence: last_occurrence >= 0)
+    @require(lambda first: first >= 0)
+    @require(lambda last: last >= 0)
     # fmt: on
-    def __init__(
-        self, first_occurrence: int, last_occurrence: int, text: Token
-    ) -> None:
-        self.first_occurrence = first_occurrence
-        self.last_occurrence = last_occurrence
-        self.text = text
+    def __init__(self, first: int, last: int, text: Token) -> None:
+        """Initialize with the given values."""
+        self.first = first  #: Index of the first occurrence
+        self.last = last  #: Index of the last occurrence
+        self.text = text  #: Text of the word
 
-    def __lt__(self, other: "Word") -> bool:
-        return (
-            self.last_occurrence - self.first_occurrence
-            < other.last_occurrence - other.first_occurrence
-        )
+    def __lt__(self, other: "WordOccurrence") -> bool:
+        """
+        Compare against ``other`` based on the :py:attr:`.first` and :py:attr:`.last`.
+        """
+        return self.last - self.first < other.last - other.first
 
-    def __le__(self, other: "Word") -> bool:
-        return (
-            self.last_occurrence - self.first_occurrence
-            <= other.last_occurrence - other.first_occurrence
-        )
+    def __le__(self, other: "WordOccurrence") -> bool:
+        """
+        Compare against ``other`` based on the :py:attr:`.first` and :py:attr:`.last`.
+        """
+        return self.last - self.first <= other.last - other.first
 
     def __repr__(self) -> str:
+        """Represent the word occurrence as string for easier debugging."""
         return (
-            f"Word("
-            f"{self.first_occurrence!r}, {self.last_occurrence!r}, {self.text!r}"
+            f"{self.__class__.__name__}("
+            f"{self.first!r}, {self.last!r}, {self.text!r}"
             f")"
         )
 
@@ -69,17 +74,17 @@ class Word(DBC):
 @ensure(
     lambda result:
     (
-            word_texts := [word.text for word in result],
+            word_texts := [word_occurrence.text for word_occurrence in result],
             len(word_texts) == len(set(word_texts))
     )[1],
-    "No duplicates in words"
+    "No duplicate word occurrences"
 )
 @ensure(
     lambda tokens, result:
     all(
-        tokens[word.first_occurrence] == word.text
-        and tokens[word.last_occurrence] == word.text
-        for word in result
+        tokens[word_occurrence.first] == word_occurrence.text
+        and tokens[word_occurrence.last] == word_occurrence.text
+        for word_occurrence in result
     )
 )
 @ensure(lambda tokens, result: len(result) <= len(tokens))
@@ -88,7 +93,7 @@ class Word(DBC):
     not (len(tokens) > 0) or len(result) > 0
 )
 # fmt: on
-def tokens_to_words(tokens: List[Token]) -> List[Word]:
+def tokens_to_words(tokens: List[Token]) -> List[WordOccurrence]:
     first_occurrences = dict()  # type: Dict[Token, int]
     last_occurrences = dict()  # type: Dict[Token, int]
 
@@ -104,20 +109,20 @@ def tokens_to_words(tokens: List[Token]) -> List[Word]:
     assert len(first_occurrences) == len(last_occurrences)
     assert set(first_occurrences.keys()) == set(last_occurrences.keys())
 
-    words = []  # type: List[Word]
+    word_occurrences = []  # type: List[WordOccurrence]
     for token, first_occurrence in first_occurrences.items():
-        words.append(
-            Word(
-                first_occurrence=first_occurrence,
-                last_occurrence=last_occurrences[token],
+        word_occurrences.append(
+            WordOccurrence(
+                first=first_occurrence,
+                last=last_occurrences[token],
                 text=token,
             )
         )
 
-    return words
+    return word_occurrences
 
 
-TOKEN_RE = re.compile("[a-zA-Z]+(-[a-zA-Z])*")
+TOKEN_RE = re.compile("[a-zA-Z]+(-[a-zA-Z])*")  #: Express a token of a text.
 
 
 # fmt: off
@@ -127,6 +132,7 @@ TOKEN_RE = re.compile("[a-zA-Z]+(-[a-zA-Z])*")
 )
 # fmt: on
 def tokenize(text: str) -> List[Token]:
+    """Tokenize the text into normalized word tokens ignoring the punctuation."""
     result = []  # type: List[Token]
     for match in TOKEN_RE.finditer(text):
         result.append(Token(match.group().lower()))
@@ -137,12 +143,12 @@ def tokenize(text: str) -> List[Token]:
 # fmt: off
 @require(lambda limit: limit > 0)
 @ensure(
-    lambda words, result:
+    lambda word_occurrences, result:
     (
-            word_set := set(words),
+            word_set := set(word_occurrences),
             all(
-                word in word_set  # pylint: disable=used-before-assignment
-                for word in result
+                word_occurrence in word_set  # pylint: disable=used-before-assignment
+                for word_occurrence in result
             )
     )[1]
 )
@@ -153,8 +159,14 @@ def tokenize(text: str) -> List[Token]:
         for i in range(len(result) - 1)
     )
 )
-@ensure(lambda words, limit, result: len(result) == min(len(words), limit))
+@ensure(
+    lambda word_occurrences, limit, result:
+    len(result) == min(len(word_occurrences), limit)
+)
 # fmt: on
-def find_top(words: List[Word], limit: int) -> List[Word]:
-    sorted_words = sorted(words, reverse=True)
+def find_top(
+    word_occurrences: List[WordOccurrence], limit: int
+) -> List[WordOccurrence]:
+    """Find the ``limit`` top occurrences in ``word_occurrences``."""
+    sorted_words = sorted(word_occurrences, reverse=True)
     return sorted_words[:limit]

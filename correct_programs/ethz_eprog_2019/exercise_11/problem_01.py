@@ -57,14 +57,14 @@ expected in the range ``[0.0, 100.0]``.
 import re
 from decimal import Decimal
 from numbers import Rational
-from typing import List, Pattern, AnyStr, cast, Union
+from typing import List, cast, Union
 
 from icontract import require, ensure, DBC
 
 from correct_programs.common import Lines
 
-ALL_GRADES = [Decimal("0.25") * i for i in range(0, 25)]
-ALL_GRADES_SET = set(ALL_GRADES)
+ALL_GRADES = [Decimal("0.25") * i for i in range(0, 25)]  #: List all possible grades.
+ALL_GRADES_SET = set(ALL_GRADES)  #: Provide a set of all possible grades.
 
 # fmt: off
 assert all(
@@ -77,22 +77,30 @@ assert max(ALL_GRADES) == Decimal("6.0")
 
 
 class Grade(DBC, Decimal):
+    """Represent a grade in Swiss educational system."""
+
     @require(lambda value: value in ALL_GRADES_SET)
     @require(lambda value: not value.is_nan())
     def __new__(cls, value: Decimal) -> "Grade":
+        """Enforce the grade properties on ``value``."""
         return cast(Grade, value)
 
     def __le__(self, other: Union[Decimal, float, Rational, "Grade"]) -> bool:
+        """Return ``True`` if ``self`` is smaller than ``other``."""
         return self < other
 
     def __add__(self, other: Union[Decimal, int, "Grade"]) -> Decimal:
+        """Add ``self`` and ``other``."""
         return self + other
 
 
 class Grading:
+    """Represent the grading of a student."""
+
     def __init__(
         self, identifier: str, grade1: Grade, grade2: Grade, grade3: Grade
     ) -> None:
+        """Initialize with the given values."""
         self.identifier = identifier
         self.grade1 = grade1
         self.grade2 = grade2
@@ -100,30 +108,30 @@ class Grading:
 
     @ensure(lambda result: result >= 0)
     def sum_grades(self) -> Decimal:
+        """Sum all grades of the student."""
         return self.grade1 + self.grade2 + self.grade3
 
 
-def compile_grading_re() -> Pattern[AnyStr]:
-    id_re = "([a-zA-Z0-9]+)"
+#: Express a grading entry for a student as a text.
+#:
+#: .. note::
+#:
+#:     The function :py:attr:`re.Pattern.__repr__` truncates at 200 characters
+#:     so that the pattern in the docs (based on ``__repr__`` function) is possibly
+#:     incorrect.
+#:     See `Python issue #13592 <https://bugs.python.org/issue13592>`_.
+GRADING_RE = re.compile(
+    "([a-zA-Z0-9]+) +"
+    "(0.0|0.25|0.5|0.75|1.0|1.25|1.5|1.75|2.0|2.25|2.5|2.75|3.0|3.25|3.5|3.75|4.0|"
+    "4.25|4.5|4.75|5.0|5.25|5.5|5.75|6.0) +"
+    "(0.0|0.25|0.5|0.75|1.0|1.25|1.5|1.75|2.0|2.25|2.5|2.75|3.0|3.25|3.5|3.75|4.0|"
+    "4.25|4.5|4.75|5.0|5.25|5.5|5.75|6.0) +"
+    "(0.0|0.25|0.5|0.75|1.0|1.25|1.5|1.75|2.0|2.25|2.5|2.75|3.0|3.25|3.5|3.75|4.0|"
+    "4.25|4.5|4.75|5.0|5.25|5.5|5.75|6.0)"
+)
 
-    grade_parts = []  # type: List[str]
-    for grade in ALL_GRADES:
-        if grade % 1 == Decimal("0.0"):
-            grade_parts.append(f"{grade.normalize()}.0")
-        else:
-            grade_parts.append(str(grade.normalize()))
 
-    grade_re = "".join(["("] + ["|".join(part for part in grade_parts)] + [")"])
-
-    complete_re = f"^{id_re} +{grade_re} +{grade_re} +{grade_re}$"
-
-    return re.compile(complete_re)  # type: ignore
-
-
-GRADING_RE = compile_grading_re()
-
-
-@require(lambda lines: all(GRADING_RE.match(line) for line in lines))
+@require(lambda lines: all(GRADING_RE.fullmatch(line) for line in lines))
 @ensure(
     lambda result: (
         identifiers := [grading.identifier for grading in result],
@@ -133,6 +141,7 @@ GRADING_RE = compile_grading_re()
 )
 @ensure(lambda lines, result: len(result) == len(lines))
 def parse(lines: Lines) -> List[Grading]:
+    """Parse the grading entries given as ``lines``."""
     result = []  # type: List[Grading]
 
     for line in lines:
@@ -172,6 +181,12 @@ def parse(lines: Lines) -> List[Grading]:
 )
 # fmt: on
 def critical(gradings: List[Grading], bound1: Grade, bound2: Decimal) -> List[Grading]:
+    """
+    List critical gradings among the ``gradings`` based on ``bound1`` and ``bound2``.
+
+    Note that ``bound1`` and ``bound2`` have special semantics.
+    Please consult the text of the problem.
+    """
     result = []  # type: List[Grading]
     for grading in gradings:
         if grading.grade1 <= bound1 and grading.grade2 + grading.grade3 < bound2:
@@ -211,6 +226,7 @@ def critical(gradings: List[Grading], bound1: Grade, bound2: Decimal) -> List[Gr
 )
 # fmt: on
 def top(gradings: List[Grading], limit: int) -> List[Grading]:
+    """Find the top ``limit`` students among the ``gradings``."""
     sorted_gradings = sorted(
         gradings, key=lambda grading: grading.sum_grades(), reverse=True
     )

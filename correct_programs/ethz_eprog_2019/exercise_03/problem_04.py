@@ -19,6 +19,7 @@ For example, the number 2 is encoded as ``abged``.
 
 from icontract import require, ensure
 
+#: Specify the valid identifiers for the segments.
 VALID_LETTERS = set("abcdefg")
 
 TO_NUMBER = {
@@ -32,10 +33,11 @@ TO_NUMBER = {
     "abc": 7,
     "abcdefg": 8,
     "abcdfg": 9,
-}
+}  #: Define the mapping: segments identifier 🠒 displayed number.
 
 assert all("".join(sorted(key)) == key for key in TO_NUMBER)
 
+#: Define the inverse mapping of :py:data:`.TO_NUMBER`: number 🠒 segments identifier
 FROM_NUMBER = {value: key for key, value in TO_NUMBER.items()}
 
 
@@ -46,6 +48,7 @@ FROM_NUMBER = {value: key for key, value in TO_NUMBER.items()}
 )
 @ensure(lambda result: 0 <= result <= 9)
 def decode(text: str) -> int:
+    """Decode the given ``text``, representing segment identifiers, as a digit."""
     signature = "".join(sorted(text))
 
     return TO_NUMBER[signature]
@@ -54,4 +57,5 @@ def decode(text: str) -> int:
 @require(lambda number: 0 <= number <= 9)
 @ensure(lambda number, result: number == decode(result))
 def encode(number: int) -> str:
+    """Encode the given ``number`` as segments identifiers of the LED display."""
     return FROM_NUMBER[number]

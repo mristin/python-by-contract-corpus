@@ -18,9 +18,10 @@ The feature was not very clear to us, and would not have had much impact
 on the contracts.)
 
 Provide the following metrics of the simulation:
+
 * ``finished``: Number of people who left the queue at the end of the simulation.
 * ``avg_queue_lengths``: A list of the average length of each queue during
-   the simulation
+  the simulation
 * ``max_queue_lengths``: A list of the maximum length of each queue during
   the simulation
 """
@@ -32,12 +33,17 @@ from icontract import require, ensure, DBC
 
 
 class Probability(DBC, float):
+    """Represent a probability value."""
+
     @require(lambda value: 0 <= value < 1)
     def __new__(cls, value: float) -> "Probability":
+        """Enforce the properties of a probability on ``value``."""
         return cast(Probability, value)
 
 
 class Specs(DBC):
+    """Specify the parameters of the simulation."""
+
     # fmt: off
     @require(
         lambda max_cart_size:
@@ -54,11 +60,13 @@ class Specs(DBC):
         new_customer_probability: Probability,
         max_cart_size: int,
     ) -> None:
+        """Initialize with the given values."""
         self.checkout_efficiencies = checkout_efficiencies
         self.new_customer_probability = new_customer_probability
         self.max_cart_size = max_cart_size
 
     def __repr__(self) -> str:
+        """Represent the specs for easier debugging."""
         return (
             f"Specs(\n"
             f"    checkout_efficiencies={self.checkout_efficiencies!r},\n"
@@ -69,6 +77,8 @@ class Specs(DBC):
 
 
 class Stats(DBC):
+    """Structure the results of the simulation."""
+
     # fmt: off
     @require(lambda finished: finished >= 0)
     @require(
@@ -92,14 +102,18 @@ class Stats(DBC):
         avg_queue_lengths: List[float],
         max_queue_lengths: List[float],
     ) -> None:
+        """Initialize with the given values."""
         self.finished = finished
         self.avg_queue_lengths = avg_queue_lengths
         self.max_queue_lengths = max_queue_lengths
 
 
 class Customer:
+    """Represent the current state of the customer in the simulation."""
+
     @require(lambda items_in_cart: items_in_cart >= 0)
     def __init__(self, items_in_cart: int) -> None:
+        """Initialize with the given values."""
         self.items_in_cart = items_in_cart
 
 
@@ -123,6 +137,7 @@ class Customer:
 )
 # fmt: on
 def simulate(specs: Specs, steps: int) -> Stats:
+    """Simulate in ``steps`` number of iterations according to the ``specs``."""
     finished = 0
 
     # Length of the queues at each step

@@ -78,6 +78,7 @@ ONLY_DASHES_RE = re.compile(r"^[-]+\Z")
 @ensure(lambda result: len(result) > 0)
 # fmt: on
 def draw(width: int, height: int) -> Lines:
+    """Draw the pattern of the size ``width`` x ``height`` and return the text lines."""
     result = []  # type: List[str]
 
     vertical_pad = int(height / 5) - 1

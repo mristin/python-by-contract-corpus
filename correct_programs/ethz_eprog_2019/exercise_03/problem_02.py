@@ -14,6 +14,7 @@ from icontract import require, ensure
 @require(lambda n: n > 0)
 @ensure(lambda n, result: bin(n) == result)
 def repr_binary(n: int) -> str:
+    """Represent ``n`` as a binary number."""
     digits = []  # type: List[str]
     remaining = n
 

@@ -13,7 +13,7 @@ class Deck(DBC):
     Please make sure that you transfer the "ownership" immediately to ``Deck``
     and don't modify the original list of strings any more:
 
-       .. code-block: python
+       .. code-block:: python
 
            ##
            # OK

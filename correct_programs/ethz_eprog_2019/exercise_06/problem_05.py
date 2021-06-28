@@ -54,6 +54,7 @@ from icontract import require, ensure
 )
 # fmt: on
 def compute_angles(hour: int, minute: int, second: int) -> Tuple[float, float, float]:
+    """Compute the angles of the clock hands for a given time of the day."""
     angle_second = second / 60 * 360
 
     angle_minute = (minute + second / 60) / 60 * 360

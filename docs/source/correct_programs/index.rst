@@ -10,3 +10,4 @@ As an important part of our corpus, we provide programs annotated with contracts
 
    common
    aoc2020/index
+   ethz_eprog_2019/index
