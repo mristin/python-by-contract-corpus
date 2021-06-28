@@ -47,7 +47,7 @@ class TestWithIcontractHypothesis(unittest.TestCase):
             )
         )
 
-        for _ in range(100):
+        for _ in range(10):
             methods = all_methods
             if lst.is_empty():
                 methods = methods_if_empty
