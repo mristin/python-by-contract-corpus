@@ -10,7 +10,8 @@ class TestWithIcontractHypothesis(unittest.TestCase):
     def test_functions(self) -> None:
         for func in [
             day_21_allergen_assessment.serialize_entry,
-            day_21_allergen_assessment.find_non_allergenic_ingredients,
+            # NOTE: uncomment once icontract-hypothesis is powerful enough
+            # day_21_allergen_assessment.find_non_allergenic_ingredients,
             day_21_allergen_assessment.solve,
         ]:
             try:
