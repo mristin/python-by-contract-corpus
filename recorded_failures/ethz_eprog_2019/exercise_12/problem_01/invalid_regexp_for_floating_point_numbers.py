@@ -67,8 +67,14 @@ class TokenizationRule:
 
 
 TOKENIZATION = [
+    # ERROR:
+    # Detected with crosshair:
+    # problem_01.py:150: error:
+    # false when calling
+    # tokens_to_text(tokens = (Token('inf.0\x00', 0, 5, <TokenKind.NUM: 1>),))
+    # (which returns 'inf.0')
     TokenizationRule(
-        TokenKind.NUM, re.compile(r"(inf|(0|[1-9][0-9]*)(\.[0-9]+)?(e[+\-]?[0-9]+)?)")
+        TokenKind.NUM, re.compile(r"(inf|0|[1-9][0-9]*)(\.[0-9]+)?(e[+\-]?[0-9]+)?")
     ),
     TokenizationRule(TokenKind.VAR, re.compile(r"[a-zA-Z_][a-zA-Z_0-9]*")),
     TokenizationRule(TokenKind.OP, re.compile(r"[+\-*/^]")),
@@ -93,7 +99,6 @@ class Token(DBC):
         lambda value, kind:
         TOKENIZATION_MAP[kind].pattern.fullmatch(value)
     )
-    @require(lambda value, start, end: len(value) == end - start)
     @require(lambda start, end: start < end)
     # fmt: on
     def __init__(self, value: str, start: int, end: int, kind: TokenKind) -> None:
@@ -155,7 +160,7 @@ class Token(DBC):
     "Text tokenized till the end"
 )
 @ensure(
-    lambda result:
+    lambda text, result:
     not (len(result) > 0)
     or result[0].start == 0,
     "Text tokenized from the start"
