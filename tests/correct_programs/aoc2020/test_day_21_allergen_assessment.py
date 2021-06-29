@@ -16,9 +16,12 @@ class TestWithIcontractHypothesis(unittest.TestCase):
             try:
                 icontract_hypothesis.test_with_inferred_strategy(func)  # type: ignore
             except Exception as error:
+                strategy = icontract_hypothesis.infer_strategy(func)  # type: ignore
+
                 raise Exception(
                     f"Automatically testing {func} with icontract-hypothesis failed "
-                    f"(please see the original error above)"
+                    f"(please see the original error above).\n\n"
+                    f"The inferred strategy was: {strategy}"
                 ) from error
 
 
