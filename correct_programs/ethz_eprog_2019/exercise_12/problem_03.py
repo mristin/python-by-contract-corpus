@@ -5,6 +5,7 @@ Implement a compiler for the interpreter developed in Exercise 12, Problem 1.
 The program should be compiled in a language based on operand stack.
 
 The following operations are supported:
+
 * ``CONST c``: push the value ``c`` on the stack,
 * ``LOAD v``: load the value of the variable ``v`` and push it on the stack,
 * ``STORE v``: pop a value from the stack and store it to the variable ``v``,
@@ -26,13 +27,14 @@ from correct_programs.ethz_eprog_2019.exercise_12 import problem_01
 
 
 class Instruction:
-    """Represent the bytecode instruction."""
+    """Represent a bytecode instruction."""
 
 
 class Const(Instruction, DBC):
     """Push the constant on the stack."""
 
     def __init__(self, value: float) -> None:
+        """Initialize with the given values."""
         self.value = value
 
     def __repr__(self) -> str:
@@ -44,6 +46,7 @@ class Load(Instruction, DBC):
     """Load a variable from the registry and push it on the stack."""
 
     def __init__(self, identifier: problem_01.Identifier) -> None:
+        """Initialize with the given values."""
         self.identifier = identifier
 
     def __repr__(self) -> str:
@@ -291,7 +294,11 @@ def _execute_call(instr: Call, stack: List[float]) -> None:
 def execute(
     instructions: List[Instruction],
 ) -> MutableMapping[problem_01.Identifier, float]:
-    """Execute the given instructions."""
+    """
+    Execute the given ``instructions``.
+
+    :return: The final state of the program
+    """
     variables = dict()  # type: MutableMapping[problem_01.Identifier, float]
 
     if len(instructions) == 0:
@@ -321,7 +328,7 @@ def execute(
 def compare_against_interpret(
     program: problem_01.Program, result: Mapping[problem_01.Identifier, float]
 ) -> bool:
-    """Compare against the interpret implementation."""
+    """Compare against the interpreted program."""
     interpreted = problem_01.interpret(program)
 
     if len(interpreted) != len(result):
@@ -347,6 +354,6 @@ def compare_against_interpret(
 def compile_and_execute(
     program: problem_01.Program,
 ) -> MutableMapping[problem_01.Identifier, float]:
-    """Compile and execute the given program."""
+    """Compile and execute the given ``program``."""
     instructions = compile_program(program)
     return execute(instructions)

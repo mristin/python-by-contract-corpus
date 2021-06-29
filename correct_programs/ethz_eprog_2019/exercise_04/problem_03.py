@@ -20,6 +20,7 @@ from icontract import require, ensure
 @ensure(lambda result: all(0 <= digit <= 9 for digit in result))
 @ensure(lambda n, result: digits_to_number(result) == n)  # type: ignore
 def number_to_digits(n: int) -> List[int]:
+    """Disassemble the integer ``n`` into individual digits."""
     digits = []  # type: List[int]
 
     factor = 10
@@ -36,6 +37,7 @@ def number_to_digits(n: int) -> List[int]:
 @require(lambda digits: len(digits) > 0)
 @require(lambda digits: all(0 <= digit <= 9 for digit in digits))
 def digits_to_number(digits: Reversible[int]) -> int:
+    """Assemble the integer from the given ``digits``."""
     number = 0
     factor = 1
     for digit in reversed(digits):
@@ -45,9 +47,10 @@ def digits_to_number(digits: Reversible[int]) -> int:
     return number
 
 
-# Pick arbitrary summands for a digit that needs to be split up such that the first
-# is always larger.
-SPLIT_FOR_ONE_DIGIT = {
+# Summands for a single digit without 7.
+#
+# The first is always larger.
+_SPLIT_FOR_ONE_DIGIT = {
     1: (1, 0),
     2: (1, 1),
     3: (2, 1),
@@ -65,14 +68,14 @@ assert all(
     summands[0] != 7 and summands[1] != 7
     and summands[0] >= summands[1]
     and digit == summands[0] + summands[1]
-    for digit, summands in SPLIT_FOR_ONE_DIGIT.items()
+    for digit, summands in _SPLIT_FOR_ONE_DIGIT.items()
 )
 # fmt: on
 
-# Pick arbitrary summands for two digits that need to be split up such that the first
-# is always larger than the second.
-
-SPLIT_FOR_TWO_DIGITS = {
+# Summands for two digits without 7.
+#
+# The first summand is always larger than the second.
+_SPLIT_FOR_TWO_DIGITS = {
     (1, 0): ((0, 6), (0, 4)),
     (1, 1): ((0, 6), (0, 5)),
     (1, 2): ((0, 8), (0, 4)),
@@ -105,7 +108,7 @@ assert all(
             digits_to_number(two_digits)
     )
     and summands[0] > summands[1]
-    for two_digits, summands in SPLIT_FOR_TWO_DIGITS.items()
+    for two_digits, summands in _SPLIT_FOR_TWO_DIGITS.items()
 )
 
 
@@ -119,6 +122,13 @@ assert all(
 @ensure(lambda result: "7" not in str(result[0]))
 @ensure(lambda result: "7" not in str(result[1]))
 def find_summands(n: int) -> Tuple[int, int]:
+    """
+    Find the two summands ``(s1, s2)`` which satisfy the conditions.
+
+    * ``s1 ≥ s2``
+    * ``s1 + s2 == n``
+    * The digit 7 does not appear neither in ``s1`` nor in ``s2``.
+    """
     digits = number_to_digits(n)
 
     summand1_digits = []
@@ -135,7 +145,7 @@ def find_summands(n: int) -> Tuple[int, int]:
         # We can simply split a single digit in two for each summand in the following
         # cases.
         if cursor == len(digits) - 1 or digits[cursor] == 0 or digits[cursor] >= 3:
-            digit1, digit2 = SPLIT_FOR_ONE_DIGIT[digits[cursor]]
+            digit1, digit2 = _SPLIT_FOR_ONE_DIGIT[digits[cursor]]
             summand1_digits.append(digit1)
             summand2_digits.append(digit2)
             cursor += 1
@@ -152,12 +162,12 @@ def find_summands(n: int) -> Tuple[int, int]:
                 f"{cursor=}, {digits[cursor:cursor+2]=}, {n=}"
             )
 
-            assert two_digits in SPLIT_FOR_TWO_DIGITS, (
+            assert two_digits in _SPLIT_FOR_TWO_DIGITS, (
                 f"Expected {two_digits=} at {cursor=} to be available "
-                f"in {SPLIT_FOR_TWO_DIGITS=}"
+                f"in {_SPLIT_FOR_TWO_DIGITS=}"
             )
 
-            two_digits1, two_digits2 = SPLIT_FOR_TWO_DIGITS[two_digits]
+            two_digits1, two_digits2 = _SPLIT_FOR_TWO_DIGITS[two_digits]
             summand1_digits.extend(two_digits1)
             summand2_digits.extend(two_digits2)
             cursor += 2

@@ -15,8 +15,12 @@ class TestWithIcontractHypothesis(unittest.TestCase):
             try:
                 problem_02.evaluate(expr=call, lookup=lookup)
             except Exception as exception:
-                # Ignore errors where we end up with complex numbers
-                if not isinstance(exception, TypeError):
+                # Ignore errors where we end up with complex numbers or mathematical
+                # domain errors
+                if not isinstance(exception, TypeError) and (
+                    not isinstance(exception, ValueError)
+                    and str(exception) == "math domain error"
+                ):
                     raise AssertionError(
                         f"{smoke_test_evaluate_call.__name__} failed.\n"
                         f"{problem_02.unparse(call)=}\n"
@@ -30,8 +34,12 @@ class TestWithIcontractHypothesis(unittest.TestCase):
             try:
                 problem_02.evaluate(expr=expr, lookup=lookup)
             except Exception as exception:
-                # Ignore errors where we end up with complex numbers
-                if not isinstance(exception, TypeError):
+                # Ignore errors where we end up with complex numbers or mathematical
+                # domain errors
+                if not isinstance(exception, TypeError) and (
+                    not isinstance(exception, ValueError)
+                    and str(exception) == "math domain error"
+                ):
                     raise AssertionError(
                         f"{smoke_test_evaluate_expr.__name__} failed.\n"
                         f"{problem_02.unparse(expr)=}\n"

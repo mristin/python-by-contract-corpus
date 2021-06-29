@@ -21,7 +21,7 @@ The period of day is determined as follows:
 
 * "Am morge" is after 6am and before 12pm.
 * 12pm is "mittag".
-* "Namittag is till 6pm.
+* "Namittag" is till 6pm.
 * "Abig" goes till 10pm.
 * The remainder of the day is "znacht".
 
@@ -41,6 +41,7 @@ from icontract import require
 @require(lambda hour: 0 <= hour < 23)
 @require(lambda minute: 0 <= minute < 60)
 def time_in_swiss_german(hour: int, minute: int) -> str:
+    """Translate the given time of the day into Swiss german."""
     if hour < 6:
         period_of_day = "znacht"
     elif 6 <= hour < 12:

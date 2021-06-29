@@ -1,7 +1,7 @@
 r"""
 Draw the following pattern:
 
-.. code-block:
+.. code-block::
 
       \/
      \\//
@@ -21,6 +21,7 @@ from icontract import require, ensure
 
 from correct_programs.common import Lines
 
+#: Express the trailing whitespace at the end of line
 TRAILING_SPACE_RE = re.compile(r"\s$")
 
 
@@ -52,6 +53,7 @@ TRAILING_SPACE_RE = re.compile(r"\s$")
 @ensure(lambda result: all(len(line) > 0 for line in result))
 # fmt: on
 def draw(width: int) -> Lines:
+    """Draw the pattern with size given as ``width`` and return the text lines."""
     result = []  # type: List[str]
     half = int(width / 2)
     for i in range(1, half + 1):

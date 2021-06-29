@@ -13,7 +13,6 @@ Draw the following pattern:
 You are given the size of the image (as width).
 """
 
-
 import re
 from typing import List
 
@@ -21,7 +20,8 @@ from icontract import require, ensure
 
 from correct_programs.common import Lines
 
-ALLOWED_CHARS = re.compile(r"^[.*]+$")
+ALLOWED_CHARS = re.compile(r"[.*]+")  #: Express every line of the pattern
+
 
 # fmt: off
 @require(lambda width: width > 0)
@@ -29,7 +29,7 @@ ALLOWED_CHARS = re.compile(r"^[.*]+$")
 @ensure(
     lambda result:
     all(
-        ALLOWED_CHARS.match(line)
+        ALLOWED_CHARS.fullmatch(line)
         for line in result
     )
 )
@@ -41,6 +41,7 @@ ALLOWED_CHARS = re.compile(r"^[.*]+$")
 @ensure(lambda width, result: len(result) == width / 2)
 # fmt: on
 def draw(width: int) -> Lines:
+    """Draw the pattern with the size given as ``width`` and return the text lines."""
     result = []  # type: List[str]
 
     for i in range(1, int(width / 2) + 1):

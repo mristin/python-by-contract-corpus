@@ -37,12 +37,12 @@ class TestManually(unittest.TestCase):
 
         self.assertEqual(2, len(top_words))
         self.assertEqual("a", top_words[0].text)
-        self.assertEqual(0, top_words[0].first_occurrence)
-        self.assertEqual(5, top_words[0].last_occurrence)
+        self.assertEqual(0, top_words[0].first)
+        self.assertEqual(5, top_words[0].last)
 
         self.assertEqual("b", top_words[1].text)
-        self.assertEqual(1, top_words[1].first_occurrence)
-        self.assertEqual(2, top_words[1].last_occurrence)
+        self.assertEqual(1, top_words[1].first)
+        self.assertEqual(2, top_words[1].last)
 
 
 if __name__ == "__main__":

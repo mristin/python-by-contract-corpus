@@ -10,8 +10,9 @@ from icontract import require, ensure
 
 
 @require(lambda c: c > 0)
-@ensure(lambda c, eps, result: abs(result * result - c) <= eps)
+@ensure(lambda c, eps, result: abs(result * result - c) <= eps, "Guaranteed precision")
 def approximate_sqrt(c: int, eps: float) -> float:
+    """Approximate the square-root of ``c`` up to the precision ``eps``."""
     c_as_float = float(c)
     result = c_as_float
 

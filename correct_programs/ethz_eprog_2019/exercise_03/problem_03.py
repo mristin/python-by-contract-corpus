@@ -20,6 +20,7 @@ from icontract import require, ensure
 @require(lambda y: y > 0)
 @ensure(lambda x, y, result: result == math.gcd(x, y))
 def gcd(x: int, y: int) -> int:
+    """Compute the greatest common divisor (GCD) between ``x`` and ``y``."""
     if x >= y and x % y == 0:
         return y
 

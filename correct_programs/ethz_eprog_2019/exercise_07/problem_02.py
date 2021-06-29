@@ -47,6 +47,11 @@ def same_order(lst: List[int], old_values: List[int]) -> bool:
 @ensure(lambda result, n: all(value >= n for value in result.values()))
 @ensure(lambda lst, result, OLD: lst.count() + result.count() == OLD.count)
 def split(lst: LinkedList, n: int) -> LinkedList:
+    """
+    Remove the elements greater-equal ``n`` from  the ``lst``.
+
+     :return: The elements removed from the ``lst``
+    """
     result = LinkedList()
 
     cursor = lst.cursor()

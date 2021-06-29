@@ -36,7 +36,7 @@ For the aforementioned example:
 import datetime
 import enum
 import re
-from typing import Mapping, List, Optional, MutableMapping, Pattern, AnyStr
+from typing import Mapping, List, Optional, MutableMapping, Pattern, AnyStr, Sequence
 
 from icontract import require, ensure, DBC
 
@@ -44,19 +44,30 @@ from correct_programs.common import Lines
 
 
 class ClassOfFlight(enum.Enum):
+    """Enumerate the different classes of flights."""
+
     ECONOMY = "ECONOMY"
     BUSINESS = "BUSINESS"
     FIRST = "FIRST"
 
 
+#: Map literal value 🠒 enumeration.
 STR_TO_CLASS_OF_FLIGHT = {
     entry.value: entry for entry in ClassOfFlight
 }  # type: Mapping[str, ClassOfFlight]
 
 
 class Flight(DBC):
+    """Represent an entry in the flight data."""
+
+    # fmt: off
     @require(lambda miles: miles is None or miles > 0)
-    @ensure(lambda miles, self: not (miles is None) or self.miles == 125)
+    @ensure(
+        lambda miles, self:
+        not (miles is None) or self.miles == 125,
+        "If ``miles`` is not given, set to the default value."
+    )
+    # fmt: on
     def __init__(
         self,
         number: str,
@@ -64,6 +75,7 @@ class Flight(DBC):
         class_of_flight: ClassOfFlight,
         miles: Optional[int],
     ) -> None:
+        """Initialize with the given values."""
         self.number = number
         self.date = date
         self.class_of_flight = class_of_flight
@@ -71,12 +83,16 @@ class Flight(DBC):
 
 
 class Block(DBC):
-    def __init__(self, name: str, flights: List[Flight]):
+    """Represent a block of flight entries tied to the flier."""
+
+    def __init__(self, name: str, flights: Sequence[Flight]):
+        """Initialize with the given values."""
         self.name = name
         self.flights = flights
 
 
 def compile_flight_re() -> Pattern[AnyStr]:
+    """Compile the regular expression that expresses the flight entry in the data."""
     number = r"(?P<number>[a-zA-Z0-9]+)"
     date = r"(?P<date>[0-9]{2}.[0-9]{2}.[0-9]{4})"
     class_of_flight = "".join(
@@ -90,7 +106,7 @@ def compile_flight_re() -> Pattern[AnyStr]:
     return re.compile(f"^{number} {date} {class_of_flight}{miles}$")  # type: ignore
 
 
-FLIGHT_RE = compile_flight_re()
+FLIGHT_RE = compile_flight_re()  #: Express the flight entry in the text data.
 
 
 # fmt: off
@@ -103,6 +119,7 @@ FLIGHT_RE = compile_flight_re()
 )
 # fmt: on
 def parse_block(lines: Lines) -> Block:
+    """Parse the given block of the input data given as text ``lines``."""
     name = lines[0]
     flights = []  # type: List[Flight]
 
@@ -125,6 +142,7 @@ def parse_block(lines: Lines) -> Block:
 @ensure(lambda lines, result: not (len(lines) == 0) or len(result) == 0)
 @ensure(lambda lines, result: not (len(lines) > 0) or len(result) > 0)
 def parse(lines: Lines) -> List[Block]:
+    """Parse the input data given as text ``lines`` into structured blocks."""
     list_of_block_lines = []  # type: List[Lines]
 
     accumulator = []  # type: List[str]
@@ -157,6 +175,11 @@ def parse(lines: Lines) -> List[Block]:
 )
 # fmt: on
 def compute_totals(blocks: List[Block]) -> MutableMapping[str, int]:
+    """
+    Compute the total miles collected by the flier.
+
+    :return: Flier name 🠒 miles collected
+    """
     result = dict()  # type: MutableMapping[str, int]
 
     for block in blocks:

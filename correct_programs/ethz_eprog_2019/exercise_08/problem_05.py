@@ -15,17 +15,22 @@ Estimate the probability of the wolf escaping the city.
 (We deliberately exclude the parts of the exercise concerning the drawing of the paths
 in the GUI.)
 """
-import dataclasses
 import random
-from typing import Set, Sequence, Optional
+from typing import Set, Sequence, Optional, Final
 
 from icontract import require, ensure
 
 
-@dataclasses.dataclass(frozen=True)
 class Position:
-    x: int
-    y: int
+    """Represent the current position of the wolf on the grid."""
+
+    x: Final[int]  #: X-coordinate of the cell
+    y: Final[int]  #: Y-coordinate of the cell
+
+    def __init__(self, x: int, y: int) -> None:
+        """Initialize with the given values."""
+        self.x = x
+        self.y = y
 
 
 # fmt: off
@@ -57,6 +62,7 @@ class Position:
 )
 # fmt: on
 def list_next_positions(pos: Position) -> Sequence[Position]:
+    """List all the possible next positions based on the current position ``pos``."""
     return (
         Position(x=pos.x + 1, y=pos.y),
         Position(x=pos.x, y=pos.y + 1),
@@ -70,6 +76,8 @@ def list_next_positions(pos: Position) -> Sequence[Position]:
 @require(lambda grid_size: grid_size % 2 == 1)
 @ensure(lambda result: 0 <= result <= 1)
 def simulate(trials: int, grid_size: int) -> float:
+    """
+    Simulate ``trials` number of wolf journeys on the quadratic ``grid_size`` grid."""
     success_count = 0
 
     half_grid_size = grid_size // 2

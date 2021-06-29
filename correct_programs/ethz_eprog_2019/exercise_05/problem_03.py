@@ -17,11 +17,14 @@ from correct_programs import common
 
 
 class Measurement(DBC, float):
+    """Represent a single measurement of a human height."""
+
     @require(
         lambda value: 0 < value < 400,
         "Only valid value; the tallest man on earth ever measured was 251cm tall.",
     )
     def __new__(cls, value: float) -> "Measurement":
+        """Enforce the valid range on the measurement."""
         return cast(Measurement, value)
 
 
@@ -40,22 +43,33 @@ class Measurement(DBC, float):
 )
 # fmt: on
 def compute_stats(measurements: List[Measurement]) -> Tuple[float, float, float]:
+    """
+    Compute the statistics of the given ``measurements``.
+
+    :return: Minimum, mean, maximum
+    """
     return min(measurements), statistics.mean(measurements), max(measurements)
 
 
 class Range:
+    """Represent a range of measurements."""
+
     @require(lambda start, end: start < end)
     @require(lambda start: not math.isnan(start))
     @require(lambda end: not math.isnan(end))
     def __init__(self, start: float, end: float) -> None:
+        """Initialize with the given values."""
         self.start = start
         self.end = end
 
     def __repr__(self) -> str:
+        """Represent as mathematical range for easier debugging."""
         return f"[{self.start}, {self.end})"
 
 
 class BinRanges(DBC):
+    """Represent the ranges of the histogram bins."""
+
     # fmt: off
     @require(
         lambda lower_bound, upper_bound:
@@ -124,6 +138,12 @@ class BinRanges(DBC):
         include_minus_inf: bool,
         include_inf: bool,
     ) -> "BinRanges":
+        """
+        Construct ``bin_count`` number of histogram bins between ``lower_bound``
+        and ``upper_bound``.
+
+        If ``include_inf``, include -∞ and +∞ in the spanned total range of histogram.
+        """
         ranges = []  # type: List[Range]
 
         if include_minus_inf:
@@ -150,24 +170,24 @@ class BinRanges(DBC):
 
     @overload
     def __getitem__(self, index: int) -> Range:
-        """Get the item at the given integer index."""
+        """Get the bin range at the given integer index."""
         pass
 
     @overload
     def __getitem__(self, index: slice) -> "BinRanges":
-        """Get the slice of the lines."""
+        """Get the slice of the bin ranges."""
         pass
 
     def __getitem__(self, index: Union[int, slice]) -> Union[Range, "BinRanges"]:
-        """Get the line(s) at the given index."""
+        """Get the bin range at the given index."""
         raise NotImplementedError("Only for type annotations")
 
     def __len__(self) -> int:
-        """Return the number of the lines."""
+        """Return the number of the bin ranges."""
         raise NotImplementedError("Only for type annotations")
 
     def __iter__(self) -> Iterator[Range]:
-        """Iterate over the lines."""
+        """Iterate over the bin ranges."""
         raise NotImplementedError("Only for type annotations")
 
 
@@ -195,6 +215,7 @@ class BinRanges(DBC):
 )
 # fmt: on
 def bin_index(ranges: BinRanges, value: float) -> int:
+    """Find the index of the bin range among ``ranges`` corresponding to ``value``."""
     # Edge cases
     if value < ranges[0].start:
         return -1
@@ -241,21 +262,28 @@ def bin_index(ranges: BinRanges, value: float) -> int:
 
 
 @invariant(lambda self: all(count >= 0 for count in self.counts))
-class Histogram:
+class Histogram(DBC):
+    """Represent a mutable histogram."""
+
     @require(lambda ranges: len(ranges) > 0)
     def __init__(self, ranges: BinRanges) -> None:
-        self.ranges = ranges
+        """Initialize the histogram with zero counts for ``ranges``."""
+        self.ranges = ranges  #: Bin ranges
+
+        #: Count of observations for the given bin
         self.counts = [0 for _ in range(len(ranges))]
 
     @require(lambda value: not math.isnan(value))
     @require(lambda self, value: self.ranges[0].start <= value < self.ranges[-1].end)
     def add(self, value: float) -> None:
+        """Count the ``value`` in the corresponding bin."""
         index = bin_index(self.ranges, value)
         assert 0 <= index < len(self.counts)
 
         self.counts[index] += 1
 
     def items(self) -> Iterator[Tuple[Range, int]]:
+        """Iterate over (bin range, count of observations)."""
         assert len(self.ranges) == len(self.counts)
         return zip(self.ranges, self.counts)
 
@@ -268,6 +296,11 @@ class Histogram:
 )
 # fmt: on
 def compute_histogram(measurements: Sequence[Measurement]) -> List[Tuple[Range, int]]:
+    """
+    Compute the histogram over ``measurements``.
+
+    :return: List of (bin range, count of observations for that bin)
+    """
     lower_bound = math.floor(min(measurements))
     upper_bound = math.ceil(max(measurements))
 

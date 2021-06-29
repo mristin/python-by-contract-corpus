@@ -23,19 +23,27 @@ def find(a: List[int], x: int) -> int:
     return -1
 
 
-def naive_is_prime(number: int) -> bool:
-    result = True
-    for another in range(number - 1, 1, -1):
-        if number % another == 0:
-            result = False
-            break
-
-    return result
-
-
+# fmt: off
 @require(lambda limit: limit > 1)
-@ensure(lambda result: all(number > 1 for number in result))
+@ensure(
+    lambda limit, result:
+    all(
+        1 < number <= limit
+        for number in result
+    )
+)
+@ensure(
+    lambda result:
+    len(result) == len(set(result)),
+    "Unique results"
+)
+# fmt: on
 def sieve(limit: int) -> List[int]:
+    """
+    Apply the Sieve of Eratosthenes on the numbers up to ``limit``.
+
+    :return: list of prime numbers till ``limit``
+    """
     candidates = list(range(2, limit + 1))
 
     result = []  # type: List[int]
