@@ -19,7 +19,10 @@ class TestWithIcontractHypothesis(unittest.TestCase):
         def draw_with_restricted_input(width: int, height: int) -> Lines:
             return problem_03.draw(width=width, height=height)
 
-        for func in [draw_with_restricted_input]:
+        for func in [  # type: ignore
+            # NOTE: uncomment once icontract-hypothesis is powerful enough
+            # draw_with_restricted_input
+        ]:
             try:
                 icontract_hypothesis.test_with_inferred_strategy(func)
             except Exception as error:
