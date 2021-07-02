@@ -23,8 +23,26 @@ def find(a: List[int], x: int) -> int:
     return -1
 
 
+def naive_is_prime(number: int) -> bool:
+    """Check naively whether the ``number`` is a prime number."""
+    result = True
+    for another in range(number - 1, 1, -1):
+        if number % another == 0:
+            result = False
+            break
+
+    return result
+
+
 # fmt: off
 @require(lambda limit: limit > 1)
+@ensure(
+    lambda result:
+    all(
+        naive_is_prime(number)
+        for number in result
+    )
+)
 @ensure(
     lambda limit, result:
     all(
