@@ -32,6 +32,10 @@ class Position:
         self.x = x
         self.y = y
 
+    def __repr__(self) -> str:
+        """Represent the instance as a string for debugging."""
+        return f"{self.__class__.__name__}({self.x!r}, {self.y!r})"
+
 
 # fmt: off
 @ensure(lambda result: len(result) == 4)
@@ -55,7 +59,8 @@ class Position:
 @ensure(
     lambda pos, result:
     all(
-        (next_pos.x == pos.x) ^ (next_pos.y == pos.y)
+        (next_pos.x == pos.x and next_pos.y != pos.y)
+        ^ (next_pos.x != pos.x and next_pos.y == pos.y)
         for next_pos in result
     ),
     "Next is either in x- or in y-direction"
