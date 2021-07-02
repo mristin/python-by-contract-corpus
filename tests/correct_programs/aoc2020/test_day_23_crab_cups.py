@@ -9,7 +9,6 @@ class TestWithIcontractHypothesis(unittest.TestCase):
     def test_functions(self) -> None:
         for func in [
             day_23_crab_cups.initialize_cups,
-            day_23_crab_cups.cup_circle_to_str,
         ]:
             try:
                 icontract_hypothesis.test_with_inferred_strategy(func)  # type: ignore

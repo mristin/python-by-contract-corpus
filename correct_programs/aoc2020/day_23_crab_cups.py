@@ -1,4 +1,4 @@
-from icontract import ensure, require, snapshot
+from icontract import DBC, ensure, require, snapshot
 from typing import List, Optional
 
 
@@ -17,7 +17,7 @@ class Cup:
             self.next_cup = self
 
 
-class CupCircle:
+class CupCircle(DBC):
     """Represent a circle of cups as a circular linked list."""
 
     current_cup: Optional[Cup]  #: the cup from which each new move starts
