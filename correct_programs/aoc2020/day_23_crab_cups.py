@@ -1,7 +1,9 @@
 from icontract import DBC, ensure, require, snapshot
+import regex as re
 from typing import List, Optional
 
 
+# class Cup(DBC):
 class Cup:
     """Represent a cup with a label and the cup next to it clockwise."""
 
@@ -58,24 +60,49 @@ class CupCircle(DBC):
         return False
 
     def __repr__(self) -> str:
-        """Represent the cup circle using the labels of the cups."""
+        """Represent the circle as its labels."""
         return cup_circle_to_str(self)
 
+    def __eq__(self, other: object) -> bool:
+        """Return whether two circles are identical in the labels of the circle."""
+        if isinstance(other, CupCircle):
+            if self.current_cup and other.current_cup:
+                tmp_1: Cup = self.current_cup
+                tmp_2: Cup = other.current_cup
+                while True:
+                    if not tmp_1.label == tmp_2.label:
+                        return False
+                    tmp_1 = tmp_1.next_cup
+                    tmp_2 = tmp_2.next_cup
+                    if tmp_1 == self.current_cup or tmp_2 == other.current_cup:
+                        if not tmp_1 == self.current_cup and tmp_2 == other.current_cup:
+                            return False
+                        return True
+            if not (self.current_cup or other.current_cup):
+                return True
+            return False
+        else:
+            return object.__eq__(self, other)
 
-# fmt: off
-@require(lambda cup_labels: cup_labels.isdecimal())
-@require(lambda cup_labels: len(set(cup_labels)) == len(cup_labels))
-@ensure(lambda result, cup_labels: cup_labels == cup_circle_to_str(result))
-# fmt: on
-def initialize_cups(cup_labels: str) -> CupCircle:
-    """Create a CupCircle from ''cup_labels''."""
-    cup_circle = CupCircle()
-    for label in cup_labels:
-        cup_circle.add_new_cup(int(label))
-    return cup_circle
+    def __len__(self) -> int:
+        """Return the number of cups in the circle."""
+        if not self.current_cup:
+            return 0
+        length = 0
+        tmp = self.current_cup
+        while True:
+            length += 1
+            tmp = tmp.next_cup
+            if tmp == self.current_cup:
+                return length
 
 
-# @ensure(lambda result, cup_circle: cup_circle == initialize_cups(result))
+NUMBER_RE = re.compile(r"[0-9]*")
+
+
+@ensure(
+    lambda result, cup_circle: cup_circle == initialize_cups(result)  # type: ignore
+)
 def cup_circle_to_str(cup_circle: CupCircle) -> str:
     """Return a string with the labels of the cups in ''cup_circle'',
     starting from the current cup."""
@@ -89,8 +116,22 @@ def cup_circle_to_str(cup_circle: CupCircle) -> str:
     return "".join(result)
 
 
-@snapshot(lambda cup_circle: len(str(cup_circle)), name="len_cup_circle")
-@ensure(lambda OLD, cup_circle: OLD.len_cup_circle == len(str(cup_circle)))
+# fmt: off
+@require(lambda cup_labels: NUMBER_RE.fullmatch(cup_labels))
+@require(lambda cup_labels: len(set(cup_labels)) == len(cup_labels))
+@ensure(lambda result, cup_labels: cup_labels == cup_circle_to_str(result))
+# fmt: on
+def initialize_cups(cup_labels: str) -> CupCircle:
+    """Create a CupCircle from ''cup_labels''."""
+    cup_circle = CupCircle()
+    for label in cup_labels:
+        cup_circle.add_new_cup(int(label))
+    return cup_circle
+
+
+@require(lambda cup_circle: len(cup_circle) >= 5)
+@snapshot(lambda cup_circle: len(cup_circle), name="len_cup_circle")
+@ensure(lambda OLD, cup_circle: OLD.len_cup_circle == len(cup_circle))
 def crab_move(cup_circle: CupCircle) -> None:
     """Perform one move by the crab."""
     if not cup_circle.current_cup:
@@ -126,8 +167,9 @@ def crab_move(cup_circle: CupCircle) -> None:
 
 # fmt: off
 @require(lambda cup_labels: len(cup_labels) >= 5)
-@require(lambda cup_labels: cup_labels.isdecimal())
+@require(lambda cup_labels: NUMBER_RE.fullmatch(cup_labels))
 @require(lambda cup_labels: len(set(cup_labels)) == len(cup_labels))
+@ensure(lambda result, cup_labels: len(cup_labels) == len(result))
 # fmt: on
 def solve_100_steps(cup_labels: str) -> CupCircle:
     """Solve the problem for 100 crab moves."""
@@ -135,8 +177,3 @@ def solve_100_steps(cup_labels: str) -> CupCircle:
     for _ in range(100):
         crab_move(cup_circle)
     return cup_circle
-
-
-# TODO remove
-if __name__ == "__main__":
-    print(solve_100_steps("389125467"))
