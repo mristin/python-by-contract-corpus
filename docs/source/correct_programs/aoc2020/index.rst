@@ -34,5 +34,6 @@ The source code of our solutions is available at: https://github.com/mristin/pyt
    day_20
    day_21
    day_22
+   day_23
    day_24
    day_25
