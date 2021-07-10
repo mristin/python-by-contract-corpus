@@ -2,15 +2,17 @@
 Python-by-Contract Corpus
 *************************
 
-.. image:: https://github.com/mristin/python-by-contract-corpus/actions/workflows/test-on-push-to-main.yml/badge.svg
-    :target: https://github.com/mristin/python-by-contract-corpus/actions/workflows/test-on-push-to-main.yml
-    :alt: Test on push to main
+.. image:: https://github.com/mristin/python-by-contract-corpus/workflows/CI/badge.svg
+    :target: https://github.com/mristin/python-by-contract-corpus/actions?query=workflow%3ACI
+    :alt: Continuous integration
 
 .. image:: https://coveralls.io/repos/github/mristin/python-by-contract-corpus/badge.svg?branch=main
     :target: https://coveralls.io/github/mristin/python-by-contract-corpus?branch=main
+    :alt: Test coverage
 
 .. image:: https://readthedocs.org/projects/python-by-contract-corpus/badge/?version=latest&style=plastic
     :target: https://python-by-contract-corpus.readthedocs.io/en/latest/
+    :alt: Documentation
 
 We present here a corpus of Python programs annotated with `contracts`_.
 

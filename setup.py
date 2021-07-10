@@ -47,6 +47,7 @@ setup(
             "mypy==0.812",
             "pylint==2.8.2",
             "coverage>=5.5,<6",
+            "twine>=3.4.1,<4"
         ]
     },
     # fmt: on

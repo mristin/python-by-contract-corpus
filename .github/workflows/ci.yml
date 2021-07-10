@@ -1,10 +1,11 @@
-name: Test-on-push-to-main
+name: CI
 
 on:
   push:
-    branches:
-      - master
-      - main
+    branches: [ master, main ]
+    tags: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
 
 jobs:
   Execute:
