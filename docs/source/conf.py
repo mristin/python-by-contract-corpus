@@ -18,18 +18,19 @@ from typing import Dict, List, Tuple
 
 sys.path.insert(0, os.path.abspath("../.."))
 
-import correct_programs
+import python_by_contract_corpus
 
 # -- Project information -----------------------------------------------------
 
 project = "python-by-contract-corpus"
-author = "Lauren De bruyn, Marko Ristin, Phillip Schanely"
-description = "A corpus of Python programs annotated with contracts"
+author = python_by_contract_corpus.__author__
+description = python_by_contract_corpus.__doc__
 
 # The short X.Y version
-version = "1.0"
+version = "2021.7.10"
 # The full version, including alpha/beta/rc tags
-release = "1.0"
+release = python_by_contract_corpus.__version__
+assert release.startswith(version)
 
 # -- General configuration ---------------------------------------------------
 

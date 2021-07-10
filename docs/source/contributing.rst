@@ -44,8 +44,12 @@ dependencies using ``pip``:
 
 .. code-block::
 
-    pip3 install -r requirements.txt
-    pip3 install -r requirements-dev.txt
+    pip3 install --editable .[dev]
+
+The `--editable <pip-editable_>`_ option is necessary so that all the changes made to the repository are automatically reflected in the virtual environment (see also `this StackOverflow question <pip-editable-stackoverflow_>`_).
+
+.. _pip-editable: https://pip.pypa.io/en/stable/reference/pip_install/#install-editable
+.. _pip-editable-stackoverflow: https://stackoverflow.com/questions/35064426/when-would-the-e-editable-option-be-useful-with-pip-install
 
 Pre-commit Checks
 =================

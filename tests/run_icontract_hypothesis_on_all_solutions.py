@@ -6,9 +6,9 @@ import sys
 
 def main() -> None:
     tests_dir = pathlib.Path(os.path.realpath(__file__)).parent
-    correct_programs_dir = tests_dir.parent / "correct_programs"
+    src_dir = tests_dir.parent / "python_by_contract_corpus"
 
-    for i, pth in enumerate(sorted(correct_programs_dir.glob("**/test_*.py"))):
+    for i, pth in enumerate(sorted(src_dir.glob("**/*.py"))):
         if i > 0:
             print()
 
