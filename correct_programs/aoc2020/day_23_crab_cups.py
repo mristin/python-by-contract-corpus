@@ -1,9 +1,8 @@
 from icontract import DBC, ensure, require, snapshot
-import regex as re
+import re
 from typing import List, Optional
 
 
-# class Cup(DBC):
 class Cup:
     """Represent a cup with a label and the cup next to it clockwise."""
 
@@ -33,8 +32,11 @@ class CupCircle(DBC):
     @require(lambda label: label >= 0)
     # fmt: on
     def add_new_cup(self, label: int) -> None:
-        """Add a new cup to the circle with ''label'',
-        next to the current cup counter-clockwise."""
+        """
+        Add a new cup to the circle with ``label``.
+
+        The cup is added next to the current cup counter-clockwise.
+        """
         if not self.current_cup:
             new_cup = Cup(label)
             new_cup.next_cup = new_cup
@@ -47,7 +49,7 @@ class CupCircle(DBC):
             tmp.next_cup = new_cup
 
     def _is_label_in_circle(self, label: int) -> bool:
-        """Check if ''label'' is present in the cup circle."""
+        """Check if ``label`` is present in the cup circle."""
         if not self.current_cup:
             return False
         tmp = self.current_cup
@@ -104,8 +106,7 @@ NUMBER_RE = re.compile(r"[0-9]*")
     lambda result, cup_circle: cup_circle == initialize_cups(result)  # type: ignore
 )
 def cup_circle_to_str(cup_circle: CupCircle) -> str:
-    """Return a string with the labels of the cups in ''cup_circle'',
-    starting from the current cup."""
+    """Stringify the labels of the ``cup_circle``, starting from the current cup."""
     result: List[str] = []
     if cup_circle.current_cup:
         tmp = cup_circle.current_cup
@@ -122,7 +123,7 @@ def cup_circle_to_str(cup_circle: CupCircle) -> str:
 @ensure(lambda result, cup_labels: cup_labels == cup_circle_to_str(result))
 # fmt: on
 def initialize_cups(cup_labels: str) -> CupCircle:
-    """Create a CupCircle from ''cup_labels''."""
+    """Create a CupCircle from ``cup_labels``."""
     cup_circle = CupCircle()
     for label in cup_labels:
         cup_circle.add_new_cup(int(label))
