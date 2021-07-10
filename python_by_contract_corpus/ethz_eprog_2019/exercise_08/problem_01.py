@@ -13,7 +13,7 @@ Here are a couple of examples:
 * ``s = "abbbc", t = "cab", k = 1``. The result is ``True``.
 * ``s = "abbbbc", t = "cab", k = 1``. The result if ``False``. The distance between
   either "a" and "b" or "b" and "c" is larger than 1.
-* ``s = "abc"
+* ``s = "abc"``
 
 """
 
