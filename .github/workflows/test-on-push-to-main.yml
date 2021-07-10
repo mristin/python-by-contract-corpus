@@ -25,12 +25,16 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip3 install --upgrade coveralls
-          pip3 install -r requirements.txt
-          pip3 install -r requirements-dev.txt
+          pip3 install -e .[dev]
 
       - name: Run checks
         run: |
           python3 precommit.py
+
+      - name: Build and check the distribution
+        run: |
+          python setup.py sdist
+          twine check dist/*
 
       - name: Upload Coverage
         run: coveralls --service=github

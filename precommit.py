@@ -14,6 +14,7 @@ class Step(enum.Enum):
     PYLINT = "pylint"
     TEST = "test"
     DOCTEST = "doctest"
+    CHECK_INIT_AND_SETUP_COINCIDE = "check-init-and-setup-coincide"
 
 
 def main() -> int:
@@ -68,7 +69,7 @@ def main() -> int:
         print("Black'ing...")
         # fmt: off
         black_targets = [
-            "correct_programs",
+            "python_by_contract_corpus",
             "tests",
             "precommit.py"
         ]
@@ -86,7 +87,7 @@ def main() -> int:
     if Step.MYPY in selects and Step.MYPY not in skips:
         print("Mypy'ing...")
         # fmt: off
-        mypy_targets = ["correct_programs", "tests"]
+        mypy_targets = ["python_by_contract_corpus", "tests"]
         subprocess.check_call(["mypy", "--strict"] + mypy_targets, cwd=str(repo_root))
         # fmt: on
     else:
@@ -95,7 +96,7 @@ def main() -> int:
     if Step.PYLINT in selects and Step.PYLINT not in skips:
         # fmt: off
         print("Pylint'ing...")
-        pylint_targets = ["correct_programs"]
+        pylint_targets = ["python_by_contract_corpus"]
         subprocess.check_call(
             ["pylint", "--rcfile=pylint.rc"] + pylint_targets, cwd=str(repo_root)
         )
@@ -112,7 +113,7 @@ def main() -> int:
         subprocess.check_call(
             [
                 "coverage", "run",
-                "--source", "correct_programs",
+                "--source", "python_by_contract_corpus",
                 "-m", "unittest", "discover", "--failfast"
             ],
             cwd=str(repo_root),
@@ -128,12 +129,27 @@ def main() -> int:
         print("Doctesting...")
         subprocess.check_call([sys.executable, "-m", "doctest", "README.rst"])
 
-        aocdbc_dir = repo_root / "correct_programs"
-        for pth in sorted(aocdbc_dir.glob("**/*.py")):
+        src_dir = repo_root / "python_by_contract_corpus"
+        for pth in sorted(src_dir.glob("**/*.py")):
             subprocess.check_call([sys.executable, "-m", "doctest", str(pth)])
 
     else:
         print("Skipped doctesting.")
+
+    if (
+        Step.CHECK_INIT_AND_SETUP_COINCIDE in selects
+        and Step.CHECK_INIT_AND_SETUP_COINCIDE not in skips
+    ):
+        print(
+            "Checking that python_by_contract_corpus/__init__.py and "
+            "setup.py coincide..."
+        )
+        subprocess.check_call([sys.executable, "check_init_and_setup_coincide.py"])
+    else:
+        print(
+            "Skipped checking that python_by_contract_corpus/__init__.py and "
+            "setup.py coincide."
+        )
 
     return 0
 

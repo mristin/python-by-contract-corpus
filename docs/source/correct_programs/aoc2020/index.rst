@@ -4,7 +4,7 @@ Solutions to Advent of Code 2020
 
 We auto-document here our solutions to the `Advent of Code 2020`_ exercises.
 
-The source code of our solutions is available at: https://github.com/mristin/python-by-contract-corpus/tree/main/correct_programs/aoc2020
+The source code of our solutions is available at: https://github.com/mristin/python-by-contract-corpus/tree/main/python_by_contract_corpus/aoc2020
 
 .. _Advent of Code 2020: https://adventofcode.com/2020
 
