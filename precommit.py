@@ -12,6 +12,7 @@ class Step(enum.Enum):
     BLACK = "black"
     MYPY = "mypy"
     PYLINT = "pylint"
+    PYICONTRACT_LINT = "pyicontract-lint"
     TEST = "test"
     DOCTEST = "doctest"
     CHECK_INIT_AND_SETUP_COINCIDE = "check-init-and-setup-coincide"
@@ -103,6 +104,17 @@ def main() -> int:
         # fmt: on
     else:
         print("Skipped pylint'ing.")
+
+    if Step.PYICONTRACT_LINT in selects and Step.PYICONTRACT_LINT not in skips:
+        # fmt: off
+        print("Pyicontract-lint'ing...")
+        subprocess.check_call(
+            ["pyicontract-lint", "python_by_contract_corpus", "tests"],
+            cwd=str(repo_root)
+        )
+        # fmt: on
+    else:
+        print("Skipped pyicontract-lint'ing.")
 
     if Step.TEST in selects and Step.TEST not in skips:
         print("Testing...")
