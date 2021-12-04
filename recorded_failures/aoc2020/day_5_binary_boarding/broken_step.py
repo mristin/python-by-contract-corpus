@@ -6,8 +6,12 @@ from icontract import require, ensure
 
 # crosshair: on
 
-
-@require(lambda first, last: (last - first + 1) % 2 == 0, "Range always divisible by 2")
+# fmt: off
+@require(
+    lambda first, last:
+    (last - first + 1) % 2 == 0,
+    "Range always divisible by 2"
+)
 @require(lambda first, last: first < last)
 @require(lambda last: last % 2 == 1)
 @require(lambda first: first % 2 == 0)
@@ -15,28 +19,38 @@ from icontract import require, ensure
 @require(lambda first: first >= 0)
 @require(lambda directive: re.match(r"^[FBLR]\Z", directive))
 @ensure(
-    lambda directive, first, last, result: not (directive in "FL")
+    lambda directive, first, last, result:
+    not (directive in "FL")
     or (result[0] == first and result[1] < last),
-    "Only last decreases on F/L.",
+    "Only last decreases on F/L."
 )
 @ensure(
-    lambda directive, first, last, result: not (directive in "BR")
+    lambda directive, first, last, result:
+    not (directive in "BR")
     or (first < result[0] and result[1] == last),
-    "Only first increases on B/R.",
+    "Only first increases on B/R."
 )
-@ensure(lambda first, last, result: first <= result[0] <= result[1] <= last)
+@ensure(
+    lambda first, last, result:
+    first <= result[0] <= result[1] <= last
+)
 # ERROR: this post-condition failed:
 # next first always divisible by 2 unless the last step: not (result[0] != result[1]) or (result[0] % 2 == 0): result was (9, 13)
 # Falsifying example: kwargs={'directive': 'B', 'first': 4, 'last': 13}
 # The pre-conditions were not sufficient!
 @ensure(
-    lambda result: not (result[0] != result[1]) or (result[0] % 2 == 0),
+    lambda result:
+    not (result[0] != result[1])
+    or (result[0] % 2 == 0),
     "next first always divisible by 2 unless the last step",
 )
 @ensure(
-    lambda result: not (result[0] != result[1]) or (result[1] % 2 == 1),
+    lambda result:
+    not (result[0] != result[1])
+    or (result[1] % 2 == 1),
     "next last always not divisible by 2 unless the last step",
 )
+# fmt: on
 def apply(first: int, last: int, directive: str) -> Tuple[int, int]:
     half = int((last - first + 1) / 2)
 
