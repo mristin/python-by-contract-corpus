@@ -2,7 +2,7 @@ import unittest
 
 from icontract_hypothesis import test_with_inferred_strategy
 
-from python_by_contract_corpus.aoc2020.day_1_report_repair import find_pair_with_sum
+from python_by_contract_corpus.correct.aoc2020.day_1_report_repair import find_pair_with_sum
 
 
 class TestDay1(unittest.TestCase):
