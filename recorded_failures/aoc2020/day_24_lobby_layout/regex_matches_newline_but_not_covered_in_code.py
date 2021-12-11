@@ -47,8 +47,8 @@ def next_cell(cell: Cell, direction: Direction) -> Cell:
 
 # ERROR: DIRECTIONS_RE will match a string ending in a new line.
 # ERROR: However, VALUE_TO_DIRECTION will fail on the new line!
-DIRECTIONS_RE = re.compile('^(se|sw|nw|ne|w|e)+$')
-ONE_DIRECTION_RE = re.compile('(se|sw|nw|ne|w|e)')
+DIRECTIONS_RE = re.compile("^(se|sw|nw|ne|w|e)+$")
+ONE_DIRECTION_RE = re.compile("(se|sw|nw|ne|w|e)")
 
 
 @require(lambda line: DIRECTIONS_RE.match(line))
@@ -64,4 +64,4 @@ def parse_line(line: str) -> List[Direction]:
 
 @ensure(lambda directions, result: parse_line(result) == directions)
 def stringify_directions(directions: List[Direction]) -> str:
-    return ''.join(direction.value for direction in directions)
+    return "".join(direction.value for direction in directions)

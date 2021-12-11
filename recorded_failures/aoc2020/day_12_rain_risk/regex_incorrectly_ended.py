@@ -15,6 +15,7 @@ Falsifying example: execute(
      'move': 'E0:'},)
  """
 
+
 class Orientation(Enum):
     EAST = 0
     SOUTH = 1
@@ -42,32 +43,41 @@ class ShipPosition:
         return result
 
 
-@require(lambda puzzle_input: re.match(r'^[NSEWLRF][0-9]+(\n[NSEWLRF][0-9]+)*$', puzzle_input))
+@require(
+    lambda puzzle_input: re.match(
+        r"^[NSEWLRF][0-9]+(\n[NSEWLRF][0-9]+)*$", puzzle_input
+    )
+)
 @ensure(lambda result, puzzle_input: "\n".join(result) == puzzle_input)
 def parse_input(puzzle_input: str) -> List[str]:
-    return list(map(lambda l: l, puzzle_input.split('\n')))
+    return list(map(lambda l: l, puzzle_input.split("\n")))
 
 
-@require(lambda move: re.match(r'^[NSEWLRF][0-9]+', move))
-@require(lambda move: not (move[0] == 'L' or move[0] == 'R') or move[1:] in [0, 90, 180, 270, 360])
+@require(lambda move: re.match(r"^[NSEWLRF][0-9]+", move))
+@require(
+    lambda move: not (move[0] == "L" or move[0] == "R")
+    or move[1:] in [0, 90, 180, 270, 360]
+)
 def update_position(current_position: ShipPosition, move: str) -> ShipPosition:
     action, value = move[0], int(move[1:])
     next_position = current_position
-    if action == 'N':
+    if action == "N":
         next_position.vertical += value
-    elif action == 'S':
+    elif action == "S":
         next_position.vertical -= value
-    elif action == 'E':
+    elif action == "E":
         next_position.horizontal += value
-    elif action == 'W':
+    elif action == "W":
         next_position.horizontal -= value
-    elif action == 'L':
+    elif action == "L":
         next_position.orientation = Orientation(
-            ((next_position.orientation).value - (value / 90)) % 4)
-    elif action == 'R':
+            ((next_position.orientation).value - (value / 90)) % 4
+        )
+    elif action == "R":
         next_position.orientation = Orientation(
-            ((next_position.orientation).value + (value / 90)) % 4)
-    elif action == 'F':
+            ((next_position.orientation).value + (value / 90)) % 4
+        )
+    elif action == "F":
         if next_position.orientation == Orientation.NORTH:
             next_position.vertical += value
         elif next_position.orientation == Orientation.SOUTH:
@@ -80,7 +90,11 @@ def update_position(current_position: ShipPosition, move: str) -> ShipPosition:
     return next_position
 
 
-@require(lambda puzzle_input: re.match(r'^[NSEWLRF][0-9]+(\n[NSEWLRF][0-9]+)*$', puzzle_input))
+@require(
+    lambda puzzle_input: re.match(
+        r"^[NSEWLRF][0-9]+(\n[NSEWLRF][0-9]+)*$", puzzle_input
+    )
+)
 def solve(puzzle_input: str) -> ShipPosition:
     current_position = ShipPosition(0, 0, Orientation.EAST)
     for command in parse_input(puzzle_input):
@@ -94,5 +108,5 @@ F7
 R90
 F11"""
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(solve(example_input))

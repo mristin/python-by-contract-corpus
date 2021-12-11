@@ -49,21 +49,22 @@ class Specs(DBC):
     )
     # fmt: on
     def __init__(
-            self,
-            checkout_efficiencies: List[Probability],
-            new_customer_probability: Probability,
-            max_cart_size: int) -> None:
+        self,
+        checkout_efficiencies: List[Probability],
+        new_customer_probability: Probability,
+        max_cart_size: int,
+    ) -> None:
         self.checkout_efficiencies = checkout_efficiencies
         self.new_customer_probability = new_customer_probability
         self.max_cart_size = max_cart_size
 
     def __repr__(self) -> str:
         return (
-            f'Specs(\n'
-            f'    checkout_efficiencies={self.checkout_efficiencies!r},\n'
-            f'    new_customer_probability={self.new_customer_probability!r},\n'
-            f'    max_cart_size={self.max_cart_size!r}\n'
-            f')'
+            f"Specs(\n"
+            f"    checkout_efficiencies={self.checkout_efficiencies!r},\n"
+            f"    new_customer_probability={self.new_customer_probability!r},\n"
+            f"    max_cart_size={self.max_cart_size!r}\n"
+            f")"
         )
 
 
@@ -86,10 +87,11 @@ class Stats(DBC):
     )
     # fmt: on
     def __init__(
-            self,
-            finished: int,
-            avg_queue_lengths: List[float],
-            max_queue_lengths: List[float]) -> None:
+        self,
+        finished: int,
+        avg_queue_lengths: List[float],
+        max_queue_lengths: List[float],
+    ) -> None:
         self.finished = finished
         self.avg_queue_lengths = avg_queue_lengths
         self.max_queue_lengths = max_queue_lengths
@@ -132,7 +134,8 @@ def simulate(specs: Specs, steps: int) -> Stats:
     for _ in range(steps):
         # Process an item
         for i, (queue, efficiency) in enumerate(
-                zip(queues, specs.checkout_efficiencies)):
+            zip(queues, specs.checkout_efficiencies)
+        ):
             if len(queue) > 0:
                 customer = queue[0]
                 # ERROR:
@@ -175,5 +178,5 @@ def simulate(specs: Specs, steps: int) -> Stats:
     return Stats(
         finished=finished,
         avg_queue_lengths=[statistics.mean(lengths) for lengths in queue_lengths],
-        max_queue_lengths=[max(lengths) for lengths in queue_lengths]
+        max_queue_lengths=[max(lengths) for lengths in queue_lengths],
     )

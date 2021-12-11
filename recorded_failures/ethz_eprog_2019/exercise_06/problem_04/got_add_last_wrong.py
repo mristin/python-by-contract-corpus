@@ -27,10 +27,7 @@ class Node:
 
 
 class Cursor:
-    def __init__(
-            self,
-            linked_list: 'LinkedList'
-    ) -> None:
+    def __init__(self, linked_list: "LinkedList") -> None:
         self._node = linked_list._first
         self._previous = None  # type: Optional[Node]
         self._linked_list = linked_list
@@ -51,7 +48,7 @@ class Cursor:
     def done(self) -> bool:
         return self._node is None
 
-    def is_last(self)->bool:
+    def is_last(self) -> bool:
         return self._node is self._linked_list._last
 
     @require(lambda self: not self.done())
@@ -146,7 +143,6 @@ class LinkedList(DBC):
     def remove_first(self) -> int:
         cur = Cursor(linked_list=self)
         return cur.remove()
-
 
     @require(lambda self: not self.is_empty())
     @snapshot(lambda self: self.count(), name="count")

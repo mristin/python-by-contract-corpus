@@ -52,4 +52,3 @@ def play_a_round(deck1: List[int], deck2: List[int]) -> Tuple[List[int], List[in
         new_deck2 = deck2[1:] + [card1, card2]
 
     return new_deck1, new_deck2
-

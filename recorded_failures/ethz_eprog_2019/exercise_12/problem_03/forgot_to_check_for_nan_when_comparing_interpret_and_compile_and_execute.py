@@ -317,6 +317,7 @@ def execute(
 
     return variables
 
+
 # ERROR:
 # icontract.errors.ViolationError:
 # result == problem_01.interpret(program):

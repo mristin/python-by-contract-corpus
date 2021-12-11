@@ -20,12 +20,12 @@ from typing import List, Pattern, Dict, cast
 
 from icontract import require, DBC, ensure
 
-WORD_RE = re.compile(r'^[a-z]+(-[a-z])*$')
+WORD_RE = re.compile(r"^[a-z]+(-[a-z])*$")
 
 
 class Token(DBC, str):
     @require(lambda text: WORD_RE.match(text))
-    def __new__(cls, text: str) -> 'Token':
+    def __new__(cls, text: str) -> "Token":
         return cast(Token, text)
 
 
@@ -38,16 +38,17 @@ class Word(DBC):
     @require(lambda first_occurrence: first_occurrence >= 0)
     @require(lambda last_occurrence: last_occurrence >= 0)
     # fmt: on
-    def __init__(self, first_occurrence: int, last_occurrence: int,
-                 text: Token) -> None:
+    def __init__(
+        self, first_occurrence: int, last_occurrence: int, text: Token
+    ) -> None:
         self.first_occurrence = first_occurrence
         self.last_occurrence = last_occurrence
         self.text = text
 
-    def __lt__(self, other: 'Word') -> bool:
+    def __lt__(self, other: "Word") -> bool:
         return (
-                self.last_occurrence - self.first_occurrence
-                < other.last_occurrence - other.first_occurrence
+            self.last_occurrence - self.first_occurrence
+            < other.last_occurrence - other.first_occurrence
         )
 
     def __repr__(self) -> str:
@@ -100,9 +101,11 @@ def tokens_to_words(tokens: List[Token]) -> List[Word]:
     words = []  # type: List[Word]
     for token in first_occurrences.keys():
         words.append(
-            Word(first_occurrence=first_occurrences[token],
-                 last_occurrence=last_occurrences[token],
-                 text=token)
+            Word(
+                first_occurrence=first_occurrences[token],
+                last_occurrence=last_occurrences[token],
+                text=token,
+            )
         )
 
     return words

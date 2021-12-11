@@ -1,10 +1,20 @@
 import collections
-from typing import Final, Sequence, MutableMapping, Iterable, Tuple, TypeVar, Optional, \
-    Mapping, cast, List
+from typing import (
+    Final,
+    Sequence,
+    MutableMapping,
+    Iterable,
+    Tuple,
+    TypeVar,
+    Optional,
+    Mapping,
+    cast,
+    List,
+)
 
 from icontract import require, ensure, DBC
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 def pairwise(iterable: Iterable[T]) -> Iterable[Tuple[T, T]]:
@@ -34,7 +44,7 @@ def pairwise(iterable: Iterable[T]) -> Iterable[Tuple[T, T]]:
 class HistogramOfDeltas(DBC, Mapping[int, int]):
     @require(lambda mapping: all(delta > 0 for delta in mapping.keys()))
     @require(lambda mapping: all(count >= 0 for count in mapping.values()))
-    def __new__(cls, mapping: Mapping[int, int]) -> 'HistogramOfDeltas':
+    def __new__(cls, mapping: Mapping[int, int]) -> "HistogramOfDeltas":
         return cast(HistogramOfDeltas, mapping)
 
 

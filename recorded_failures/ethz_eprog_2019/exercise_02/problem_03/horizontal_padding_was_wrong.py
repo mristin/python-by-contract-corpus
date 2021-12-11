@@ -34,7 +34,7 @@ from icontract import require, ensure
 
 from correct_programs.common import Lines
 
-ONLY_DASHES_RE = re.compile(r'^[-]+\Z')
+ONLY_DASHES_RE = re.compile(r"^[-]+\Z")
 
 
 # fmt: off
@@ -89,21 +89,23 @@ def draw(width: int, height: int) -> Lines:
 
     vertical_pad = int(height / 5) - 1
 
-    result.append('-' * width)
+    result.append("-" * width)
 
     for i in range(vertical_pad):
-        result.append(''.join(['|', ' ' * (width - 2), '|']))
+        result.append("".join(["|", " " * (width - 2), "|"]))
 
     def draw_cross(cross_count: int) -> None:
         for i in range(int(height / 5)):
-            result.append(''.join(
-                [
-                    '|',
-                    ' ' * (cross_count - 1),
-                    '+' * cross_count,
-                    ' ' * (cross_count - 1),
-                    '|'
-                ])
+            result.append(
+                "".join(
+                    [
+                        "|",
+                        " " * (cross_count - 1),
+                        "+" * cross_count,
+                        " " * (cross_count - 1),
+                        "|",
+                    ]
+                )
             )
 
     draw_cross(cross_count=int(width / 5))
@@ -111,8 +113,8 @@ def draw(width: int, height: int) -> Lines:
     draw_cross(cross_count=int(width / 5))
 
     for i in range(vertical_pad):
-        result.append(''.join(['|', ' ' * (width - 2), '|']))
+        result.append("".join(["|", " " * (width - 2), "|"]))
 
-    result.append('-' * width)
+    result.append("-" * width)
 
     return Lines(result)

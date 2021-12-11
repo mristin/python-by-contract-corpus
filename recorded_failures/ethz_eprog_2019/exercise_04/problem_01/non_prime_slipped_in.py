@@ -32,6 +32,7 @@ def naive_is_prime(number: int) -> bool:
 
     return result
 
+
 # ERROR:
 # icontract.errors.ViolationError:
 # all(problem_01.naive_is_prime(number) for number in result):

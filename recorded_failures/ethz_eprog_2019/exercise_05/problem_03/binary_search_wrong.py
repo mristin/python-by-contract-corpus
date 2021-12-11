@@ -19,10 +19,10 @@ from correct_programs import common
 class Measurements(DBC):
     @require(
         lambda values: all(0 < value < 400 for value in values),
-        "Only valid values; the tallest man on earth ever measured was 251cm tall."
+        "Only valid values; the tallest man on earth ever measured was 251cm tall.",
     )
     @require(lambda values: len(values) > 0)
-    def __new__(cls, values: Sequence[float]) -> 'Measurements':
+    def __new__(cls, values: Sequence[float]) -> "Measurements":
         return cast(Measurements, values)
 
     def __add__(self, other: "Measurements") -> "Measurements":
@@ -143,8 +143,13 @@ class BinRanges(DBC):
     )
     # fmt: on
     def __new__(
-            cls, bin_count: int, lower_bound: float, upper_bound: float,
-            include_minus_inf: bool, include_inf: bool) -> 'BinRanges':
+        cls,
+        bin_count: int,
+        lower_bound: float,
+        upper_bound: float,
+        include_minus_inf: bool,
+        include_inf: bool,
+    ) -> "BinRanges":
         ranges = []  # type: List[Range]
 
         if include_minus_inf:
@@ -175,7 +180,7 @@ class BinRanges(DBC):
         pass
 
     @overload
-    def __getitem__(self, index: slice) -> 'BinRanges':
+    def __getitem__(self, index: slice) -> "BinRanges":
         """Get the slice of the lines."""
         pass
 
@@ -309,7 +314,7 @@ def compute_histogram(measurements: Measurements) -> List[Tuple[Range, int]]:
         lower_bound=lower_bound,
         upper_bound=upper_bound,
         include_minus_inf=True,
-        include_inf=True
+        include_inf=True,
     )
 
     histogram = Histogram(ranges=ranges)

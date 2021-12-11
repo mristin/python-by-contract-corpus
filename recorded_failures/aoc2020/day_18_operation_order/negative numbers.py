@@ -5,37 +5,37 @@ import regex as re
 from icontract import require, ensure, DBC
 
 
-NUMBER_RE = re.compile(r'^(\d+)')
+NUMBER_RE = re.compile(r"^(\d+)")
 
 
 class Operation(Enum):
-    ADD = '+'
-    MUL = '*'
+    ADD = "+"
+    MUL = "*"
 
 
 @dataclass
 class Tail:
     op: Operation
-    right: Union[int, 'Node']
+    right: Union[int, "Node"]
 
 
 @dataclass
 class Node:
-    head: Union[int, 'Node']
+    head: Union[int, "Node"]
     tail: Optional[List[Tail]]
 
 
-@require(lambda expr: expr.startswith('('))
-@require(lambda expr: expr.count('(') == expr.count(')'))
+@require(lambda expr: expr.startswith("("))
+@require(lambda expr: expr.count("(") == expr.count(")"))
 @ensure(lambda expr, result: result in expr)
 def extract_expression(expr: str) -> str:
     parenthesis_balance = 0
-    result = ''
+    result = ""
 
     for c in expr:
-        if c == '(':
+        if c == "(":
             parenthesis_balance += 1
-        elif c == ')':
+        elif c == ")":
             parenthesis_balance -= 1
 
         if parenthesis_balance == 0:
@@ -48,14 +48,14 @@ def extract_expression(expr: str) -> str:
 def parse(expression: str) -> Optional[Node]:
     if not expression:
         return None
-    if expression.startswith('('):
+    if expression.startswith("("):
         head_str = extract_expression(expression)
         head = parse(head_str)
-        rest_expr = expression[len(head_str)+2:]
+        rest_expr = expression[len(head_str) + 2 :]
     elif NUMBER_RE.match(expression):
         head_str = NUMBER_RE.match(expression).group(1)
         head = int(head_str)
-        rest_expr = expression[len(head_str):]
+        rest_expr = expression[len(head_str) :]
     else:
         raise Exception
 
@@ -63,14 +63,14 @@ def parse(expression: str) -> Optional[Node]:
 
     while rest_expr:
         op = Operation(rest_expr[0])
-        if rest_expr[1:].startswith('('):
+        if rest_expr[1:].startswith("("):
             right_str = extract_expression(rest_expr[1:])
             right = parse(right_str)
-            rest_expr = rest_expr[len(right_str)+3:]
+            rest_expr = rest_expr[len(right_str) + 3 :]
         elif NUMBER_RE.match(rest_expr[1:]):
             right_str = NUMBER_RE.match(rest_expr[1:]).group(1)
             right = int(right_str)
-            rest_expr = rest_expr[len(right_str)+1:]
+            rest_expr = rest_expr[len(right_str) + 1 :]
         else:
             raise Exception
         tails.append(Tail(op=op, right=right))
@@ -81,7 +81,7 @@ def parse(expression: str) -> Optional[Node]:
 
 @ensure(lambda result, node: parse(result) == node)
 def serialize(node: Node) -> str:
-    result = ''
+    result = ""
     if isinstance(node.head, int):
         result += str(node.head)
     else:
@@ -117,13 +117,32 @@ def compute(node: Node) -> int:
     return result
 
 
-if __name__ == '__main__':
-    e1 = '(1+2)+(3*4)'  # 15
-    e2 = '(1+(2*3))+4'  # 11
-    e3 = '1+2*3+4+6*7'  # 133
+if __name__ == "__main__":
+    e1 = "(1+2)+(3*4)"  # 15
+    e2 = "(1+(2*3))+4"  # 11
+    e3 = "1+2*3+4+6*7"  # 133
 
-    n1 = Node(head=Node(head=1, tail=[Tail(op=Operation.ADD, right=2)]), tail=[Tail(op=Operation.ADD, right=Node(head=3, tail=[Tail(op=Operation.MUL, right=4)]))])
-    n2 = Node(head=Node(head=1, tail=[Tail(op=Operation.ADD, right=Node(head=2, tail=[Tail(op=Operation.MUL, right=3)]))]), tail=[Tail(op=Operation.ADD, right=4)])
+    n1 = Node(
+        head=Node(head=1, tail=[Tail(op=Operation.ADD, right=2)]),
+        tail=[
+            Tail(
+                op=Operation.ADD,
+                right=Node(head=3, tail=[Tail(op=Operation.MUL, right=4)]),
+            )
+        ],
+    )
+    n2 = Node(
+        head=Node(
+            head=1,
+            tail=[
+                Tail(
+                    op=Operation.ADD,
+                    right=Node(head=2, tail=[Tail(op=Operation.MUL, right=3)]),
+                )
+            ],
+        ),
+        tail=[Tail(op=Operation.ADD, right=4)],
+    )
 
     assert n1 == parse(e1)
     assert n2 == parse(e2)

@@ -58,8 +58,8 @@ def follow_directions(start: Cell, directions: List[Direction]) -> Cell:
     return cursor
 
 
-DIRECTIONS_RE = re.compile('^(se|sw|nw|ne|w|e)+\Z')
-ONE_DIRECTION_RE = re.compile('(se|sw|nw|ne|w|e)')
+DIRECTIONS_RE = re.compile("^(se|sw|nw|ne|w|e)+\Z")
+ONE_DIRECTION_RE = re.compile("(se|sw|nw|ne|w|e)")
 
 
 @require(lambda line: DIRECTIONS_RE.match(line))
@@ -75,7 +75,7 @@ def parse_line(line: str) -> List[Direction]:
 
 @ensure(lambda directions, result: parse_line(result) == directions)
 def stringify_directions(directions: List[Direction]) -> str:
-    return ''.join(direction.value for direction in directions)
+    return "".join(direction.value for direction in directions)
 
 
 # ERROR: The plan with empty directions [[], []] will break the program!

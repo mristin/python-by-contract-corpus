@@ -8,6 +8,7 @@ from icontract import require, ensure
 
 # crosshair: on
 
+
 class Cell:
     @require(lambda x, y, z: x + y + z == 0)
     def __init__(self, x: int, y: int, z: int) -> None:
@@ -60,8 +61,8 @@ def follow_directions(start: Cell, directions: List[Direction]) -> Cell:
     return cursor
 
 
-DIRECTIONS_RE = re.compile('^(se|sw|nw|ne|w|e)+\Z')
-ONE_DIRECTION_RE = re.compile('(se|sw|nw|ne|w|e)')
+DIRECTIONS_RE = re.compile("^(se|sw|nw|ne|w|e)+\Z")
+ONE_DIRECTION_RE = re.compile("(se|sw|nw|ne|w|e)")
 
 
 @require(lambda line: DIRECTIONS_RE.match(line))
@@ -78,7 +79,7 @@ def parse_line(line: str) -> List[Direction]:
 # ERROR: We forgot to handle the empty directions. This breaks the post-condition!
 @ensure(lambda directions, result: parse_line(result) == directions)
 def stringify_directions(directions: List[Direction]) -> str:
-    return ''.join(direction.value for direction in directions)
+    return "".join(direction.value for direction in directions)
 
 
 def count_flips(plan: List[List[Direction]]) -> int:
