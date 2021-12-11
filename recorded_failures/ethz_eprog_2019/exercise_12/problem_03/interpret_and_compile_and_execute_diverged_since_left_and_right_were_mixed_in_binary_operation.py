@@ -137,8 +137,9 @@ def _execute_const(instr: Const, stack: List[float]) -> None:
     stack == OLD.stack + [variables[instr.identifier]]
 )
 # fmt: on
-def _execute_load(instr: Load, variables: Mapping[str, float],
-                  stack: List[float]) -> None:
+def _execute_load(
+    instr: Load, variables: Mapping[str, float], stack: List[float]
+) -> None:
     stack.append(variables[instr.identifier])
 
 
@@ -161,7 +162,7 @@ def _execute_load(instr: Load, variables: Mapping[str, float],
 @ensure(lambda instr, variables: instr.identifier in variables)
 # fmt: on
 def _execute_store(
-        instr: Store, variables: MutableMapping[str, float], stack: List[float]
+    instr: Store, variables: MutableMapping[str, float], stack: List[float]
 ) -> None:
     value = stack.pop()
     variables[instr.identifier] = value
@@ -261,7 +262,7 @@ def _execute_call(instr: Call, stack: List[float]) -> None:
 
 
 def execute(
-        instructions: List[Instruction]
+    instructions: List[Instruction],
 ) -> MutableMapping[problem_01.Identifier, float]:
     """Execute the given instructions."""
     variables = dict()  # type: MutableMapping[problem_01.Identifier, float]
@@ -302,7 +303,7 @@ def execute(
 # )
 @ensure(lambda program, result: result == problem_01.interpret(program))
 def compile_and_execute(
-        program: problem_01.Program
+    program: problem_01.Program,
 ) -> MutableMapping[problem_01.Identifier, float]:
     """Compile and execute the given program."""
     instructions = compile_program(program)

@@ -47,9 +47,7 @@ def same_order(lst: List[int], old_values: List[int]) -> bool:
 @ensure(lambda lst, OLD: same_order(list(lst.values()), OLD.values))
 @ensure(lambda lst, n: all(value < n for value in lst.values()))
 @ensure(lambda result, n: all(value >= n for value in result.values()))
-@ensure(
-    lambda lst, result, OLD: lst.count() + result.count() == OLD.count
-)
+@ensure(lambda lst, result, OLD: lst.count() + result.count() == OLD.count)
 def split(lst: LinkedList, n: int) -> LinkedList:
     result = LinkedList()
 

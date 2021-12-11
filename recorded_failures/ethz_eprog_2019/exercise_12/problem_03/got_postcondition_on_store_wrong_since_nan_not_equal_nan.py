@@ -137,9 +137,11 @@ def _execute_const(instr: Const, stack: List[float]) -> None:
     stack == OLD.stack + [variables[instr.identifier]]
 )
 # fmt: on
-def _execute_load(instr: Load, variables: Mapping[str, float],
-                  stack: List[float]) -> None:
+def _execute_load(
+    instr: Load, variables: Mapping[str, float], stack: List[float]
+) -> None:
     stack.append(variables[instr.identifier])
+
 
 # ERROR:
 # icontract.errors.ViolationError:
@@ -170,7 +172,7 @@ def _execute_load(instr: Load, variables: Mapping[str, float],
 @ensure(lambda instr, variables: instr.identifier in variables)
 # fmt: on
 def _execute_store(
-        instr: Store, variables: MutableMapping[str, float], stack: List[float]
+    instr: Store, variables: MutableMapping[str, float], stack: List[float]
 ) -> None:
     value = stack.pop()
     variables[instr.identifier] = value

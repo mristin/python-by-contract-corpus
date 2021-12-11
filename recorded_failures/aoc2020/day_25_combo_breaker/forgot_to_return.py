@@ -12,5 +12,3 @@ def transform(subject: int, loop_size: int):
         value *= subject
         value %= 20201227
     # ERROR: forgot to return `value`
-
-

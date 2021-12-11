@@ -643,6 +643,7 @@ class _UnparseVisitor(_Visitor[None]):
     def visit_default(self, node: Node) -> None:
         raise NotImplementedError(repr(node))
 
+
 # ERROR:
 # icontract.errors.ViolationError:
 # parse_program(tokenize(result)) == program:

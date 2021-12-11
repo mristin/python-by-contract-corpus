@@ -7,6 +7,7 @@ from icontract import require, ensure, DBC
 
 # crosshair: on
 
+
 class Rule(DBC):
     @ensure(lambda text, result: not (result is not None) or (len(text) > len(result)))
     @ensure(lambda text, result: not (result is not None) or (text.endswith(result)))
@@ -61,11 +62,12 @@ class RuleLiteral(Rule):
         if not text.startswith(self.literal):
             return None
 
-        return text[len(self.literal):]
+        return text[len(self.literal) :]
 
 
 class Node(DBC):
     """Represent a node in the abstract syntax tree."""
+
     pass
 
 
@@ -89,20 +91,22 @@ class NodeOr(Node):
         self.sequences = sequences
 
 
-
 RULE_RE = re.compile(
-    r'^'
-    r'(?P<identifier>0|[1-9][0-9]*): '
-    r'(?P<body>'
+    r"^"
+    r"(?P<identifier>0|[1-9][0-9]*): "
+    r"(?P<body>"
     r'"([^"]*)"'
-    r'|'
-    r'(0|[1-9][0-9]*)( (0|[1-9][0-9]*))*'
-    r'( \| (0|[1-9][0-9]*)( (0|[1-9][0-9]*))*)*'
-    r')\Z')
+    r"|"
+    r"(0|[1-9][0-9]*)( (0|[1-9][0-9]*))*"
+    r"( \| (0|[1-9][0-9]*)( (0|[1-9][0-9]*))*)*"
+    r")\Z"
+)
 
 RULE_LITERAL_RE = re.compile(r'^"(?P<literal>[^"]*)"\Z')
-RULE_COMPOSITE_RE = re.compile(r'^(0|[1-9][0-9]*)( (0|[1-9][0-9]*))*'
-                               r'( \| (0|[1-9][0-9]*)( (0|[1-9][0-9]*))*)*\Z')
+RULE_COMPOSITE_RE = re.compile(
+    r"^(0|[1-9][0-9]*)( (0|[1-9][0-9]*))*"
+    r"( \| (0|[1-9][0-9]*)( (0|[1-9][0-9]*))*)*\Z"
+)
 
 
 @require(lambda line: RULE_RE.match(line))
@@ -110,24 +114,24 @@ def parse_rule(line: str) -> Tuple[int, Node]:
     mtch = RULE_RE.match(line)
     assert mtch is not None
 
-    identifier = int(mtch.group('identifier'))
+    identifier = int(mtch.group("identifier"))
 
-    body = mtch.group('body')
+    body = mtch.group("body")
 
     mtch = RULE_LITERAL_RE.match(body)
     if mtch:
-        node = NodeLiteral(literal=mtch.group('literal'))
+        node = NodeLiteral(literal=mtch.group("literal"))
         return identifier, node
 
     mtch = RULE_COMPOSITE_RE.match(body)
     if mtch:
-        texts_of_sequences = body.split(' | ')
+        texts_of_sequences = body.split(" | ")
         sequences = []  # type: List[NodeSequence]
 
         for text_of_sequence in texts_of_sequences:
             references = [
                 NodeReference(identifier=int(reference_text))
-                for reference_text in text_of_sequence.split(' ')
+                for reference_text in text_of_sequence.split(" ")
             ]
 
             sequences.append(NodeSequence(references=references))
@@ -136,7 +140,8 @@ def parse_rule(line: str) -> Tuple[int, Node]:
         return identifier, node
 
     raise NotImplementedError(
-        f"The body {body!r} of a rule could not be parsed: {line!r}")
+        f"The body {body!r} of a rule could not be parsed: {line!r}"
+    )
 
 
 @require(lambda lines: all(RULE_RE.match(line) for line in lines))
@@ -185,7 +190,8 @@ def interpret_rule_0(rule_trees: Mapping[int, Node]) -> Rule:
 
             if rule_tree.identifier not in rule_trees:
                 raise ValueError(
-                    f"The reference to the rule is dangling: {rule_tree.identifier}")
+                    f"The reference to the rule is dangling: {rule_tree.identifier}"
+                )
 
             rule = interpret_rule_tree(rule_tree=rule_trees[rule_tree.identifier])
             interpreted_rules[rule_tree.identifier] = rule

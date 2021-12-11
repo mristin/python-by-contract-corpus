@@ -20,14 +20,26 @@ An exception should be raised if a parameter has not been specified.
 import enum
 import math
 import re
-from typing import List, Pattern, AnyStr, Mapping, Union, Tuple, cast, Optional, \
-    Sequence, overload, Iterator
+from typing import (
+    List,
+    Pattern,
+    AnyStr,
+    Mapping,
+    Union,
+    Tuple,
+    cast,
+    Optional,
+    Sequence,
+    overload,
+    Iterator,
+)
 
 from icontract import require, ensure, DBC
 
 
 class TokenKind(enum.Enum):
     """Define the token."""
+
     NUM = 1
     VAR = 2
     OP = 4
@@ -45,17 +57,16 @@ class TokenizationRule:
 
 
 TOKENIZATION = [
-    TokenizationRule(TokenKind.NUM, re.compile(r'(0|[1-9][0-9]*)(\.[0-9]+)?')),
-    TokenizationRule(TokenKind.VAR, re.compile(r'[a-zA-Z_][a-zA-Z_0-9]*')),
-    TokenizationRule(TokenKind.OP, re.compile(r'(\+|-|\*|/|^)')),
-    TokenizationRule(TokenKind.OPEN, re.compile(r'\(')),
-    TokenizationRule(TokenKind.CLOSE, re.compile(r'\)')),
-    TokenizationRule(TokenKind.WHITESPACE, re.compile(r'\s+')),
+    TokenizationRule(TokenKind.NUM, re.compile(r"(0|[1-9][0-9]*)(\.[0-9]+)?")),
+    TokenizationRule(TokenKind.VAR, re.compile(r"[a-zA-Z_][a-zA-Z_0-9]*")),
+    TokenizationRule(TokenKind.OP, re.compile(r"(\+|-|\*|/|^)")),
+    TokenizationRule(TokenKind.OPEN, re.compile(r"\(")),
+    TokenizationRule(TokenKind.CLOSE, re.compile(r"\)")),
+    TokenizationRule(TokenKind.WHITESPACE, re.compile(r"\s+")),
 ]
 
 TOKENIZATION_MAP = {
-    rule.kind: rule
-    for rule in TOKENIZATION
+    rule.kind: rule for rule in TOKENIZATION
 }  # type: Mapping[TokenKind, TokenizationRule]
 
 
@@ -71,34 +82,36 @@ class Token(DBC):
     # start was 0
     # text was '(-(A))+(A)'
     @require(
-        lambda text, start, end, kind:
-        TOKENIZATION_MAP[kind].pattern.fullmatch(text[start:end])
+        lambda text, start, end, kind: TOKENIZATION_MAP[kind].pattern.fullmatch(
+            text[start:end]
+        )
     )
     @require(lambda text, end: 0 <= end <= len(text))
     @require(lambda text, start: 0 <= start < len(text))
     @require(lambda start, end: start < end)
-    def __init__(
-            self, text: str, start: int, end: int, kind: TokenKind
-    ) -> None:
+    def __init__(self, text: str, start: int, end: int, kind: TokenKind) -> None:
         self.text = text
         self.start = start
         self.end = end
         self.kind = kind
 
-        self.value = self.text[self.start:self.end]
+        self.value = self.text[self.start : self.end]
 
-    def __eq__(self, other: 'Token') -> bool:
+    def __eq__(self, other: "Token") -> bool:
         return (
-                self.text == other.text
-                and self.start == other.start
-                and self.end == other.end
-                and self.kind == other.kind
+            self.text == other.text
+            and self.start == other.start
+            and self.end == other.end
+            and self.kind == other.kind
         )
 
     def __repr__(self) -> str:
         """Represent the instance as a string for debugging."""
-        return (f"{self.__class__.__name__}("
-                f"{self.text!r}, {self.start}, {self.end}, {self.kind.value!r})")
+        return (
+            f"{self.__class__.__name__}("
+            f"{self.text!r}, {self.start}, {self.end}, {self.kind.value!r})"
+        )
+
 
 @ensure(lambda text, result: tokens_to_text(result) == text)
 def tokenize(text: str) -> List[Token]:
@@ -117,9 +130,7 @@ def tokenize(text: str) -> List[Token]:
 
             if mtch:
                 start, end = mtch.span()
-                result.append(
-                    Token(
-                        text=text, start=start, end=end, kind=rule.kind))
+                result.append(Token(text=text, start=start, end=end, kind=rule.kind))
                 cursor = end
                 break
 
@@ -133,16 +144,18 @@ def tokenize(text: str) -> List[Token]:
 
 @ensure(lambda tokens, result: tokens == tokenize(result))
 def tokens_to_text(tokens: Sequence[Token]) -> str:
-    return ''.join(token.value for token in tokens)
+    return "".join(token.value for token in tokens)
 
 
 class UnOp(enum.Enum):
     """Represent unary operators."""
+
     MINUS = "-"
 
 
 # See precedence climbing,
 # https://eli.thegreenplace.net/2012/08/02/parsing-expressions-by-precedence-climbing
+
 
 class Associativity(enum.Enum):
     LEFT = "Left"
@@ -159,6 +172,7 @@ class BinOpInfo:
 
 class BinOp(enum.Enum):
     """Represent binary operators."""
+
     ADD = "+"
     SUB = "-"
     MUL = "*"
@@ -166,27 +180,24 @@ class BinOp(enum.Enum):
     POW = "^"
 
 
-_STR_TO_BINOP = {
-    literal.value: literal
-    for literal in BinOp
-}
+_STR_TO_BINOP = {literal.value: literal for literal in BinOp}
 
 _BIN_OP_TABLE = {
     BinOp.ADD: BinOpInfo(precedence=1, associativity=Associativity.LEFT),
     BinOp.SUB: BinOpInfo(precedence=1, associativity=Associativity.LEFT),
     BinOp.MUL: BinOpInfo(precedence=2, associativity=Associativity.LEFT),
     BinOp.DIV: BinOpInfo(precedence=2, associativity=Associativity.LEFT),
-    BinOp.POW: BinOpInfo(precedence=3, associativity=Associativity.RIGHT)
+    BinOp.POW: BinOpInfo(precedence=3, associativity=Associativity.RIGHT),
 }
 
-IDENTIFIER_RE = re.compile(r'[a-zA-Z_][a-zA-Z0-9]*')
+IDENTIFIER_RE = re.compile(r"[a-zA-Z_][a-zA-Z0-9]*")
 
 
 class Identifier(DBC, str):
     """Represent an identifier of a variable or of a function."""
 
     @require(lambda value: IDENTIFIER_RE.fullmatch(value))
-    def __new__(cls, value: str) -> 'Identifier':
+    def __new__(cls, value: str) -> "Identifier":
         return cast(Identifier, value)
 
 
@@ -201,10 +212,7 @@ class Constant(Expr, DBC):
         self.value = value
 
     def __eq__(self, other: object) -> bool:
-        return (
-                isinstance(other, Constant)
-                and self.value == other.value
-        )
+        return isinstance(other, Constant) and self.value == other.value
 
     def __repr__(self) -> str:
         """Represent the instance as a string for debugging."""
@@ -216,10 +224,7 @@ class Variable(Expr, DBC):
         self.identifier = identifier
 
     def __eq__(self, other: object) -> bool:
-        return (
-                isinstance(other, Variable)
-                and self.identifier == other.identifier
-        )
+        return isinstance(other, Variable) and self.identifier == other.identifier
 
     def __repr__(self) -> str:
         """Represent the instance as a string for debugging."""
@@ -227,15 +232,15 @@ class Variable(Expr, DBC):
 
 
 class UnaryOperation(Expr, DBC):
-    def __init__(self, target: 'Expr', operator: UnOp) -> None:
+    def __init__(self, target: "Expr", operator: UnOp) -> None:
         self.target = target
         self.operator = operator
 
     def __eq__(self, other: object) -> bool:
         return (
-                isinstance(other, UnaryOperation)
-                and self.target == other.target
-                and self.operator == other.operator
+            isinstance(other, UnaryOperation)
+            and self.target == other.target
+            and self.operator == other.operator
         )
 
     def __repr__(self) -> str:
@@ -247,39 +252,39 @@ class UnaryOperation(Expr, DBC):
 
 
 class BinaryOperation(Expr, DBC):
-    def __init__(self, left: 'Expr', operator: BinOp, right: 'Expr') -> None:
+    def __init__(self, left: "Expr", operator: BinOp, right: "Expr") -> None:
         self.left = left
         self.operator = operator
         self.right = right
 
     def __eq__(self, other: object) -> bool:
         return (
-                isinstance(other, BinaryOperation)
-                and self.left == other.left
-                and self.operator == other.operator
-                and self.right == other.right
+            isinstance(other, BinaryOperation)
+            and self.left == other.left
+            and self.operator == other.operator
+            and self.right == other.right
         )
 
     def __repr__(self) -> str:
         """Represent the instance as a string for debugging."""
-        return (f"{self.__class__.__name__}("
-                f"{self.left!r}, {self.operator.value!r}, {self.right!r})")
+        return (
+            f"{self.__class__.__name__}("
+            f"{self.left!r}, {self.operator.value!r}, {self.right!r})"
+        )
 
 
 class Call(Expr, DBC):
     """Represent a function call in the expression."""
 
-    def __init__(
-            self, identifier: Identifier, argument: 'Expr'
-    ) -> None:
+    def __init__(self, identifier: Identifier, argument: "Expr") -> None:
         self.identifier = identifier
         self.argument = argument
 
     def __eq__(self, other: object) -> bool:
         return (
-                isinstance(other, Call)
-                and self.identifier == other.identifier
-                and self.argument == other.argument
+            isinstance(other, Call)
+            and self.identifier == other.identifier
+            and self.argument == other.argument
         )
 
     def __repr__(self) -> str:
@@ -303,7 +308,7 @@ class TokensWoWhitespace(DBC):
         pass
 
     def __getitem__(
-            self, index: Union[int, slice]
+        self, index: Union[int, slice]
     ) -> Union[Token, "TokensWoWhitespace"]:
         raise NotImplementedError("Only for type annotations")
 
@@ -321,16 +326,16 @@ def _parse_atom(tokens: TokensWoWhitespace, cursor: int) -> Tuple[Expr, int]:
 
     remaining = len(tokens) - cursor
 
-    if remaining >= 2 and tokens[cursor].value == '-':
+    if remaining >= 2 and tokens[cursor].value == "-":
         cursor += 1
         target, cursor = _parse_expr(tokens=tokens, min_precedence=1, cursor=cursor)
 
         return UnaryOperation(target=target, operator=UnOp.MINUS), cursor
 
     elif (
-            remaining >= 2
-            and tokens[cursor].kind == TokenKind.VAR
-            and tokens[cursor + 1].kind == TokenKind.OPEN
+        remaining >= 2
+        and tokens[cursor].kind == TokenKind.VAR
+        and tokens[cursor + 1].kind == TokenKind.OPEN
     ):
         identifier = Identifier(tokens[cursor].value)
         cursor += 2
@@ -344,7 +349,8 @@ def _parse_atom(tokens: TokensWoWhitespace, cursor: int) -> Tuple[Expr, int]:
             raise SyntaxError(
                 f"Unmatched '(', "
                 f"got: {tokens[cursor].value!r} "
-                f"at column {tokens[cursor].start + 1}")
+                f"at column {tokens[cursor].start + 1}"
+            )
 
         cursor += 1
         return Call(identifier=identifier, argument=argument), cursor
@@ -372,7 +378,8 @@ def _parse_atom(tokens: TokensWoWhitespace, cursor: int) -> Tuple[Expr, int]:
             raise SyntaxError(
                 f"Unmatched '(', "
                 f"got: {tokens[cursor].value!r} "
-                f"at column {tokens[cursor].start + 1}")
+                f"at column {tokens[cursor].start + 1}"
+            )
 
         cursor += 1
 
@@ -388,9 +395,7 @@ def _parse_atom(tokens: TokensWoWhitespace, cursor: int) -> Tuple[Expr, int]:
 
 @require(lambda min_precedence: min_precedence >= 1)
 def _parse_expr(
-        tokens: TokensWoWhitespace,
-        min_precedence: int,
-        cursor: int
+    tokens: TokensWoWhitespace, min_precedence: int, cursor: int
 ) -> Tuple[Expr, int]:
     atom_lhs, cursor = _parse_atom(tokens=tokens, cursor=cursor)
 
@@ -412,7 +417,8 @@ def _parse_expr(
         cursor += 1
 
         atom_rhs, cursor = _parse_expr(
-            tokens=tokens, min_precedence=next_min_precedence, cursor=cursor)
+            tokens=tokens, min_precedence=next_min_precedence, cursor=cursor
+        )
 
         atom_lhs = BinaryOperation(left=atom_lhs, operator=bin_op, right=atom_rhs)
 
@@ -422,7 +428,8 @@ def _parse_expr(
 def parse_tokens(tokens: Sequence[Token]) -> Expr:
     """Parse the given tokens into an expression."""
     tokens_wo_ws = TokensWoWhitespace(
-        [token for token in tokens if token.kind != TokenKind.WHITESPACE])
+        [token for token in tokens if token.kind != TokenKind.WHITESPACE]
+    )
 
     expr, end = _parse_expr(tokens=tokens_wo_ws, min_precedence=1, cursor=0)
 
@@ -443,27 +450,20 @@ def _unparse(expr: Expr) -> List[str]:
     elif isinstance(expr, Constant):
         return [str(expr.value)]
     elif isinstance(expr, UnaryOperation):
-        return (
-                [expr.operator.value, '('] +
-                _unparse(expr.target) +
-                [')']
-        )
+        return [expr.operator.value, "("] + _unparse(expr.target) + [")"]
     elif isinstance(expr, BinaryOperation):
         return (
-                ['('] +
-                _unparse(expr.left) +
-                [')', expr.operator.value, '('] +
-                _unparse(expr.right) +
-                [')']
+            ["("]
+            + _unparse(expr.left)
+            + [")", expr.operator.value, "("]
+            + _unparse(expr.right)
+            + [")"]
         )
     elif isinstance(expr, Call):
-        return (
-                [expr.identifier, '('] +
-                _unparse(expr.argument)
-                + [')']
-        )
+        return [expr.identifier, "("] + _unparse(expr.argument) + [")"]
     else:
         raise AssertionError(str(expr))
+
 
 # ERROR:
 # Falsifying example: execute(
@@ -473,4 +473,4 @@ def _unparse(expr: Expr) -> List[str]:
 def unparse(expr: Expr) -> str:
     """Convert the AST to the source code."""
     parts = _unparse(expr)
-    return ''.join(parts)
+    return "".join(parts)

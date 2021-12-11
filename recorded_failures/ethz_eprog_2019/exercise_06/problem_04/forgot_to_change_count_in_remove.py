@@ -27,10 +27,7 @@ class Node:
 
 
 class Cursor:
-    def __init__(
-            self,
-            linked_list: 'LinkedList'
-    ) -> None:
+    def __init__(self, linked_list: "LinkedList") -> None:
         self._node = linked_list._first
         self._previous = None  # type: Optional[Node]
         self._linked_list = linked_list

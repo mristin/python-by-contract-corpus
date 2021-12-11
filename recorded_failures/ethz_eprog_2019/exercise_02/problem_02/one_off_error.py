@@ -21,7 +21,7 @@ from icontract import require, ensure
 
 from correct_programs.common import Lines
 
-TRAILING_SPACE_RE = re.compile(r'\s$')
+TRAILING_SPACE_RE = re.compile(r"\s$")
 
 
 # fmt: off
@@ -47,9 +47,9 @@ def draw(width: int) -> Lines:
 
     # NOTE (mristin, 2021-05-09): I forgot to include half + 1 in the first range.
     for i in itertools.chain(range(1, half), range(half, 0, -1)):
-        left_pad = ' ' * (half - i)
-        backslashes = '\\' * i
-        slashes = '/' * i
+        left_pad = " " * (half - i)
+        backslashes = "\\" * i
+        slashes = "/" * i
         result.append(left_pad + backslashes + slashes)
 
     print(result)

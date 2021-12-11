@@ -62,7 +62,7 @@ from icontract import require, ensure, DBC
 
 from correct_programs.common import Lines
 
-ALL_GRADES = [Decimal('0.25') * i for i in range(0, 25)]
+ALL_GRADES = [Decimal("0.25") * i for i in range(0, 25)]
 ALL_GRADES_SET = set(ALL_GRADES)
 
 # fmt: off
@@ -71,27 +71,28 @@ assert all(
     for grade in ALL_GRADES
 )
 # fmt: on
-assert min(ALL_GRADES) == Decimal('0.0')
-assert max(ALL_GRADES) == Decimal('6.0')
+assert min(ALL_GRADES) == Decimal("0.0")
+assert max(ALL_GRADES) == Decimal("6.0")
 
 
 class Grade(DBC, Decimal):
     # ERROR:
     # TypeError: Cannot hash a signaling NaN value
     @require(lambda value: value in ALL_GRADES_SET)
-    def __new__(cls, value: Decimal) -> 'Grade':
+    def __new__(cls, value: Decimal) -> "Grade":
         return cast(Grade, value)
 
-    def __le__(self, other: 'Grade') -> bool:
+    def __le__(self, other: "Grade") -> bool:
         return self < other
 
-    def __add__(self, other: 'Grade') -> Decimal:
+    def __add__(self, other: "Grade") -> Decimal:
         return self + other
 
 
 class Grading:
     def __init__(
-            self, identifier: str, grade1: Grade, grade2: Grade, grade3: Grade) -> None:
+        self, identifier: str, grade1: Grade, grade2: Grade, grade3: Grade
+    ) -> None:
         self.identifier = identifier
         self.grade1 = grade1
         self.grade2 = grade2
@@ -103,14 +104,11 @@ class Grading:
 
 
 def compile_grading_re() -> Pattern[AnyStr]:
-    identifier = '([a-zA-Z0-9]+)'
+    identifier = "([a-zA-Z0-9]+)"
 
-    grade = ''.join(
-        ['('] +
-        ['|'.join(str(grade) for grade in ALL_GRADES)] +
-        [')'])
+    grade = "".join(["("] + ["|".join(str(grade) for grade in ALL_GRADES)] + [")"])
 
-    return re.compile(f'^{identifier} {grade} {grade} {grade}$')  # type: ignore
+    return re.compile(f"^{identifier} {grade} {grade} {grade}$")  # type: ignore
 
 
 GRADING_RE = compile_grading_re()
@@ -118,19 +116,18 @@ GRADING_RE = compile_grading_re()
 
 @require(lambda lines: all(GRADING_RE.match(line) for line in lines))
 @ensure(
-    lambda result:
-    (
-            identifiers := [grading.name for grading in result],
-            len(identifiers) == len(set(identifiers))
+    lambda result: (
+        identifiers := [grading.name for grading in result],
+        len(identifiers) == len(set(identifiers)),
     )[1],
-    "Unique identifiers"
+    "Unique identifiers",
 )
 @ensure(lambda lines, result: len(result) == len(lines))
 def parse(lines: Lines) -> List[Grading]:
     result = []  # type: List[Grading]
 
     for line in lines:
-        parts = line.split(' ')
+        parts = line.split(" ")
         assert len(parts) == 4
         identifier = parts[0]
         grades = [Grade(Decimal(part)) for part in parts[1:]]
@@ -140,7 +137,7 @@ def parse(lines: Lines) -> List[Grading]:
                 identifier=identifier,
                 grade1=grades[0],
                 grade2=grades[1],
-                grade3=grades[2]
+                grade3=grades[2],
             )
         )
 
@@ -207,8 +204,7 @@ def critical(gradings: List[Grading], bound1: Grade, bound2: Decimal) -> List[Gr
 # fmt: on
 def top(gradings: List[Grading], limit: int) -> List[Grading]:
     sorted_gradings = sorted(
-        gradings,
-        key=lambda grading: grading.sum_grades(),
-        reverse=True)
+        gradings, key=lambda grading: grading.sum_grades(), reverse=True
+    )
 
     return sorted_gradings

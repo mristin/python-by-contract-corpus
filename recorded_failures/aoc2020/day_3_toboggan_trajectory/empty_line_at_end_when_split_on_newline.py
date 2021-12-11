@@ -14,18 +14,25 @@ step_size_horizontal: int = 3
 step_size_vertical: int = 1
 
 
-@require(lambda input_string: re.match(r'^([.#]*\\n)+$', input_string),)
-@require(lambda input_string: all(len(line) == len(input_string.split('\n')[0]) for line in input_string.split('\n')))
+@require(
+    lambda input_string: re.match(r"^([.#]*\\n)+$", input_string),
+)
+@require(
+    lambda input_string: all(
+        len(line) == len(input_string.split("\n")[0])
+        for line in input_string.split("\n")
+    )
+)
 @ensure(lambda result: result[0] * result[1] == len(result[2]))
 def parse_input_file(input_string: str) -> Tuple[int, int, str]:
-    lines = input_string.split('\n')
+    lines = input_string.split("\n")
     width: int = len(lines[0])
     height: int = len(lines)
     return width, height, "".join(lines)
 
 
 @require(lambda width, height: width > 0 and height > 0)
-@require(lambda input_string: re.match(r'^[.#]*', input_string))
+@require(lambda input_string: re.match(r"^[.#]*", input_string))
 @require(lambda width, height, input_string: width * height == len(input_string))
 @ensure(lambda result, height: result <= height / step_size_vertical)
 def count_trees(width: int, height: int, input_string: str):

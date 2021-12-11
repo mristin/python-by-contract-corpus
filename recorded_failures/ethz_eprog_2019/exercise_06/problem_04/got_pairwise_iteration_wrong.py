@@ -20,7 +20,7 @@ from icontract import require, ensure, invariant, snapshot, DBC
 
 
 class Node:
-    def __init__(self, value: int, next_node: Optional['Node']) -> None:
+    def __init__(self, value: int, next_node: Optional["Node"]) -> None:
         self.value = value
         self.next_node = next_node
 
