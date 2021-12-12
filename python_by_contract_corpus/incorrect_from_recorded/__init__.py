@@ -3,25 +3,11 @@
 """
 Provide programs as solutions to problems with bugs.
 
-These programs are based on the recorded failures while we were solving the problems.
-Whenever we encountered a bug, we recorded the state of the program. To make
-the problems more focused, we took the solutions without obvious bugs
-(see :mod:`python_by_contract_corpus.correct`) and manually introduced the recorded
-bugs.
+These programs are based on the recorded failures that we eventually re-introduced in
+the (apparently correct) final solutions.
 
-If we could not manually reproduce the bug by changing the correct solution,
-the recorded failure was ignored. This was either because the recorded case was not
-informative enough or because the recorded case was too far away from the final solution
-to re-introduce the bug in a meaningful manner.
-
-The initial and the final solutions oftentimes diverged as we had to completely change
-the approach and re-model the problem with different abstractions to solve it.
-Thus capturing a bug helped us in re-modelling, but it was later impossible to
-re-trace the bug and re-introduce it since *knowing* about the bug changed the solution
-in such a way to avoid it (*e.g.*, by using a different class hierarchy or different
-responsibility domains of the functions).
-
-Thus we excluded the following failure cases which we could not reproduce:
+We could not reproduce the following failure cases since they were either not
+informative enough or the final and the recorded solution diverged too much:
 
 * recorded_failures/aoc2020/day_3_toboggan_trajectory/empty_line_at_end_when_split_on_newline.py
 * recorded_failures/aoc2020/day_7_handy_haversacks/dont_count_outer_bag.py

@@ -4,7 +4,7 @@ Solutions to ETHZ "Introduction to Programming" 2019
 
 We translated the exercises from the lecture `"Introduction to Programming"`_ ("Einführung in die Programmierung", 252-0027) held at ETH Zurich, Switzerland, as part of the Computer Science curriculum in Fall 2019.
 
-You can find our auto-documented solutions here, while the source code is available at: https://github.com/mristin/python-by-contract-corpus/tree/main/python_by_contract_corpus/ethz_eprog_2019
+You can find our auto-documented solutions here, while the source code is available at: https://github.com/mristin/python-by-contract-corpus/tree/main/python_by_contract_corpus/correct/ethz_eprog_2019
 
 .. _"Introduction to Programming": https://www.lst.inf.ethz.ch/education/archive/Fall2019/einfuehrung-in-die-programmierung-i--252-0027-.html
 

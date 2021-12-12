@@ -9,6 +9,7 @@ Welcome to python-by-contract-corpus' documentation!
    introduction
    correct_programs/index
    recorded_failures
+   incorrect_programs
    contributing
    contributors
    changelog
