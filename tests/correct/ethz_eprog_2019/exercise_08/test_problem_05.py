@@ -8,7 +8,7 @@ from python_by_contract_corpus.correct.ethz_eprog_2019.exercise_08 import proble
 
 class TestWithIcontractHypothesis(unittest.TestCase):
     def test_functions(self) -> None:
-        @require(lambda trials: 0 <= trials < 10)
+        @require(lambda trials: 1 <= trials < 10)
         @require(lambda grid_size: 3 <= grid_size < 10)
         @require(lambda grid_size: grid_size % 2 == 1)
         def restricted_simulate(trials: int, grid_size: int) -> float:
