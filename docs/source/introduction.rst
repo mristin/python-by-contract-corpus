@@ -6,8 +6,9 @@ We present here a corpus of Python programs annotated with `contracts`_.
 
 The corpus includes:
 
-* Solutions to the exercises of the `Advent of Code 2020`_, and
-* Solutions to the exercises used during the lecture `"Introduction to Programming"`_ at ETH Zurich (Switzerland) in Fall 2019.
+* Solutions to the exercises of the `Advent of Code 2020`_,
+* Solutions to the exercises used during the lecture `"Introduction to Programming"`_ at ETH Zurich (Switzerland) in Fall 2019, and
+* Incorrect code with minimal difference to the final solutions obtained from recorded failures (see :ref:`Recorded Failures` and :ref:`Incorrect Programs`).
 
 .. _contracts: https://en.wikipedia.org/wiki/Design_by_contract
 .. _Advent of Code 2020: https://adventofcode.com/2020
