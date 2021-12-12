@@ -49,13 +49,10 @@ class Specs(DBC):
         lambda max_cart_size:
         max_cart_size >= 1
     )
-    # ERROR (mristin, 2021-06-03):
-    # I missed to specify that the number of checkouts must not be zero.
-    # Something like:
-    # @require(
-    #     lambda checkout_efficiencies:
-    #     len(checkout_efficiencies) > 0
-    # )
+    @require(
+        lambda checkout_efficiencies:
+        len(checkout_efficiencies) > 0
+    )
     # fmt: on
     def __init__(
         self,
@@ -121,7 +118,12 @@ class Customer:
 
 
 # fmt: off
-@require(lambda steps: steps >= 1)
+# ERROR (mristin, 2021-12-12):
+# I forgot to restrict the number of steps above 1 such that :py:func`statistics.mean`
+# can return a meaningful result. I should have written a pre-condition such as
+# the following one instead:
+# @require(lambda steps: steps >= 1)
+@require(lambda steps: steps >= 0)
 @ensure(
     lambda result:
     all(

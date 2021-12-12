@@ -8,7 +8,7 @@ from python_by_contract_corpus.correct.ethz_eprog_2019.exercise_08 import proble
 
 class TestWithIcontractHypothesis(unittest.TestCase):
     def test_functions(self) -> None:
-        @require(lambda steps: 0 <= steps < 100)
+        @require(lambda steps: 1 <= steps < 100)
         def restricted_simulate(
             specs: problem_03.Specs, steps: int
         ) -> problem_03.Stats:

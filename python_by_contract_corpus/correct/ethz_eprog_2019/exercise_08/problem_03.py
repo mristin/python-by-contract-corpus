@@ -118,7 +118,7 @@ class Customer:
 
 
 # fmt: off
-@require(lambda steps: steps >= 0)
+@require(lambda steps: steps >= 1)
 @ensure(
     lambda result:
     all(
