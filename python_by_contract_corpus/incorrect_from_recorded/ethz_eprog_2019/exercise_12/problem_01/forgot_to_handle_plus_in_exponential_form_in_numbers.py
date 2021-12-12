@@ -14,7 +14,7 @@ user input/output is out-of-scope of this corpus.)
 # parsing modules, respectively.
 #
 # We opt for the former solution (all the code in the same module) for simplicity.
-
+import abc
 import enum
 import io
 import math
@@ -259,12 +259,22 @@ class Identifier(DBC, str):
         return cast(Identifier, value)
 
 
-class Node:
+class Node(DBC):
     """Represent a node of an abstract syntax tree (AST) of a program."""
+
+    @abc.abstractmethod
+    def __repr__(self) -> str:
+        """Represent the instance as a string for debugging."""
+        raise NotImplementedError()
 
 
 class Expr(Node):
     """Represent a mathematical expression in an AST."""
+
+    @abc.abstractmethod
+    def __repr__(self) -> str:
+        """Represent the instance as a string for debugging."""
+        raise NotImplementedError()
 
 
 class Constant(Expr, DBC):
@@ -412,8 +422,13 @@ class Call(Expr, DBC):
 class Statement(Node):
     """Represent a statement in the AST."""
 
+    @abc.abstractmethod
+    def __repr__(self) -> str:
+        """Represent the instance as a string for debugging."""
+        raise NotImplementedError()
 
-class Assign(Statement, DBC):
+
+class Assign(Statement):
     """Represent an assignment statement."""
 
     def __init__(self, target: Identifier, expr: Expr) -> None:
