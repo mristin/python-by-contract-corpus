@@ -75,7 +75,7 @@ class TestWithIcontractHypothesis(unittest.TestCase):
 
             try:
                 problem_03.compile_and_execute(program)
-            except (ValueError, OverflowError):
+            except (ValueError, OverflowError, ZeroDivisionError):
                 pass
 
         icontract_hypothesis.test_with_inferred_strategy(restricted)
