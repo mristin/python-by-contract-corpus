@@ -418,10 +418,16 @@ class Call(Expr, DBC):
 class Statement(Node):
     """Represent a statement in the AST."""
 
-    @abc.abstractmethod
-    def __repr__(self) -> str:
-        """Represent the instance as a string for debugging."""
-        raise NotImplementedError()
+    # ERROR (mristin, 2021-12-12):
+    # I forgot to make :py:class:`Statement` abstract so icontract-hypothesis (and
+    # possibly other testing tools) generate instances of :py:class:`Program` that
+    # can not be properly represented.
+    #
+    # I should have at least defined an abstract method such as this one:
+    # @abc.abstractmethod
+    # def __repr__(self) -> str:
+    #     """Represent the instance as a string for debugging."""
+    #     raise NotImplementedError()
 
 
 class Assign(Statement):
@@ -432,19 +438,16 @@ class Assign(Statement):
         self.target = target
         self.expr = expr
 
-    # ERROR (mristin, 2021-06-18):
-    # I forgot to implement a specific ``__eq__`` for the :py:class:`Assign`.
-    # Something like:
-    # def __eq__(self, other: object) -> bool:
-    #     """
-    #     Compare against ``other`` of the same class based on the properties.
-    #
-    #     Otherwise, propagate to :py:attr:`object.__eq__`.
-    #     """
-    #     if isinstance(other, Assign):
-    #         return self.target == other.target and self.expr == other.expr
-    #
-    #     return object.__eq__(self, other)
+    def __eq__(self, other: object) -> bool:
+        """
+        Compare against ``other`` of the same class based on the properties.
+
+        Otherwise, propagate to :py:attr:`object.__eq__`.
+        """
+        if isinstance(other, Assign):
+            return self.target == other.target and self.expr == other.expr
+
+        return object.__eq__(self, other)
 
     def __repr__(self) -> str:
         """Represent the instance as a string for debugging."""
@@ -801,6 +804,7 @@ class _UnparseVisitor(_Visitor[None]):
 @ensure(lambda program, result: parse_program(tokenize(result)) == program)
 def unparse(program: Program) -> str:
     """Convert the AST back to the source code."""
+    print(f"program is {program!r}")  # TODO: debug
     visitor = _UnparseVisitor()
     visitor.visit(program)
 
