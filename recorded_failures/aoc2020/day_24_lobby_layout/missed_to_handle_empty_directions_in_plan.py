@@ -79,7 +79,7 @@ def stringify_directions(directions: List[Direction]) -> str:
 
 
 # ERROR: The plan with empty directions [[], []] will break the program!
-# ERRORO: This is actually an error in the post-conditions!
+# ERROR: This is actually an error in the post-conditions!
 @ensure(lambda plan, result: not (len(plan) == 0) or result == 0)
 @ensure(lambda plan, result: not (len(plan) != 0) or result > 0)
 def count_flips(plan: List[List[Direction]]) -> int:

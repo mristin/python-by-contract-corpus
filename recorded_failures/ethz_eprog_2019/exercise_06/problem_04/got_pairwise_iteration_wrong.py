@@ -87,7 +87,7 @@ class LinkedList(DBC):
         prev = None  # type: Optional[Node]
         while cursor != self._last:
             # ERROR (mristin):
-            # I got the assignment of prev wrong, it should come befure cursor is
+            # I got the assignment of prev wrong, it should come before the cursor is
             # assigned to a new value.
             cursor = cursor.next_node
             prev = cursor

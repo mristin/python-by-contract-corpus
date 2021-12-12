@@ -125,7 +125,7 @@ def main() -> int:
         subprocess.check_call(
             [
                 "coverage", "run",
-                "--source", "python_by_contract_corpus",
+                "--source", "python_by_contract_corpus.correct",
                 "-m", "unittest", "discover", "--failfast"
             ],
             cwd=str(repo_root),

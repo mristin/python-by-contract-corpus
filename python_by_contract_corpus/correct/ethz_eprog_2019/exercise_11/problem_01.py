@@ -63,7 +63,7 @@ from icontract import require, ensure, DBC
 
 from python_by_contract_corpus.common import Lines
 
-ALL_GRADES = [Decimal("0.25") * i for i in range(0, 25)]  #: List all possible grades.
+ALL_GRADES = [Decimal("0.25") * i for i in range(4, 25)]  #: List all possible grades.
 ALL_GRADES_SET = set(ALL_GRADES)  #: Provide a set of all possible grades.
 
 # fmt: off
@@ -72,8 +72,10 @@ assert all(
     for grade in ALL_GRADES
 )
 # fmt: on
-assert min(ALL_GRADES) == Decimal("0.0")
-assert max(ALL_GRADES) == Decimal("6.0")
+MIN_GRADE = Decimal("1.0")
+MAX_GRADE = Decimal("6.0")
+assert min(ALL_GRADES) == MIN_GRADE
+assert max(ALL_GRADES) == MAX_GRADE
 
 
 class Grade(DBC, Decimal):
@@ -106,7 +108,7 @@ class Grading:
         self.grade2 = grade2
         self.grade3 = grade3
 
-    @ensure(lambda result: result >= 0)
+    @ensure(lambda result: 3 * MIN_GRADE <= result <= 3 * MAX_GRADE)
     def sum_grades(self) -> Decimal:
         """Sum all grades of the student."""
         return self.grade1 + self.grade2 + self.grade3
@@ -122,11 +124,11 @@ class Grading:
 #:     See `Python issue #13592 <https://bugs.python.org/issue13592>`_.
 GRADING_RE = re.compile(
     "([a-zA-Z0-9]+) +"
-    "(0.0|0.25|0.5|0.75|1.0|1.25|1.5|1.75|2.0|2.25|2.5|2.75|3.0|3.25|3.5|3.75|4.0|"
+    "(1.0|1.25|1.5|1.75|2.0|2.25|2.5|2.75|3.0|3.25|3.5|3.75|4.0|"
     "4.25|4.5|4.75|5.0|5.25|5.5|5.75|6.0) +"
-    "(0.0|0.25|0.5|0.75|1.0|1.25|1.5|1.75|2.0|2.25|2.5|2.75|3.0|3.25|3.5|3.75|4.0|"
+    "(1.0|1.25|1.5|1.75|2.0|2.25|2.5|2.75|3.0|3.25|3.5|3.75|4.0|"
     "4.25|4.5|4.75|5.0|5.25|5.5|5.75|6.0) +"
-    "(0.0|0.25|0.5|0.75|1.0|1.25|1.5|1.75|2.0|2.25|2.5|2.75|3.0|3.25|3.5|3.75|4.0|"
+    "(1.0|1.25|1.5|1.75|2.0|2.25|2.5|2.75|3.0|3.25|3.5|3.75|4.0|"
     "4.25|4.5|4.75|5.0|5.25|5.5|5.75|6.0)"
 )
 

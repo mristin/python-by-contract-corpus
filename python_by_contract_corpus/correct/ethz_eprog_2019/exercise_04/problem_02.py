@@ -10,6 +10,10 @@ from icontract import require, ensure
 
 
 @require(lambda c: c > 0)
+# We need to restrict the input as the original problem statement does not
+# specify what to do if the approximation is numerically not possible.
+@require(lambda c: c < 1000 * 1000)
+@require(lambda eps: eps > 1e-6)
 @ensure(lambda c, eps, result: abs(result * result - c) <= eps, "Guaranteed precision")
 def approximate_sqrt(c: int, eps: float) -> float:
     """Approximate the square-root of ``c`` up to the precision ``eps``."""
