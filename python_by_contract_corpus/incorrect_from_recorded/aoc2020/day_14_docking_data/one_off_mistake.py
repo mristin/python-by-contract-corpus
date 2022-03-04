@@ -46,7 +46,7 @@ def parse_mask(text: str) -> Mask:
     for bit_i in range(len(mask_text)):
         # ERROR (mristin, 2021-12-04):
         # This is an additional error taken from
-        # recorded_failures/aoc2020/day_14_docking_data/regex_pattern_broken.py
+        # archived/recorded_failures/aoc2020/day_14_docking_data/regex_pattern_broken.py
         # and put into a separate incorrect_from_recorded program.
         symbol = mask_text[-bit_i]
         if symbol == "0":

@@ -38,7 +38,7 @@ setup(
     ],
     license="License :: OSI Approved :: MIT License",
     keywords="design-by-contract contracts automatic testing corpus",
-    packages=find_packages(exclude=["tests"]),
+    packages=find_packages(exclude=["tests", "archived"]),
     install_requires=install_requires,
     # fmt: off
     extras_require={
