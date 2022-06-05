@@ -651,7 +651,7 @@ class _EvaluateVisitor(_Visitor[float]):
             return left / right
 
         elif expr.operator == BinOp.POW:
-            return left ** right
+            return left**right
 
         else:
             raise NotImplementedError(repr(expr))

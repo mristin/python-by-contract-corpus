@@ -236,7 +236,7 @@ class ValidTileText(DBC):
 
 
 def parse_tile(lines: ValidTileText) -> Tuple[int, Tile]:
-    """Parse the ``lines`` into (ID number, tile """
+    """Parse the ``lines`` into (ID number, tile"""
     match = re.match(r"Tile (\d+)", lines[0])
     assert match
     tile_id = int(match.group(1))
