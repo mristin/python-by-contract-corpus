@@ -22,5 +22,18 @@ class TestWithIcontractHypothesis(unittest.TestCase):
                 ) from error
 
 
+class TestManually(unittest.TestCase):
+    def test_numerical_edge_case_for_entry_collection(self) -> None:
+        entry = problem_04.Entry(
+            room_number=1,
+            start=1,
+            end=257,
+            price_per_day=6.994914921643253e299,
+            price_discount=0.0,
+        )
+
+        _ = problem_04.total_revenue(entries=[entry])
+
+
 if __name__ == "__main__":
     unittest.main()
