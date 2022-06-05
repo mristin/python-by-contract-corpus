@@ -17,6 +17,7 @@ The program answers the following questions:
 * What is the total revenue of the hotel for the year?
 """
 import collections
+import math
 from typing import MutableMapping, Collection, List
 
 from icontract import require, ensure, DBC
@@ -44,6 +45,16 @@ class Entry(DBC):
         lambda price_discount: 0 <= price_discount <= 100,
         "The price discount is given as a percentage."
     )
+    @require(
+        lambda price_discount:
+        not math.isnan(price_discount) and price_discount < 1e300,
+        "Reasonable bounds to avoid NaN's and inf's"
+    )
+    @require(
+        lambda price_per_day:
+        not math.isnan(price_per_day) and price_per_day < 1e300,
+        "Reasonable bounds to avoid NaN's and inf's"
+    )
     # fmt: on
     def __init__(
         self,
@@ -64,6 +75,16 @@ class Entry(DBC):
     def duration(self) -> int:
         """Compute the duration of the stay."""
         return self.end - self.start + 1
+
+    def __repr__(self) -> str:
+        return (
+            f"Entry("
+            f"room_number={self.room_number}, "
+            f"start={self.start}, "
+            f"end={self.end}, "
+            f"price_per_day={self.price_per_day}, "
+            f"price_discount={self.price_discount})"
+        )
 
 
 @require(lambda entries: len(entries) > 0)
