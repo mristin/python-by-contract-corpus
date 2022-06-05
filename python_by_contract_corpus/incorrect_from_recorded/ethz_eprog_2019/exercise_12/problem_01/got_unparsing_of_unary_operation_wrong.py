@@ -850,7 +850,7 @@ class _EvaluateVisitor(_Visitor[float]):
             return left / right
 
         elif node.operator == BinOp.POW:
-            return left ** right
+            return left**right
 
         else:
             raise NotImplementedError(repr(node))

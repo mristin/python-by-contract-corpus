@@ -43,7 +43,7 @@ setup(
     # fmt: off
     extras_require={
         "dev": [
-            "black==20.8b1",
+            "black==22.3.0",
             "mypy==0.812",
             "pylint==2.8.2",
             "pyicontract-lint>=2.1.3,<3"

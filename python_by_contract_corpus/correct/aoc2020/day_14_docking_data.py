@@ -15,8 +15,8 @@ class Mask(DBC):
     clearing: Final[int]  #: mask of the bits to be cleared (``AND``'ed)
     setting: Final[int]  #: mask of the bits to be set (``OR``'ed)
 
-    @require(lambda clearing: 0 <= clearing <= 2 ** 36 - 1)
-    @require(lambda setting: 0 <= setting <= 2 ** 36 - 1)
+    @require(lambda clearing: 0 <= clearing <= 2**36 - 1)
+    @require(lambda setting: 0 <= setting <= 2**36 - 1)
     def __init__(self, clearing: int, setting: int) -> None:
         """Initialize with the given values."""
         self.clearing = clearing
@@ -25,11 +25,11 @@ class Mask(DBC):
 
 @require(lambda text: MASK_RE.match(text))
 @ensure(
-    lambda result: 0 <= result.clearing <= 2 ** 36 - 1,
+    lambda result: 0 <= result.clearing <= 2**36 - 1,
     "The clearing mask not too large",
 )
 @ensure(
-    lambda result: 0 <= result.setting <= 2 ** 36 - 1, "The setting mask not too large"
+    lambda result: 0 <= result.setting <= 2**36 - 1, "The setting mask not too large"
 )
 def parse_mask(text: str) -> Mask:
     """Parse the text as an clearing and a setting mask, respectively."""
@@ -40,7 +40,7 @@ def parse_mask(text: str) -> Mask:
     assert len(mask_text) == 36
 
     setting = 0
-    clearing = 2 ** 36 - 1
+    clearing = 2**36 - 1
 
     # Loop from the least significant bit
     for bit_i in range(len(mask_text)):
@@ -64,7 +64,7 @@ class Write(DBC):
     value: Final[int]  #: Value to be written
 
     @require(lambda address: address >= 0)
-    @require(lambda value: 0 <= value <= 2 ** 36 - 1, "The value in expected range")
+    @require(lambda value: 0 <= value <= 2**36 - 1, "The value in expected range")
     def __init__(self, address: int, value: int) -> None:
         """Initialize with the given values."""
         self.address = address
@@ -110,7 +110,7 @@ def parse_lines(lines: Lines) -> Program:
     writes_as_tuples = [parse_write(line) for line in lines[1:]]
 
     for _, value in writes_as_tuples:
-        if value >= 2 ** 36:
+        if value >= 2**36:
             raise ValueError(f"Value does not fit in 35 bits (>= {2**36=}): {value}")
 
     writes = [

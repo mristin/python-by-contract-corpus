@@ -254,7 +254,7 @@ def _execute_binary_operation(instr: BinaryOperation, stack: List[float]) -> Non
     elif instr.operator == problem_01.BinOp.DIV:
         result = left_value / right_value
     elif instr.operator == problem_01.BinOp.POW:
-        result = left_value ** right_value
+        result = left_value**right_value
     else:
         raise NotImplementedError(f"{instr.operator=}")
 
