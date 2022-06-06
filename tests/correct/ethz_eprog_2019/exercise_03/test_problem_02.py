@@ -10,10 +10,10 @@ class TestWithIcontractHypothesis(unittest.TestCase):
     def test_functions(self) -> None:
         @require(lambda n: n > 0)
         @require(lambda n: n < 1000)
-        def repr_bin_with_restricted_input(n: int) -> str:
+        def repr_binary_with_restricted_input(n: int) -> str:
             return problem_02.repr_binary(n=n)
 
-        for func in [repr_bin_with_restricted_input]:
+        for func in [repr_binary_with_restricted_input]:
             try:
                 icontract_hypothesis.test_with_inferred_strategy(func)
             except Exception as error:

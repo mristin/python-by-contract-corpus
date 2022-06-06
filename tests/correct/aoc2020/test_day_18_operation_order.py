@@ -2,19 +2,12 @@ import unittest
 
 import icontract_hypothesis
 
-from python_by_contract_corpus.correct.aoc2020.day_18_operation_order import (
-    serialize,
-    compute,
-    Node,
-    Operation,
-    Tail,
-    parse,
-)
+from python_by_contract_corpus.correct.aoc2020 import day_18_operation_order
 
 
 class TestWithIcontractHypothesis(unittest.TestCase):
     def test_functions(self) -> None:
-        for func in [serialize, compute]:
+        for func in [day_18_operation_order.serialize, day_18_operation_order.compute]:
             try:
                 icontract_hypothesis.test_with_inferred_strategy(func)
             except Exception as error:
@@ -28,35 +21,70 @@ class TestManually(unittest.TestCase):
     test_expressions = ["(1+2)+(3*4)", "(1+(2*3))+4", "1+2*3+4+6*7"]  # 15  # 11  # 133
 
     test_nodes = [
-        Node(
-            head=Node(head=1, tail=[Tail(op=Operation.ADD, right=2)]),
-            tail=[
-                Tail(
-                    op=Operation.ADD,
-                    right=Node(head=3, tail=[Tail(op=Operation.MUL, right=4)]),
-                )
-            ],
-        ),
-        Node(
-            head=Node(
+        day_18_operation_order.Node(
+            head=day_18_operation_order.Node(
                 head=1,
                 tail=[
-                    Tail(
-                        op=Operation.ADD,
-                        right=Node(head=2, tail=[Tail(op=Operation.MUL, right=3)]),
+                    day_18_operation_order.Tail(
+                        op=day_18_operation_order.Operation.ADD, right=2
                     )
                 ],
             ),
-            tail=[Tail(op=Operation.ADD, right=4)],
+            tail=[
+                day_18_operation_order.Tail(
+                    op=day_18_operation_order.Operation.ADD,
+                    right=day_18_operation_order.Node(
+                        head=3,
+                        tail=[
+                            day_18_operation_order.Tail(
+                                op=day_18_operation_order.Operation.MUL, right=4
+                            )
+                        ],
+                    ),
+                )
+            ],
         ),
-        Node(
+        day_18_operation_order.Node(
+            head=day_18_operation_order.Node(
+                head=1,
+                tail=[
+                    day_18_operation_order.Tail(
+                        op=day_18_operation_order.Operation.ADD,
+                        right=day_18_operation_order.Node(
+                            head=2,
+                            tail=[
+                                day_18_operation_order.Tail(
+                                    op=day_18_operation_order.Operation.MUL, right=3
+                                )
+                            ],
+                        ),
+                    )
+                ],
+            ),
+            tail=[
+                day_18_operation_order.Tail(
+                    op=day_18_operation_order.Operation.ADD, right=4
+                )
+            ],
+        ),
+        day_18_operation_order.Node(
             head=1,
             tail=[
-                Tail(op=Operation.ADD, right=2),
-                Tail(op=Operation.MUL, right=3),
-                Tail(op=Operation.ADD, right=4),
-                Tail(op=Operation.ADD, right=6),
-                Tail(op=Operation.MUL, right=7),
+                day_18_operation_order.Tail(
+                    op=day_18_operation_order.Operation.ADD, right=2
+                ),
+                day_18_operation_order.Tail(
+                    op=day_18_operation_order.Operation.MUL, right=3
+                ),
+                day_18_operation_order.Tail(
+                    op=day_18_operation_order.Operation.ADD, right=4
+                ),
+                day_18_operation_order.Tail(
+                    op=day_18_operation_order.Operation.ADD, right=6
+                ),
+                day_18_operation_order.Tail(
+                    op=day_18_operation_order.Operation.MUL, right=7
+                ),
             ],
         ),
     ]
@@ -65,15 +93,15 @@ class TestManually(unittest.TestCase):
 
     def test_parse(self) -> None:
         for expr, node in zip(self.test_expressions, self.test_nodes):
-            self.assertEqual(node, parse(expr))
+            self.assertEqual(node, day_18_operation_order.parse(expr))
 
     def test_serialize(self) -> None:
         for expr, node in zip(self.test_expressions, self.test_nodes):
-            self.assertEqual(expr, serialize(node))
+            self.assertEqual(expr, day_18_operation_order.serialize(node))
 
     def test_compute(self) -> None:
         for node, result in zip(self.test_nodes, self.test_results):
-            self.assertEqual(result, compute(node))
+            self.assertEqual(result, day_18_operation_order.compute(node))
 
 
 if __name__ == "__main__":
