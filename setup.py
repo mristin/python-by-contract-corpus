@@ -22,7 +22,7 @@ with open(os.path.join(here, "requirements.txt"), encoding="utf-8") as fid:
 setup(
     name="python-by-contract-corpus",
     # Please don't forget to sync up with __init__.py!
-    version="2021.7.10rc1",
+    version="2022.8.15",
     description=(
         "Provide a corpus of programs annotated with contracts "
         "with no obvious bugs."
