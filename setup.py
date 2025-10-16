@@ -46,7 +46,7 @@ setup(
             "black==22.3.0",
             "mypy==0.812",
             "pylint==2.8.2",
-            "pyicontract-lint>=2.1.3,<3"
+            "pyicontract-lint>=2.1.3,<3",
             "coverage>=5.5,<6",
             "twine>=3.4.1,<4"
         ]
